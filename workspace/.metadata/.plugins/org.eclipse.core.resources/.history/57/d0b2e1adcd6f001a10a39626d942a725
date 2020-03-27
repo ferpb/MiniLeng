@@ -1,0 +1,24 @@
+/*********************************************************************************
+ * Subclase de TokenMgrError que personaliza los mensajes de error
+ *
+ * Fichero:    MiniLengTokenMgrError.jj
+ * Autor:      Fernando Peña (NIA: 756012)
+ * Fecha:      20/02/2020
+ * Versión:    v1.0
+ * Asignatura: Procesadores de Lenguajes, curso 2019-2020
+ **********************************************************************************/
+
+
+public class MiniLengTokenMgrError extends TokenMgrError {
+	
+	private static final long serialVersionUID = 2L;
+
+	@Override
+	protected static String LexicalError(boolean EOFSeen, int lexState, int errorLine, int errorColumn, String errorAfter, char curChar) {
+		return("Error léxico " +
+				errorLine + ", column " +
+		        errorColumn + ".  Encountered: " +
+		        (EOFSeen ? "<EOF> " : ("\"" + addEscapes(String.valueOf(curChar)) + "\"") + " (" + (int)curChar + "), ") +
+		        "after : \"" + addEscapes(errorAfter) + "\"");
+	}
+}

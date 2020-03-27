@@ -1,0 +1,454 @@
+/*********************************************************************************
+ * Especificación JavaCC para el lenguaje MiniLeng (Procesadores de Lenguajes)
+ *
+ * Fichero:    minilengcompiler.jj
+ * Autor:      Fernando Peña (NIA: 756012)
+ * Fecha:      20/02/2020
+ * Versión:    v1.0
+ * Asignatura: Procesadores de Lenguajes, curso 2019-2020
+ **********************************************************************************/
+options{  static = true;
+  ignore_case = true;
+  // debug_parser = true;
+  }PARSER_BEGIN(minilengcompiler)
+
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.Arrays;
+
+import lexico.TablaOcurrencias;
+
+
+public class minilengcompiler {
+  
+	static Boolean verbose_mode = false;
+
+	private static void help() {
+		System.out.println("Uso: minilengcompiler [opciones] [fichero ...]\n");
+      	System.out.println("Opciones:");
+      	System.out.println("    -v, --verbose	Mostrar resumen de los símbolos utilizados en el programa");
+      	System.out.println("    -h, --help	  	Imprimir ayuda (esta pantalla) y salir");
+      	System.out.println("    --version		Imprimir información de la versión y salir");
+      		
+      	System.exit(0);
+    }
+
+    private static void version() {
+		System.out.println("  Compilador de MiniLeng Versión 1.0		Compilado el 27-03-2020");
+		System.out.println("		---");
+		System.out.println("Prácticas de la asignatura: Procesadores de Lenguajes");
+		System.out.println("    Curso 2019-2020");
+		System.out.println("    Universidad de Zaragoza");
+		System.out.println("		---");
+		System.out.println("Programado con JavaCC en Eclipse 2019-12");
+		System.out.println("JavaCC Eclipse Plug-in 1.5.33");
+		
+      	System.exit(0);
+    }
+ 	public static void main(String args []) throws ParseException {
+		System.out.println("Compilador de MiniLeng -- v1.0 (marzo de 2020)");
+    	System.out.println("Autor: Fernando Peña Bes (NIA: 756012)\n");
+       	minilengcompiler parser;
+    	InputStream stream = System.in;
+
+
+    	String ficheros_entrada[] = null;
+
+
+    	if (args.length == 0) {
+    	  	// Compilador llamado sin argumentos
+      		// System.out.println("MiniLeng: Leyendo de la entrada estándar...");
+      		// parser = new minilengcompiler(System.in);
+      		// No se han introducido argumentos
+    	}
+    	else if (args[0].equals("-h") || args[0].equals("--help")) {
+    	  	// Mostrar ayuda y salir
+    	  	help();
+  		}
+  		else if (args[0].equals("--version")) {
+    	  	// Mostrar ayuda y salir
+    	  	version();
+  		}
+  		else {
+  			// Leer los argumentos.
+  			// Va leyendo hasta que encuentra uno que no empieza por '-', todos los
+  			// argumentos depués de ese se consideran ficheros de entrada
+  			for (int i = 0; i < args.length; i++) {
+  			    switch(args[i]) {
+  			        case "-h":
+  			        case "--help":
+  			        case "--version":
+  			            // Ignorar si aparece ayuda o versión de nuevo
+  			        	break;
+  			        	
+  			      	case "-v":
+  			      	case "--verbose":
+  			      		// Activar modo verboso
+  			      		verbose_mode = true;
+  			      		break;
+
+					default:
+						if (args[i].charAt(0) == '-') {
+							System.out.println("MiniLeng: Opción inválida <" + args[0] + ">\n");
+							help();
+						}
+						else {
+						  	ficheros_entrada = Arrays.copyOfRange(args, i++, args.length);
+						}
+						break;
+  			    }
+  			}
+ 		}
+
+		/*
+	   	for (fichero : ficheros_entrada) {
+  			System.out.println("MiniLeng: Leyendo el fichero " + fichero + "...");
+  			try {
+    			// parser = new minilengcompiler(new FileInputStream(args[0]));
+    			stream = new FileInputStream(args[0]);
+  			}
+  			catch (FileNotFoundException e) {
+    			System.out.println("MiniLeng: No he encontrado el fichero " + args[0] + ".");
+  			}
+		}
+
+		if (ficheros_entrada == null) {
+		  	// No se ha introducido ningún fichero
+			System.out.println("MiniLeng: No se ha introducido ningún fichero\n");
+		  	help();
+		}
+		*/
+
+		if (ficheros_entrada != null) {
+		  	// Lectura del fichero del usuario.
+			String fichero = ficheros_entrada[0];
+			// Ejecutar el compilador con los fichero introducidos
+			System.out.println("MiniLeng: Leyendo el fichero " + fichero + "...");
+      		try {
+        		// parser = new minilengcompiler(new FileInputStream(args[0]));
+        		stream = new FileInputStream(args[0]);
+      		}
+      		catch (FileNotFoundException e) {
+        		System.out.println("MiniLeng: No he encontrado el fichero " + fichero + ".");
+        		System.exit(0);
+      		}
+		}
+		else {
+  			System.out.println("MiniLeng: Leyendo de la entrada estándar...");
+		}
+				try {
+	  		parser = new minilengcompiler(stream);			switch (minilengcompiler.programa()) {  				case 0 :   					System.out.println("OK.");  					break;  				case 1 :   					System.out.println("GOODBYE.");  					break;  				default :   					break;			}		}		catch (Exception e) {
+			// error sintáctico			System.out.println("NOK.");			System.out.println(e.getMessage());		}		catch (Error e) {
+			// error léxico			// System.out.println("Error léxico (<linea, columna>): símbolo no reconocido <símbolo>");			// si no hay errores léxicos no muestra nada en la salida.
+			System.out.println(e.getMessage());
+		}  	}}PARSER_END(minilengcompiler)
+
+TOKEN_MGR_DECLS : {
+  // Crear e inicializar tabla de ocurrencias
+  static TablaOcurrencias tabla = new TablaOcurrencias();
+}
+SKIP : {  " "| "\r"| "\t"| "\n"
+| < "%"~["%"] > : COMENTARIO
+| "%%"          : MULTICOMENTARIO}
+
+// Ignorar comentarios en la entrada
+< COMENTARIO > SKIP : {
+  "\n" : DEFAULT
+}
+
+<COMENTARIO> MORE : {
+   < ~[] >
+}
+
+<MULTICOMENTARIO> SKIP : {
+  "%%" : DEFAULT
+}
+
+<MULTICOMENTARIO> MORE : {
+   < ~[] >
+}
+
+
+TOKEN : /* PALABRAS RESERVADAS */
+{
+  < tPROGRAMA : "programa" >
+  {
+    tabla.incrementar(TablaOcurrencias.Reservadas.tPROGRAMA);
+  }
+| < tVAR : "var" >
+  {
+    tabla.incrementar(TablaOcurrencias.Reservadas.tVAR);
+  }
+| < tPRINCIPIO : "principio" >
+  {
+    tabla.incrementar(TablaOcurrencias.Reservadas.tPRINCIPIO);
+  }
+| < tFIN : "fin" >
+  {
+    tabla.incrementar(TablaOcurrencias.Reservadas.tFIN);
+  }
+| < tSI : "si" >
+  {
+    tabla.incrementar(TablaOcurrencias.Reservadas.tSI);
+  }
+| < tENT : "ent" >
+  {
+    tabla.incrementar(TablaOcurrencias.Reservadas.tENT);
+
+  }
+| < tSI_NO : "si_no" >
+  {
+    tabla.incrementar(TablaOcurrencias.Reservadas.tSI_NO);
+  }
+| < tFSI : "fsi" >
+  {
+    tabla.incrementar(TablaOcurrencias.Reservadas.tFSI);
+  }
+| < tMQ : "mq" >
+  {
+    tabla.incrementar(TablaOcurrencias.Reservadas.tMQ);
+  }
+| < tFMQ : "fmq" >
+  {
+    tabla.incrementar(TablaOcurrencias.Reservadas.tFMQ);
+  }
+| < tESCRIBIR : "escribir" >
+  {
+    tabla.incrementar(TablaOcurrencias.Reservadas.tESCRIBIR);
+  }
+| < tLEER : "leer" >
+  {
+    tabla.incrementar(TablaOcurrencias.Reservadas.tLEER);
+  }
+
+  // Funciones predefinidas
+| < tENTACAR : "entacar" >
+  {
+    tabla.incrementar(TablaOcurrencias.Reservadas.tENTACAR);
+  }
+| < tCARAENT : "caraent" >
+  {
+    tabla.incrementar(TablaOcurrencias.Reservadas.tCARAENT);
+  }
+
+  // Funciones
+| < tACCION : "accion" >
+  {
+    tabla.incrementar(TablaOcurrencias.Reservadas.tACCION);
+  }
+| < tVAL : "val" >
+  {
+    tabla.incrementar(TablaOcurrencias.Reservadas.tVAL);
+  }
+|  < tREF : "ref" >
+  {
+    tabla.incrementar(TablaOcurrencias.Reservadas.tREF);
+  }
+}
+
+
+TOKEN : /* TIPOS DE DATOS */
+{
+  < tENTERO : "entero" >
+  {
+    tabla.incrementar(TablaOcurrencias.Tipos.tENTERO);
+  }
+| < tBOOLEANO : "booleano" >
+  {
+    tabla.incrementar(TablaOcurrencias.Tipos.tBOOLEANO);
+  }
+| < tCARACTER : "caracter" >
+  {
+    tabla.incrementar(TablaOcurrencias.Tipos.tCARACTER);
+  }
+}
+
+
+TOKEN : /* AGRUPACIONES */
+{
+  < tLLAVE_IZQ : "{" >
+  {
+    tabla.incrementar(TablaOcurrencias.Agrupaciones.tLLAVE_IZQ);
+  }
+| < tLLAVE_DER : "}" >
+  {
+    tabla.incrementar(TablaOcurrencias.Agrupaciones.tLLAVE_DER);
+  }
+| < tPARENTESIS_IZQ : "(" >
+  {
+    tabla.incrementar(TablaOcurrencias.Agrupaciones.tPARENTESIS_IZQ);
+  }
+| < tPARENTESIS_DER : ")" >
+  {
+    tabla.incrementar(TablaOcurrencias.Agrupaciones.tPARENTESIS_DER);
+  }
+}
+
+
+TOKEN : /* OPERADORES */
+{
+  < tOPAS : ":=" >
+  {
+    tabla.incrementar(TablaOcurrencias.Operadores.tOPAS);
+  }
+
+| < tFIN_SENTENCIA : ";" > {
+    tabla.incrementar(TablaOcurrencias.Operadores.tFIN_SENTENCIA);
+  }
+| < tSEP_VARIABLE : "," > {
+    tabla.incrementar(TablaOcurrencias.Operadores.tSEP_VARIABLE);
+  }
+
+  // Aritméticos
+| < tSUMA : "+" >
+  {
+    tabla.incrementar(TablaOcurrencias.OpAritmeticos.tSUMA);
+  }
+| < tRESTA : "-" >
+  {
+    tabla.incrementar(TablaOcurrencias.OpAritmeticos.tRESTA);
+  }
+| < tPRODUCTO : "*" >
+  {
+    tabla.incrementar(TablaOcurrencias.OpAritmeticos.tPRODUCTO);
+  }
+| < tDIVISION : "/" >
+  {
+    tabla.incrementar(TablaOcurrencias.OpAritmeticos.tDIVISION);
+  }
+| < tMOD : "mod" >
+  {
+    tabla.incrementar(TablaOcurrencias.OpAritmeticos.tMOD);
+  }
+
+  // Lógicos
+| < tAND : "and" >
+  {
+    tabla.incrementar(TablaOcurrencias.OpLogicos.tAND);
+  }
+| < tOR : "or" >
+  {
+    tabla.incrementar(TablaOcurrencias.OpLogicos.tOR);
+  }
+| < tNOT : "not" >
+  {
+    tabla.incrementar(TablaOcurrencias.OpLogicos.tNOT);
+  }
+| < tMAYOR : ">" >
+  {
+    tabla.incrementar(TablaOcurrencias.OpLogicos.tMAYOR);
+  }
+| < tMENOR : "<" >
+  {
+    tabla.incrementar(TablaOcurrencias.OpLogicos.tMENOR);
+  }
+| < tIGUAL : "=" >
+  {
+    tabla.incrementar(TablaOcurrencias.OpLogicos.tIGUAL);
+  }
+| < tMAI : ">=" >
+  {
+    tabla.incrementar(TablaOcurrencias.OpLogicos.tMAI);
+  }
+| < tMEI : "<=" >
+  {
+    tabla.incrementar(TablaOcurrencias.OpLogicos.tMEI);
+  }
+| < tNI : "<>" >
+  {
+    tabla.incrementar(TablaOcurrencias.OpLogicos.tNI);
+  }
+}
+  
+
+TOKEN : /* VALORES */
+{
+  < #DIGITO : [ "0"-"9" ] >
+| < #LETRA : [ "a"-"z" ] >
+
+  // Booleanos
+| < tTRUE : "true" >
+  {
+    tabla.incrementar(TablaOcurrencias.Valores.tTRUE, "True");
+  }
+| < tFALSE : "false" >
+  {
+     tabla.incrementar(TablaOcurrencias.Valores.tFALSE, "False");
+  }
+  
+  // Identificadores
+| < tIDENTIFICADOR : (< LETRA > | "_"(< LETRA > | < DIGITO >))(("_")?(< LETRA > | < DIGITO >))* >
+  {
+    tabla.incrementar(TablaOcurrencias.Valores.tIDENTIFICADOR, matchedToken.image);
+  }
+
+  // Numéricos
+| < tVALOR_ENTERO : ("-")?(["0"-"9"])+ >
+  {
+    tabla.incrementar(TablaOcurrencias.Valores.tVALOR_ENTERO, matchedToken.image);
+  }
+  
+  // Caracteres
+| < tCADENA_CARACTERES : "\""(~["\""])*"\"" >
+  {
+    tabla.incrementar(TablaOcurrencias.Valores.tCADENA_CARACTERES, matchedToken.image);
+  }
+}
+int programa() :{}{  (
+	< tPROGRAMA >
+  | < tVAR >
+  | < tPRINCIPIO >
+  | < tFIN >
+  | < tSI >
+  | < tENT >
+  | < tSI_NO >
+  | < tFSI >
+  | < tMQ >
+  | < tFMQ >
+  | < tESCRIBIR >
+  | < tLEER >
+  | < tENTACAR >
+  | < tCARAENT >
+  | < tACCION >
+  | < tVAL >
+  | < tREF >
+
+  | < tLLAVE_IZQ >
+  |	< tLLAVE_DER >
+  |	< tPARENTESIS_IZQ >
+  |	< tPARENTESIS_DER >
+
+  | < tOPAS >
+  | < tFIN_SENTENCIA >
+  | < tSEP_VARIABLE >
+
+  | < tSUMA >
+  | < tRESTA >
+  | < tPRODUCTO >
+  | < tDIVISION >
+  | < tMOD >
+
+  | < tAND >
+  | < tOR >
+  | < tNOT >
+  | < tMAYOR >
+  | < tMENOR >
+  | < tIGUAL >
+  | < tMAI >
+  | < tMEI >
+  | < tNI >
+
+  | < tENTERO >
+  | < tBOOLEANO >
+  | < tCARACTER >
+
+  | < tTRUE >
+  | < tFALSE >
+  | < tIDENTIFICADOR >
+  | < tVALOR_ENTERO >
+  | < tCADENA_CARACTERES >  )+
+    {
+      if (verbose_mode) { 
+          token_source.tabla.imprimirTabla();
+      }      return 0;    }}
