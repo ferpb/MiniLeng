@@ -82,15 +82,15 @@ public class TablaOcurrencias {
 	private final int nOperadores = 3;
 
 	public enum OpAritmeticos {
-        tSUMA,
-        tRESTA,
+        tMAS,
+        tMENOS,
         tPRODUCTO,
         tDIVISION,
         tMOD
 	}
 	private static final String[] OpAritmeticosNombres = {
-        "SUMA",
-        "RESTA",
+        "MAS",
+        "MENOS",
         "PRODUCTO",
         "DIVISION",
         "MOD"
@@ -137,17 +137,19 @@ public class TablaOcurrencias {
         tTRUE,
         tFALSE,
         tIDENTIFICADOR,
-        tVALOR_ENTERO,
-        tCADENA_CARACTERES
+        tCONSTENTERA,
+        tCONSTCHAR,
+        tCONSTCAD
 	}
     private static final String[] ValoresNombres = {
         "TRUE",
         "FALSE",
         "IDENTIFICADOR",
-        "VALOR_ENTERO",
-        "CADENA_CARACTERES",
+        "CONSTENTERA",
+        "CONSTCHAR",
+        "CONSTCAD"
 	};
-	private final int nValores = 5;
+	private final int nValores = 6;
 
 	// Definición de los contadores, uno por cada tipo de token.
 	int cReservadas[];
@@ -157,15 +159,20 @@ public class TablaOcurrencias {
 	int cOpLogicos[];
 	int cTipos[];
 	int cValores[];
-
+	
+	
+	// Mostrar o no los tokens reconocidos
+	private Boolean show_tokens;
 
 
 	/*
 	 * Constructor de la clase que inicializa todos
 	 * los contadores a 0
 	 */
-	public TablaOcurrencias() {
+	public TablaOcurrencias(Boolean show_tokens) {
 		// Se puede utilizar también Arrays.fills(arr, 0)
+		
+		this.show_tokens = show_tokens;
 
 		cReservadas = new int[nReservadas];
 		cAgrupaciones = new int[nAgrupaciones];
@@ -182,37 +189,51 @@ public class TablaOcurrencias {
 	 * divididas por tipos de token.
 	 */
 	public void incrementar(Reservadas token) {
-		System.out.println(token.name());
+		if (show_tokens) {
+			System.out.println(token.name());
+		}
 		cReservadas[token.ordinal()]++;
 	}
 
 	public void incrementar(Agrupaciones token) {
-		System.out.println(token.name());
+		if (show_tokens) {
+			System.out.println(token.name());
+		}
 		cAgrupaciones[token.ordinal()]++;
 	}
 
 	public void incrementar(Operadores token) {
-		System.out.println(token.name());
+		if (show_tokens) {
+			System.out.println(token.name());
+		}
 		cOperadores[token.ordinal()]++;
 	}
 
 	public void incrementar(OpAritmeticos token) {
-		System.out.println(token.name());
+		if (show_tokens) {
+			System.out.println(token.name());
+		}
 		cOpAritmeticos[token.ordinal()]++;
 	}
 
 	public void incrementar(OpLogicos token) {
-		System.out.println(token.name());
+		if (show_tokens) {
+			System.out.println(token.name());
+		}
 		cOpLogicos[token.ordinal()]++;
 	}
 
 	public void incrementar(Tipos token) {
-	    System.out.println(token.name());
+		if (show_tokens) {
+			System.out.println(token.name());
+		}
 		cTipos[token.ordinal()]++;
 	}
 
 	public void incrementar(Valores token, String valor) {
-	    System.out.println(token.name() + " (Valor: " + valor + ")");
+		if (show_tokens) {
+			System.out.println(token.name() + " (Valor: " + valor + ")");
+		}
 		cValores[token.ordinal()]++;
 	}
 

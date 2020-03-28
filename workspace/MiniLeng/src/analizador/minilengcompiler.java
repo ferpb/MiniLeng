@@ -6,16 +6,23 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
 
+import analizador.TokenMgrError;
+import analizador.minilengcompilerTokenManager;
+import analizador.SimpleCharStream;
+
 import lib.lexico.TablaOcurrencias;
 
 public class minilengcompiler implements minilengcompilerConstants {
 
         static Boolean verbose_mode = false;
+        static Boolean show_tokens = false;
+
 
         private static void help() {
                 System.out.println("Uso: minilengcompiler [opciones] [fichero ...]\u005cn");
         System.out.println("Opciones:");
         System.out.println("    -v, --verbose\u0009Mostrar resumen de los s\u00edmbolos utilizados en el programa");
+        System.out.println("    -t, --tokens\u0009Muestra los tokens que se van reconociendo");
         System.out.println("    -h, --help\u0009  \u0009Imprimir ayuda (esta pantalla) y salir");
         System.out.println("    --version\u0009\u0009Imprimir informaci\u00f3n de la versi\u00f3n y salir");
 
@@ -72,6 +79,13 @@ public class minilengcompiler implements minilengcompilerConstants {
                                     // Ignorar si aparece ayuda o versión de nuevo
                                         break;
 
+                                case "-t":
+                                case "--tokens":
+                                        // Mostrar tokens conforme se reconocen
+                                        show_tokens = true;
+                                        break;
+
+
                                 case "-v":
                                 case "--verbose":
                                         // Activar modo verboso
@@ -80,7 +94,7 @@ public class minilengcompiler implements minilengcompilerConstants {
 
                                         default:
                                                 if (args[i].charAt(0) == '-') {
-                                                        System.out.println("MiniLeng: Opci\u00f3n inv\u00e1lida <" + args[0] + ">\u005cn");
+                                                        System.err.println("MiniLeng: Opci\u00f3n inv\u00e1lida <" + args[0] + ">\u005cn");
                                                         help();
                                                 }
                                                 else {
@@ -113,6 +127,14 @@ public class minilengcompiler implements minilengcompilerConstants {
                 if (ficheros_entrada != null) {
                         // Lectura del fichero del usuario.
                         String fichero = ficheros_entrada[0];
+
+                        // Si el fichero no terminal en .ml, error
+                        if (!fichero.endsWith(".ml")) {
+                        System.err.println("MiniLeng: El fichero a compilar tiene que tener extensi\u00f3n .ml");
+                        System.err.println("          Fichero introducido: " + fichero + " .");
+                        System.exit(0);
+                        }
+
                         // Ejecutar el compilador con los fichero introducidos
                         System.out.println("MiniLeng: Leyendo el fichero " + fichero + " ...");
                 try {
@@ -120,7 +142,7 @@ public class minilengcompiler implements minilengcompilerConstants {
                         stream = new FileInputStream(fichero);
                 }
                 catch (FileNotFoundException e) {
-                        System.out.println("MiniLeng: No he encontrado el fichero " + fichero + " .");
+                        System.err.println("MiniLeng: No he encontrado el fichero " + fichero + " .");
                         System.exit(0);
                 }
                 }
@@ -132,231 +154,587 @@ public class minilengcompiler implements minilengcompilerConstants {
                         parser = new minilengcompiler(stream);
                         switch (minilengcompiler.programa()) {
                                 case 0 :
-                                        System.out.println("OK.");
+                                        System.out.println("Compilado correctamente!");
                                         break;
                                 case 1 :
-                                        System.out.println("GOODBYE.");
+                                        System.out.println("Adi\u00f3s.");
                                         break;
                                 default :
                                         break;
                         }
                 }
                 catch (Exception e) {
-                        // error sintáctico                        System.out.println("NOK.");
+                        // Detectado error sintáctico                        System.out.println("NOK.");
                         System.out.println(e.getMessage());
-                }
+                        // errorSintactico();                }
                 catch (Error e) {
-                        // error léxico                        // System.out.println("Error léxico (<linea, columna>): símbolo no reconocido <símbolo>");                        // si no hay errores léxicos no muestra nada en la salida.
-                        System.out.println(e.getMessage());
+                        // Detectado error léxico
+                        System.out.println("Oops.");
+                        errorLexico();
                 }
         }
 
+
+        private static void errorLexico() {
+                SimpleCharStream entrada = minilengcompilerTokenManager.input_stream;
+                String error;
+
+                try {
+                        error = Character.toString(entrada.readChar());
+                }
+                catch (Exception fin_fichero) {
+                        error = "<EOF>";
+                }
+
+                // Imprime el caracter erroneo, si puede no ser imprimible por la terminal,
+                // imprime su equivalente escapado.
+                System.err.println("MiniLeng: ERROR L\u00c9XICO (l\u00ednea " + entrada.line +
+                        ", columna " + (entrada.column - 1) + "): " +
+                        "s\u00edmbolo no reconocido: " + error +
+                        (!TokenMgrError.addEscapes(error).equals(error) ? " (" + TokenMgrError.addEscapes(error) + ")" : "")
+                );
+        }
+
+        private static void errorSintactico(ParseException e, String mensaje) {
+                /*
+  	  	Token ultimoToken = minilengcompilerTokenManager.getNextToken();
+  	  	e.currentToken.beginLine;
+  	  	e.currentToken.beginColumn;
+		e.currentToken.next;
+		*/
+
+                // Hacer contador de errores
+                /*
+		System.err.println("MiniLeng: ERROR SINTÁCTICO (línea " + entrada.line +
+			", columna " + (entrada.column - 1) + "): " +
+			"símbolo no reconocido: " + error +
+			(!TokenMgrError.addEscapes(error).equals(error) ? " (" + TokenMgrError.addEscapes(error) + ")" : "")
+		);
+		*/
+        }
+
   static final public int programa() throws ParseException {
+    jj_consume_token(tPROGRAMA);
+    jj_consume_token(tIDENTIFICADOR);
+    jj_consume_token(tFIN_SENTENCIA);
+    declaracion_variables();
+    declaracion_acciones();
+    bloque_sentencias();
+    if (verbose_mode) {
+      token_source.tabla.imprimirTabla();
+    }
+    {if (true) return 0;}
+    throw new Error("Missing return statement in function");
+  }
+
+  static final public void declaracion_variables() throws ParseException {
     label_1:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case tPROGRAMA:
-        jj_consume_token(tPROGRAMA);
-        break;
-      case tVAR:
-        jj_consume_token(tVAR);
-        break;
-      case tPRINCIPIO:
-        jj_consume_token(tPRINCIPIO);
-        break;
-      case tFIN:
-        jj_consume_token(tFIN);
-        break;
-      case tSI:
-        jj_consume_token(tSI);
-        break;
-      case tENT:
-        jj_consume_token(tENT);
-        break;
-      case tSI_NO:
-        jj_consume_token(tSI_NO);
-        break;
-      case tFSI:
-        jj_consume_token(tFSI);
-        break;
-      case tMQ:
-        jj_consume_token(tMQ);
-        break;
-      case tFMQ:
-        jj_consume_token(tFMQ);
-        break;
-      case tESCRIBIR:
-        jj_consume_token(tESCRIBIR);
-        break;
-      case tLEER:
-        jj_consume_token(tLEER);
-        break;
-      case tENTACAR:
-        jj_consume_token(tENTACAR);
-        break;
-      case tCARAENT:
-        jj_consume_token(tCARAENT);
-        break;
-      case tACCION:
-        jj_consume_token(tACCION);
-        break;
-      case tVAL:
-        jj_consume_token(tVAL);
-        break;
-      case tREF:
-        jj_consume_token(tREF);
-        break;
-      case tLLAVE_IZQ:
-        jj_consume_token(tLLAVE_IZQ);
-        break;
-      case tLLAVE_DER:
-        jj_consume_token(tLLAVE_DER);
-        break;
-      case tPARENTESIS_IZQ:
-        jj_consume_token(tPARENTESIS_IZQ);
-        break;
-      case tPARENTESIS_DER:
-        jj_consume_token(tPARENTESIS_DER);
-        break;
-      case tOPAS:
-        jj_consume_token(tOPAS);
-        break;
-      case tFIN_SENTENCIA:
-        jj_consume_token(tFIN_SENTENCIA);
-        break;
-      case tSEP_VARIABLE:
-        jj_consume_token(tSEP_VARIABLE);
-        break;
-      case tSUMA:
-        jj_consume_token(tSUMA);
-        break;
-      case tRESTA:
-        jj_consume_token(tRESTA);
-        break;
-      case tPRODUCTO:
-        jj_consume_token(tPRODUCTO);
-        break;
-      case tDIVISION:
-        jj_consume_token(tDIVISION);
-        break;
-      case tMOD:
-        jj_consume_token(tMOD);
-        break;
-      case tAND:
-        jj_consume_token(tAND);
-        break;
-      case tOR:
-        jj_consume_token(tOR);
-        break;
-      case tNOT:
-        jj_consume_token(tNOT);
-        break;
-      case tMAYOR:
-        jj_consume_token(tMAYOR);
-        break;
-      case tMENOR:
-        jj_consume_token(tMENOR);
-        break;
-      case tIGUAL:
-        jj_consume_token(tIGUAL);
-        break;
-      case tMAI:
-        jj_consume_token(tMAI);
-        break;
-      case tMEI:
-        jj_consume_token(tMEI);
-        break;
-      case tNI:
-        jj_consume_token(tNI);
-        break;
-      case tENTERO:
-        jj_consume_token(tENTERO);
-        break;
-      case tBOOLEANO:
-        jj_consume_token(tBOOLEANO);
-        break;
-      case tCARACTER:
-        jj_consume_token(tCARACTER);
-        break;
-      case tTRUE:
-        jj_consume_token(tTRUE);
-        break;
-      case tFALSE:
-        jj_consume_token(tFALSE);
-        break;
-      case tIDENTIFICADOR:
-        jj_consume_token(tIDENTIFICADOR);
-        break;
-      case tVALOR_ENTERO:
-        jj_consume_token(tVALOR_ENTERO);
-        break;
-      case tCADENA_CARACTERES:
-        jj_consume_token(tCADENA_CARACTERES);
-        break;
-      default:
-        jj_la1[0] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
-      }
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case tPROGRAMA:
-      case tVAR:
-      case tPRINCIPIO:
-      case tFIN:
-      case tSI:
-      case tENT:
-      case tSI_NO:
-      case tFSI:
-      case tMQ:
-      case tFMQ:
-      case tESCRIBIR:
-      case tLEER:
-      case tENTACAR:
-      case tCARAENT:
-      case tACCION:
-      case tVAL:
-      case tREF:
       case tENTERO:
       case tBOOLEANO:
       case tCARACTER:
-      case tLLAVE_IZQ:
-      case tLLAVE_DER:
-      case tPARENTESIS_IZQ:
-      case tPARENTESIS_DER:
-      case tOPAS:
-      case tFIN_SENTENCIA:
-      case tSEP_VARIABLE:
-      case tSUMA:
-      case tRESTA:
-      case tPRODUCTO:
-      case tDIVISION:
-      case tMOD:
-      case tAND:
-      case tOR:
-      case tNOT:
-      case tMAYOR:
-      case tMENOR:
-      case tIGUAL:
-      case tMAI:
-      case tMEI:
-      case tNI:
-      case tTRUE:
-      case tFALSE:
-      case tIDENTIFICADOR:
-      case tVALOR_ENTERO:
-      case tCADENA_CARACTERES:
         ;
         break;
       default:
-        jj_la1[1] = jj_gen;
+        jj_la1[0] = jj_gen;
         break label_1;
       }
+      declaracion();
+      jj_consume_token(tFIN_SENTENCIA);
     }
-      if (verbose_mode) {
-          token_source.tabla.imprimirTabla();
+  }
+
+  static final public void declaracion() throws ParseException {
+    tipo_variables();
+    identificadores();
+  }
+
+  static final public void tipo_variables() throws ParseException {
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case tENTERO:
+      jj_consume_token(tENTERO);
+      break;
+    case tCARACTER:
+      jj_consume_token(tCARACTER);
+      break;
+    case tBOOLEANO:
+      jj_consume_token(tBOOLEANO);
+      break;
+    default:
+      jj_la1[1] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+  }
+
+  static final public void identificadores() throws ParseException {
+    jj_consume_token(tIDENTIFICADOR);
+    label_2:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tSEP_VARIABLE:
+        ;
+        break;
+      default:
+        jj_la1[2] = jj_gen;
+        break label_2;
       }
-      {if (true) return 0;}
-    throw new Error("Missing return statement in function");
+      jj_consume_token(tSEP_VARIABLE);
+      jj_consume_token(tIDENTIFICADOR);
+    }
+  }
+
+  static final public void declaracion_acciones() throws ParseException {
+    label_3:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tACCION:
+        ;
+        break;
+      default:
+        jj_la1[3] = jj_gen;
+        break label_3;
+      }
+      declaracion_accion();
+    }
+  }
+
+  static final public void declaracion_accion() throws ParseException {
+    cabecera_accion();
+    jj_consume_token(tFIN_SENTENCIA);
+    declaracion_variables();
+    declaracion_acciones();
+    bloque_sentencias();
+  }
+
+  static final public void cabecera_accion() throws ParseException {
+    jj_consume_token(tACCION);
+    jj_consume_token(tIDENTIFICADOR);
+    parametros_formales();
+  }
+
+  static final public void parametros_formales() throws ParseException {
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case tPARENTESIS_IZQ:
+      jj_consume_token(tPARENTESIS_IZQ);
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tVAL:
+      case tREF:
+        lista_parametros();
+        break;
+      default:
+        jj_la1[4] = jj_gen;
+        ;
+      }
+      jj_consume_token(tPARENTESIS_DER);
+      break;
+    default:
+      jj_la1[5] = jj_gen;
+      ;
+    }
+  }
+
+  static final public void lista_parametros() throws ParseException {
+    parametros();
+    label_4:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tFIN_SENTENCIA:
+        ;
+        break;
+      default:
+        jj_la1[6] = jj_gen;
+        break label_4;
+      }
+      jj_consume_token(tFIN_SENTENCIA);
+      parametros();
+    }
+  }
+
+  static final public void parametros() throws ParseException {
+    clase_parametros();
+    declaracion();
+  }
+
+  static final public void clase_parametros() throws ParseException {
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case tVAL:
+      jj_consume_token(tVAL);
+      break;
+    case tREF:
+      jj_consume_token(tREF);
+      break;
+    default:
+      jj_la1[7] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+  }
+
+  static final public void bloque_sentencias() throws ParseException {
+    jj_consume_token(tPRINCIPIO);
+    lista_sentencias();
+    jj_consume_token(tFIN);
+  }
+
+  static final public void lista_sentencias() throws ParseException {
+    sentencia();
+    label_5:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tSI:
+      case tMQ:
+      case tESCRIBIR:
+      case tLEER:
+      case tIDENTIFICADOR:
+        ;
+        break;
+      default:
+        jj_la1[8] = jj_gen;
+        break label_5;
+      }
+      sentencia();
+    }
+  }
+
+  static final public void sentencia() throws ParseException {
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case tLEER:
+      leer();
+      break;
+    case tESCRIBIR:
+      escribir();
+      break;
+    case tIDENTIFICADOR:
+      instruccion();
+      break;
+    case tSI:
+      seleccion();
+      break;
+    case tMQ:
+      mientras_que();
+      break;
+    default:
+      jj_la1[9] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+  }
+
+  static final public void leer() throws ParseException {
+    jj_consume_token(tLEER);
+    jj_consume_token(tPARENTESIS_IZQ);
+    lista_asignables();
+    jj_consume_token(tPARENTESIS_DER);
+    jj_consume_token(tFIN_SENTENCIA);
+  }
+
+  static final public void lista_asignables() throws ParseException {
+    identificadores();
+  }
+
+  static final public void escribir() throws ParseException {
+    jj_consume_token(tESCRIBIR);
+    jj_consume_token(tPARENTESIS_IZQ);
+    lista_escribibles();
+    jj_consume_token(tPARENTESIS_DER);
+    jj_consume_token(tFIN_SENTENCIA);
+  }
+
+  static final public void lista_escribibles() throws ParseException {
+    lista_expresiones();
+  }
+
+  static final public void asignacion() throws ParseException {
+    jj_consume_token(tOPAS);
+    expresion();
+    jj_consume_token(tFIN_SENTENCIA);
+  }
+
+  static final public void instruccion() throws ParseException {
+    jj_consume_token(tIDENTIFICADOR);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case tPARENTESIS_IZQ:
+    case tFIN_SENTENCIA:
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tPARENTESIS_IZQ:
+        argumentos();
+        break;
+      default:
+        jj_la1[10] = jj_gen;
+        ;
+      }
+      jj_consume_token(tFIN_SENTENCIA);
+      break;
+    case tOPAS:
+      asignacion();
+      break;
+    default:
+      jj_la1[11] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+  }
+
+  static final public void mientras_que() throws ParseException {
+    jj_consume_token(tMQ);
+    expresion();
+    lista_sentencias();
+    jj_consume_token(tFMQ);
+  }
+
+  static final public void seleccion() throws ParseException {
+    jj_consume_token(tSI);
+    expresion();
+    jj_consume_token(tENT);
+    lista_sentencias();
+    label_6:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tSI_NO:
+        ;
+        break;
+      default:
+        jj_la1[12] = jj_gen;
+        break label_6;
+      }
+      jj_consume_token(tSI_NO);
+      lista_sentencias();
+    }
+    jj_consume_token(tFSI);
+  }
+
+  static final public void argumentos() throws ParseException {
+    jj_consume_token(tPARENTESIS_IZQ);
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case tENTACAR:
+    case tCARAENT:
+    case tPARENTESIS_IZQ:
+    case tMAS:
+    case tMENOS:
+    case tNOT:
+    case tTRUE:
+    case tFALSE:
+    case tIDENTIFICADOR:
+    case tCONSTENTERA:
+    case tCONSTCHAR:
+    case tCONSTCAD:
+      lista_expresiones();
+      break;
+    default:
+      jj_la1[13] = jj_gen;
+      ;
+    }
+    jj_consume_token(tPARENTESIS_DER);
+  }
+
+  static final public void lista_expresiones() throws ParseException {
+    expresion();
+    label_7:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tSEP_VARIABLE:
+        ;
+        break;
+      default:
+        jj_la1[14] = jj_gen;
+        break label_7;
+      }
+      jj_consume_token(tSEP_VARIABLE);
+      expresion();
+    }
+  }
+
+  static final public void expresion() throws ParseException {
+    expresion_simple();
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case tMAYOR:
+    case tMENOR:
+    case tIGUAL:
+    case tMAI:
+    case tMEI:
+    case tNI:
+      operador_relacional();
+      expresion_simple();
+      break;
+    default:
+      jj_la1[15] = jj_gen;
+      ;
+    }
+  }
+
+  static final public void operador_relacional() throws ParseException {
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case tIGUAL:
+      jj_consume_token(tIGUAL);
+      break;
+    case tMENOR:
+      jj_consume_token(tMENOR);
+      break;
+    case tMAYOR:
+      jj_consume_token(tMAYOR);
+      break;
+    case tMAI:
+      jj_consume_token(tMAI);
+      break;
+    case tMEI:
+      jj_consume_token(tMEI);
+      break;
+    case tNI:
+      jj_consume_token(tNI);
+      break;
+    default:
+      jj_la1[16] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+  }
+
+  static final public void expresion_simple() throws ParseException {
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case tMAS:
+    case tMENOS:
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tMAS:
+        jj_consume_token(tMAS);
+        break;
+      case tMENOS:
+        jj_consume_token(tMENOS);
+        break;
+      default:
+        jj_la1[17] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+      break;
+    default:
+      jj_la1[18] = jj_gen;
+      ;
+    }
+    termino();
+    label_8:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tMAS:
+      case tMENOS:
+      case tOR:
+        ;
+        break;
+      default:
+        jj_la1[19] = jj_gen;
+        break label_8;
+      }
+      operador_aditivo();
+      termino();
+    }
+  }
+
+  static final public void operador_aditivo() throws ParseException {
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case tMAS:
+      jj_consume_token(tMAS);
+      break;
+    case tMENOS:
+      jj_consume_token(tMENOS);
+      break;
+    case tOR:
+      jj_consume_token(tOR);
+      break;
+    default:
+      jj_la1[20] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+  }
+
+  static final public void termino() throws ParseException {
+    factor();
+    label_9:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tPRODUCTO:
+      case tDIVISION:
+      case tMOD:
+      case tAND:
+        ;
+        break;
+      default:
+        jj_la1[21] = jj_gen;
+        break label_9;
+      }
+      operador_multiplicativo();
+      factor();
+    }
+  }
+
+  static final public void operador_multiplicativo() throws ParseException {
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case tPRODUCTO:
+      jj_consume_token(tPRODUCTO);
+      break;
+    case tDIVISION:
+      jj_consume_token(tDIVISION);
+      break;
+    case tMOD:
+      jj_consume_token(tMOD);
+      break;
+    case tAND:
+      jj_consume_token(tAND);
+      break;
+    default:
+      jj_la1[22] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+  }
+
+  static final public void factor() throws ParseException {
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case tNOT:
+      jj_consume_token(tNOT);
+      factor();
+      break;
+    case tPARENTESIS_IZQ:
+      jj_consume_token(tPARENTESIS_IZQ);
+      expresion();
+      jj_consume_token(tPARENTESIS_DER);
+      break;
+    case tENTACAR:
+      jj_consume_token(tENTACAR);
+      jj_consume_token(tPARENTESIS_IZQ);
+      expresion();
+      jj_consume_token(tPARENTESIS_DER);
+      break;
+    case tCARAENT:
+      jj_consume_token(tCARAENT);
+      jj_consume_token(tPARENTESIS_IZQ);
+      expresion();
+      jj_consume_token(tPARENTESIS_DER);
+      break;
+    case tIDENTIFICADOR:
+      jj_consume_token(tIDENTIFICADOR);
+      break;
+    case tCONSTENTERA:
+      jj_consume_token(tCONSTENTERA);
+      break;
+    case tCONSTCHAR:
+      jj_consume_token(tCONSTCHAR);
+      break;
+    case tCONSTCAD:
+      jj_consume_token(tCONSTCAD);
+      break;
+    case tTRUE:
+      jj_consume_token(tTRUE);
+      break;
+    case tFALSE:
+      jj_consume_token(tFALSE);
+      break;
+    default:
+      jj_la1[23] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
   }
 
   static private boolean jj_initialized_once = false;
@@ -369,7 +747,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   static public Token jj_nt;
   static private int jj_ntk;
   static private int jj_gen;
-  static final private int[] jj_la1 = new int[2];
+  static final private int[] jj_la1 = new int[24];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -377,10 +755,10 @@ public class minilengcompiler implements minilengcompilerConstants {
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0xfffff800,0xfffff800,};
+      jj_la1_0 = new int[] {0x70000000,0x70000000,0x0,0x2000000,0xc000000,0x0,0x0,0xc000000,0x688000,0x688000,0x0,0x0,0x20000,0x1800000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1800000,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x7cfffff,0x7cfffff,};
+      jj_la1_1 = new int[] {0x0,0x0,0x20,0x0,0x0,0x2,0x10,0x0,0x1000000,0x1000000,0x2,0x1a,0x0,0xfc020c2,0x20,0xfc000,0xfc000,0xc0,0xc0,0x10c0,0x10c0,0xf00,0xf00,0xfc02002,};
    }
 
   /** Constructor with InputStream. */
@@ -401,7 +779,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 2; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -415,7 +793,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 2; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -432,7 +810,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 2; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -442,7 +820,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 2; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -458,7 +836,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 2; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -467,7 +845,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 2; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
   }
 
   static private Token jj_consume_token(int kind) throws ParseException {
@@ -518,12 +896,12 @@ public class minilengcompiler implements minilengcompilerConstants {
   /** Generate ParseException. */
   static public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[59];
+    boolean[] la1tokens = new boolean[60];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 24; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -535,7 +913,7 @@ public class minilengcompiler implements minilengcompilerConstants {
         }
       }
     }
-    for (int i = 0; i < 59; i++) {
+    for (int i = 0; i < 60; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

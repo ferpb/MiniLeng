@@ -65,9 +65,9 @@ public interface minilengcompilerConstants {
   /** RegularExpression Id. */
   int tSEP_VARIABLE = 37;
   /** RegularExpression Id. */
-  int tSUMA = 38;
+  int tMAS = 38;
   /** RegularExpression Id. */
-  int tRESTA = 39;
+  int tMENOS = 39;
   /** RegularExpression Id. */
   int tPRODUCTO = 40;
   /** RegularExpression Id. */
@@ -103,9 +103,11 @@ public interface minilengcompilerConstants {
   /** RegularExpression Id. */
   int tIDENTIFICADOR = 56;
   /** RegularExpression Id. */
-  int tVALOR_ENTERO = 57;
+  int tCONSTENTERA = 57;
   /** RegularExpression Id. */
-  int tCADENA_CARACTERES = 58;
+  int tCONSTCHAR = 58;
+  /** RegularExpression Id. */
+  int tCONSTCAD = 59;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -173,8 +175,9 @@ public interface minilengcompilerConstants {
     "\"true\"",
     "\"false\"",
     "<tIDENTIFICADOR>",
-    "<tVALOR_ENTERO>",
-    "<tCADENA_CARACTERES>",
+    "<tCONSTENTERA>",
+    "<tCONSTCHAR>",
+    "<tCONSTCAD>",
   };
 
 }
