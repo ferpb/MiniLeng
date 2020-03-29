@@ -1,0 +1,7 @@
+package lib.lexico;
+
+public class ErrorLexico {
+	
+	static int contadorErrores;
+
+}

@@ -1,0 +1,5 @@
+package lib.lexico;
+
+public class ErrorLexico {
+
+}

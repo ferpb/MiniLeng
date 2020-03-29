@@ -4,12 +4,20 @@ programa decidemayor;
 entero n;
 
 accion prueba;
-principio
 
-	accion prueba:
-	principio
+entero n;
+	accion prueba;
+
+	entero n;
+
+	
+	  n := 2;
 
 	fin
+
+principio
+n := 1;
+
 fin
 
 

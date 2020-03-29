@@ -1,0 +1,28 @@
+package lib.sintactico;
+
+import ParseExceptionñ
+
+public class ErrorSintactico {
+	
+	private static int contadorErrores = 0;
+	
+	
+	public static void deteccion(ParseException e, String mensaje) {
+        /*
+	  	Token ultimoToken = minilengcompilerTokenManager.getNextToken();
+	  	e.currentToken.beginLine;
+	  	e.currentToken.beginColumn;
+	e.currentToken.next;
+	*/
+
+           System.err.println("MiniLeng: ERROR SINT\u00c1CTICO (l\u00ednea " + e.currentToken.beginLine +
+                   ", columna " + (e.currentToken.beginColumn - 1) + "): Token incorrecto: '" +
+                   e.currentToken.next + "'. " + mensaje);
+	}
+	
+	public static int getContadorErrores() {
+		return contadorErrores;
+	}
+	
+
+}

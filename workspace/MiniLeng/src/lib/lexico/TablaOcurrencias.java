@@ -5,7 +5,7 @@
  * Fichero:    TablaOcurrencias.jj
  * Autor:      Fernando Peña (NIA: 756012)
  * Fecha:      20/02/2020
- * Versión:    v1
+ * Versión:    v1.0
  * Asignatura: Procesadores de Lenguajes, curso 2019-2020
  **********************************************************************************/
 

@@ -1,0 +1,32 @@
+package lib.lexico;
+
+import analizador.minilengcompilerTokenManager;
+import analizador.TokenMgrError;
+import analizador.SimpleCharStream;
+
+public class ErrorLexico {
+	
+	public static int contadorErrores = 0;
+	
+	public static void errorLexico() {
+		SimpleCharStream entrada = minilengcompilerTokenManager.input_stream;
+		String error;
+
+		try { 
+			error = Character.toString(entrada.readChar());
+		}
+		catch (Exception fin_fichero) {
+		  	error = "<EOF>";
+		}
+
+		// Imprime el caracter erroneo, si puede no ser imprimible por la terminal,
+		// imprime su equivalente escapado.
+		System.err.println("MiniLeng: ERROR LÉXICO (línea " + entrada.getEndLine() +
+			", columna " + (entrada.getEndColumn() - 1) + "): " +
+			"símbolo no reconocido: '" + error + "'" +
+			(!TokenMgrError.addEscapes(error).equals(error) ? " (" + TokenMgrError.addEscapes(error) + ")" : "")
+		);
+	}
+	
+
+}

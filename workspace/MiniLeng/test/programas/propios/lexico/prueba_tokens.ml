@@ -4,20 +4,20 @@ programa prueba_tokens;
 %-------------------------------------------------------------------
 entero   _variable_entera, _variable_entera2;
 caracter variableCaracter1;
-boolean  Booleano;
+booleano  bool;
 
 caracter pri, seg;
 entero n, m;
 
 %-------------------------------------------------------------------
-accion accion_de_prueba(val entero a, ref entero b)
+accion accion_de_prueba(val entero a; ref entero b);
 %-------------------------------------------------------------------
 entero uno;
 entero dos;
 
 principio
-	uno := 1
-	dos := 2
+	uno := 1;
+	dos := 2;
 	si int1 < int2 ent
 		escribir("uno es menor que dos");
 		escribir(entacar(10), entacar(13));
@@ -26,17 +26,20 @@ principio
 		escribir(entacar(10), entacar(13));
 	fsi
 
-	b = entero * entero;
+	b := uno * do;
 fin
 
 %-------------------------------------------------------------------
-accion accion_de_prueba
+accion accion_de_prueba;
 %-------------------------------------------------------------------
 
-%%----------------------------
+%%
+%----------------------------
 % Multicomentario
 % Otra línea (si, lleva tilde)
-%%----------------------------
+%----------------------------
+%%
+
 % Línea fuera del comentario
 
 entero cero;
@@ -50,18 +53,21 @@ principio
 	fmq
 fin
 
+
+
 principio
 	pri := entacar(49);
 	%%%%seg := entacar(50); % No debería haber problemas
 
-	{ }
+	% { }
 
 	leer(pri);
 	leer(seg);
 
-	n = caraent(pri);
-	m = caraent(seg);
+	n := n = caraent(pri);
+	n := m = caraent(seg);
 
+	%%
 	n + n;
 	n - m;
 	n * m;
@@ -80,6 +86,7 @@ principio
   	n >= m;
   	n <= m;
   	n <> m;
+  	%%
 
   	escribir("Prueba tabuladores\t y fines de línea\n Otra línea\n\tAhora 
            indentada\nY ahora con caracteres éSπeçíá¬éß");

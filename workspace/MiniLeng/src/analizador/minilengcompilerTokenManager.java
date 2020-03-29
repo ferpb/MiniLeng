@@ -8,6 +8,8 @@ import analizador.TokenMgrError;
 import analizador.minilengcompilerTokenManager;
 import analizador.SimpleCharStream;
 import lib.lexico.TablaOcurrencias;
+import lib.lexico.ErrorLexico;
+import lib.sintactico.ErrorSintactico;
 
 /** Token Manager. */
 public class minilengcompilerTokenManager implements minilengcompilerConstants

@@ -27,7 +27,7 @@ accion pedirletra;
 
  caracter c,ln;
 
- principio
+  principio
   c := " ";
   mq (c < "A") or (c > "Z")
     escribir("letra:");
