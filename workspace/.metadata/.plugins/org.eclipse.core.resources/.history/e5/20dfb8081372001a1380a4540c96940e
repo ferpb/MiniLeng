@@ -1,5 +1,5 @@
 /*********************************************************************************
- * Tratamiento de errores sintácticos
+ * Especificación JavaCC para el lenguaje MiniLeng (Procesadores de Lenguajes)
  *
  * Fichero:    ErrorSintactico.java
  * Autor:      Fernando Peña (NIA: 756012)

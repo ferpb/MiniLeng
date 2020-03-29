@@ -69,7 +69,7 @@ public class minilengcompiler implements minilengcompilerConstants {
                 help();
                 }
                 else if (args[0].equals("--version")) {
-                // Mostrar ayuda y salir
+                // Mostrar version y salir
                 version();
                 }
                 else {

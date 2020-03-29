@@ -80,7 +80,7 @@ public class minilengcompiler {
     	  	help();
   		}
   		else if (args[0].equals("--version")) {
-    	  	// Mostrar version y salir
+    	  	// Mostrar ayuda y salir
     	  	version();
   		}
   		else {

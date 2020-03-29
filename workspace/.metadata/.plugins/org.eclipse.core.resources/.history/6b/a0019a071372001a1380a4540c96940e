@@ -1,5 +1,5 @@
 /*********************************************************************************
- * Tratamiento de errores léxicos
+ * Especificación JavaCC para el lenguaje MiniLeng (Procesadores de Lenguajes)
  *
  * Fichero:    ErrorLexico.java
  * Autor:      Fernando Peña (NIA: 756012)
