@@ -1,0 +1,21 @@
+package lib.sintactico;
+
+public class PanicMode {
+	
+	private static int contadorErrores = 0;
+    System.out.println("Fila, columna: Se esperaba ';', iniciado panic mode");
+
+    Token t = getNextToken();
+    while(t.kind != tFIN_SENTENCIA && t.kind != EOF) {
+      System.out.println("Warning: descartado token: " + t.image);
+      t = getNextToken();
+    }
+
+    if (t.kind == EOF) {
+    	System.out.println("Fila, columna: Se ha terminado el fichero. Terminado panic mode");
+    }
+    else {
+    	System.out.println("Fila, columna: Se ha encontrado ';'. Terminado panic mode");        
+    }
+
+}

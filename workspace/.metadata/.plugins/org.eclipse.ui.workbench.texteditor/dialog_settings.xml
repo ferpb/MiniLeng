@@ -6,20 +6,35 @@
 		<item key="wholeword" value="false"/>
 		<item key="incremental" value="false"/>
 		<item key="isRegEx" value="false"/>
-		<item key="selection" value="Constructor"/>
+		<item key="selection" value="fin de bloque"/>
 		<list key="findhistory">
-			<item value="constructor"/>
-			<item value="with"/>
-			<item value="stream"/>
-			<item value="minilengcompilerTokenManager"/>
-			<item value="error"/>
-			<item value="tSUMA"/>
-			<item value="ML"/>
-			<item value="&lt;?parser_name?&gt;"/>
-			<item value="Ejemplo"/>
-			<item value="Armonía&#x0A;Programado: 20 feb 2020 19:45 - 20:45&#x0A;"/>
+			<item value="fin de bloque"/>
+			<item value="fin de loque"/>
+			<item value="errorSintactico"/>
+			<item value="read"/>
+			<item value="token"/>
+			<item value="current"/>
+			<item value="currentToken"/>
+			<item value="&lt;tIDENTIFICADOR&gt;"/>
+			<item value="&lt;tFIN&gt;"/>
+			<item value="&lt;tPRINCIPIO&gt;"/>
+			<item value="&lt;tPARENTESIS_DER&gt;"/>
+			<item value="&lt;tPARENTESIS_IZQ&gt;"/>
+			<item value="&lt;tSEP_VARIABLE&gt;"/>
+			<item value="&lt;tSEP_VARIABLES&gt;"/>
+			<item value="punto_y_coma()"/>
 		</list>
 		<list key="replacehistory">
+			<item value="ErrorSintactico.deteccion"/>
+			<item value="identificador()"/>
+			<item value="fin()"/>
+			<item value="principio()"/>
+			<item value="parentesis_der()"/>
+			<item value="parentesis_izq()"/>
+			<item value="sep_variable()"/>
+			<item value="sep_variables()"/>
+			<item value="fin_sentencia()"/>
+			<item value="punto_y_coma()"/>
 			<item value="minilengcompiler"/>
 			<item value="ML"/>
 			<item value="P1"/>
@@ -27,8 +42,8 @@
 		</list>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
-		<item key="DIALOG_X_ORIGIN" value="909"/>
-		<item key="DIALOG_Y_ORIGIN" value="269"/>
+		<item key="DIALOG_X_ORIGIN" value="906"/>
+		<item key="DIALOG_Y_ORIGIN" value="458"/>
 		<item key="DIALOG_WIDTH" value="290"/>
 		<item key="DIALOG_HEIGHT" value="409"/>
 		<item key="DIALOG_FONT_NAME" value="1|.AppleSystemUIFont|11.0|0|COCOA|1|.AppleSystemUIFont"/>

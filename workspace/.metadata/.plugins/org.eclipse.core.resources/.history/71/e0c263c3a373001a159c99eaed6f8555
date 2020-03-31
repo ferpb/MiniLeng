@@ -1,0 +1,28 @@
+package lib.sintactico;
+
+import analizador.ParseException;
+import analizador.Token;
+import analizador.minilengcompiler;
+import analizador.minilengcompilerConstants;
+
+public class PanicMode implement minilengcompilerConstants {
+	
+	private static int contadorErrores = 0;
+	
+	public static void iniciar(ParseException e) {
+		System.out.println("Fila, columna: Se esperaba ';', iniciado panic mode");
+
+		Token t = minilengcompiler.getNextToken();
+		while(t.kind != tFIN_SENTENCIA && t.kind != EOF) {
+			System.out.println("Warning: descartado token: " + t.image);
+			t = getNextToken();
+		}
+
+		if (t.kind == EOF) {
+			System.out.println("Fila, columna: Se ha terminado el fichero. Terminado panic mode");
+		}
+		else {
+			System.out.println("Fila, columna: Se ha encontrado ';'. Terminado panic mode");        
+		}
+	}
+}

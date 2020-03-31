@@ -10,6 +10,7 @@ import analizador.SimpleCharStream;
 import lib.lexico.TablaOcurrencias;
 import lib.lexico.ErrorLexico;
 import lib.sintactico.ErrorSintactico;
+import lib.sintactico.PanicMode;
 
 /** Token Manager. */
 public class minilengcompilerTokenManager implements minilengcompilerConstants

@@ -13,24 +13,28 @@ import analizador.SimpleCharStream;
 import lib.lexico.TablaOcurrencias;
 import lib.lexico.ErrorLexico;
 import lib.sintactico.ErrorSintactico;
+import lib.sintactico.PanicMode;
 
 public class minilengcompiler implements minilengcompilerConstants {
 
-        private static final String version = "2.0";
-        private static final String fecha_version = "marzo de 2020";
-        private static final String fecha_compilado = "29-03-2020";
+        private static final String version = "2.2";
+        private static final String fecha_version = "abril de 2020";
+        private static final String fecha_compilado = "2-04-2020";
 
 
         protected static Boolean verbose_mode = false;
+        protected static Boolean panic_mode = false;
         protected static Boolean show_tokens = false;
 
         private static Boolean compilado_sin_errores = true;
+        private static Boolean entrado_en_panic = false;
 
 
         private static void help() {
                 System.out.println("Uso: minilengcompiler [opciones] [fichero ...]\u005cn");
         System.out.println("Opciones:");
         System.out.println("  -v, --verbose  Mostrar resumen de los s\u00edmbolos utilizados en el programa");
+        System.out.println("  -p, --panic\u0009 Compila con panic mode");
         System.out.println("  -t, --tokens   Muestra los tokens que se van reconociendo");
         System.out.println("  -h, --help\u0009 Imprimir ayuda (esta pantalla) y salir");
         System.out.println("  --version      Imprimir informaci\u00f3n de la versi\u00f3n y salir");
@@ -84,17 +88,22 @@ public class minilengcompiler implements minilengcompilerConstants {
                                     // Ignorar si aparece ayuda o versión de nuevo
                                         break;
 
-                                case "-t":
-                                case "--tokens":
-                                        // Mostrar tokens conforme se reconocen
-                                        show_tokens = true;
-                                        break;
-
-
                                 case "-v":
                                 case "--verbose":
                                         // Activar modo verboso
                                         verbose_mode = true;
+                                        break;
+
+                                case "-p":
+                                case "--panic":
+                                        // Activar modo pánico
+                                        panic_mode = true;
+                                        break;
+
+                                case "-t":
+                                case "--tokens":
+                                        // Mostrar tokens conforme se reconocen
+                                        show_tokens = true;
                                         break;
 
                                         default:
@@ -174,11 +183,20 @@ public class minilengcompiler implements minilengcompilerConstants {
                         System.out.println("Errores sint\u00e1cticos: " + ErrorSintactico.getContadorErrores());
                 }
 
-                if (compilado_sin_errores) {
-                        System.out.println("Compilado sin errores!");
+            if (PanicMode.getContadorErrores() > 0) {
+                        entrado_en_panic = true;
+                        System.out.println("Veces entrado en panic mode: " + PanicMode.getContadorErrores());
+                }
+
+                // Resultados compilacion
+                if (!compilado_sin_errores) {
+                        System.out.println("No se ha podido compilar el programa.");
+                }
+                else if (entrado_en_panic) {
+                        System.out.println("Se ha activado el panic mode. Corrige los errores y vuelve a compilar.");
                 }
                 else {
-                        System.out.println("No se ha podido compilar el programa.");
+                        System.out.println("Compilado sin errores!");
                 }
         }
 
@@ -209,7 +227,13 @@ public class minilengcompiler implements minilengcompilerConstants {
     try {
       jj_consume_token(tFIN_SENTENCIA);
     } catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba ';'");
+    // Si el modo pánico está activado, descartar entrada hasta el siguiente ;
+    if (panic_mode) {
+      PanicMode.iniciar(e, "Se esperaba ';'", tFIN_SENTENCIA, ";");
+    }
+    else {
+      ErrorSintactico.deteccion(e, "Se esperaba ';'");
+   }
     }
   }
 
