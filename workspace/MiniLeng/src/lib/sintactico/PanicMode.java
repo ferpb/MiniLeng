@@ -34,7 +34,7 @@ public class PanicMode implements minilengcompilerConstants {
 		Token t = minilengcompiler.getNextToken();
 		
 		while(t.kind != tipoToken && t.kind != EOF) {
-			System.out.println("  > PANIC MODE: Token descartado: " + t.image);
+			System.out.println("  > PANIC MODE: Token descartado: '" + t.image + "'");
 			t = minilengcompiler.getNextToken();
 		}
 

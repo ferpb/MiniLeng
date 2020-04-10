@@ -75,39 +75,41 @@ public interface minilengcompilerConstants {
   /** RegularExpression Id. */
   int tMOD = 42;
   /** RegularExpression Id. */
-  int tAND = 43;
+  int tDIV = 43;
   /** RegularExpression Id. */
-  int tOR = 44;
+  int tAND = 44;
   /** RegularExpression Id. */
-  int tNOT = 45;
+  int tOR = 45;
   /** RegularExpression Id. */
-  int tMAYOR = 46;
+  int tNOT = 46;
   /** RegularExpression Id. */
-  int tMENOR = 47;
+  int tMAYOR = 47;
   /** RegularExpression Id. */
-  int tIGUAL = 48;
+  int tMENOR = 48;
   /** RegularExpression Id. */
-  int tMAI = 49;
+  int tIGUAL = 49;
   /** RegularExpression Id. */
-  int tMEI = 50;
+  int tMAI = 50;
   /** RegularExpression Id. */
-  int tNI = 51;
+  int tMEI = 51;
   /** RegularExpression Id. */
-  int DIGITO = 52;
+  int tNI = 52;
   /** RegularExpression Id. */
-  int LETRA = 53;
+  int DIGITO = 53;
   /** RegularExpression Id. */
-  int tTRUE = 54;
+  int LETRA = 54;
   /** RegularExpression Id. */
-  int tFALSE = 55;
+  int tTRUE = 55;
   /** RegularExpression Id. */
-  int tIDENTIFICADOR = 56;
+  int tFALSE = 56;
   /** RegularExpression Id. */
-  int tCONSTENTERA = 57;
+  int tIDENTIFICADOR = 57;
   /** RegularExpression Id. */
-  int tCONSTCHAR = 58;
+  int tCONSTENTERA = 58;
   /** RegularExpression Id. */
-  int tCONSTCAD = 59;
+  int tCONSTCHAR = 59;
+  /** RegularExpression Id. */
+  int tCONSTCAD = 60;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -161,6 +163,7 @@ public interface minilengcompilerConstants {
     "\"*\"",
     "\"/\"",
     "\"mod\"",
+    "\"div\"",
     "\"and\"",
     "\"or\"",
     "\"not\"",

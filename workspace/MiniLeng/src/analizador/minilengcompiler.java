@@ -19,7 +19,7 @@ public class minilengcompiler implements minilengcompilerConstants {
 
         private static final String version = "2.2";
         private static final String fecha_version = "abril de 2020";
-        private static final String fecha_compilado = "2-04-2020";
+        private static final String fecha_compilado = "10-04-2020";
 
 
         protected static Boolean verbose_mode = false;
@@ -31,9 +31,9 @@ public class minilengcompiler implements minilengcompilerConstants {
 
 
         private static void help() {
-                System.out.println("Uso: minilengcompiler [opciones] [fichero ...]\u005cn");
+                System.out.println("Uso: minilengcompiler [opciones] [fichero]\u005cn");
         System.out.println("Opciones:");
-        System.out.println("  -v, --verbose  Mostrar resumen de los s\u00edmbolos utilizados en el programa");
+        System.out.println("  -v, --verbose  Mostrar un resumen de los s\u00edmbolos utilizados en el programa");
         System.out.println("  -p, --panic\u0009 Compila con panic mode");
         System.out.println("  -t, --tokens   Muestra los tokens que se van reconociendo");
         System.out.println("  -h, --help\u0009 Imprimir ayuda (esta pantalla) y salir");
@@ -59,7 +59,7 @@ public class minilengcompiler implements minilengcompilerConstants {
                 System.out.println("Compilador de MiniLeng -- v" + version + " (" + fecha_version + ")");
         System.out.println("Autor: Fernando Pe\u00f1a Bes (NIA: 756012)\u005cn");
 
-                // Entrada al programa    	
+                // Entrada al programa
         InputStream stream = System.in;
         String fichero_entrada = null;
 
@@ -125,7 +125,7 @@ public class minilengcompiler implements minilengcompilerConstants {
                         // Si el fichero no terminal en .ml, error
                         if (!fichero_entrada.endsWith(".ml")) {
                         System.err.println("MiniLeng: El fichero a compilar tiene que tener extensi\u00f3n .ml");
-                        System.err.println("          Fichero introducido: " + fichero_entrada);
+                        System.err.println("          Fichero introducido: '" + fichero_entrada + "'");
                         System.exit(0);
                         }
 
@@ -136,7 +136,7 @@ public class minilengcompiler implements minilengcompilerConstants {
                         stream = new FileInputStream(fichero_entrada);
                 }
                 catch (FileNotFoundException e) {
-                        System.err.println("MiniLeng: No he encontrado el fichero " + fichero_entrada + " .");
+                        System.err.println("MiniLeng: No se ha encontrado el fichero '" + fichero_entrada + "'");
                         System.exit(0);
                 }
                 }
@@ -145,13 +145,17 @@ public class minilengcompiler implements minilengcompilerConstants {
                 }
 
 
-                // Ejecución del compilador                try {
+                // Ejecución del compilador
+        try {
                 minilengcompiler parser = new minilengcompiler(stream);
                         minilengcompiler.programa();
-                }
-                catch (Exception e) {
-                        // Detectado error sintáctico                        // System.out.println("NOK.");                        // System.out.println(e.getMessage());                }
-                catch (Error e) {
+        }
+        catch (Exception e) {
+                        // Detectado error sintáctico
+            // System.out.println("NOK.");
+            // System.out.println(e.getMessage());
+        }
+        catch (Error e) {
                         // Detectado error léxico
                         SimpleCharStream entrada = minilengcompilerTokenManager.input_stream;
                         String error;
@@ -168,7 +172,7 @@ public class minilengcompiler implements minilengcompilerConstants {
 
                 // Imprimir resultados de la compilación
                 resultadosCompilacion();
-        }
+    }
 
         static void resultadosCompilacion() {
                 System.out.println("");
@@ -234,7 +238,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
     else {
       ErrorSintactico.deteccion(e, "Se esperaba ';'");
-   }
+    }
     }
   }
 
@@ -837,6 +841,7 @@ public class minilengcompiler implements minilengcompilerConstants {
         case tPRODUCTO:
         case tDIVISION:
         case tMOD:
+        case tDIV:
         case tAND:
           ;
           break;
@@ -863,6 +868,9 @@ public class minilengcompiler implements minilengcompilerConstants {
         break;
       case tMOD:
         jj_consume_token(tMOD);
+        break;
+      case tDIV:
+        jj_consume_token(tDIV);
         break;
       case tAND:
         jj_consume_token(tAND);
@@ -950,7 +958,7 @@ public class minilengcompiler implements minilengcompilerConstants {
       jj_la1_0 = new int[] {0x70000000,0x70000000,0x0,0x2000000,0xc000000,0x0,0x0,0xc000000,0x688000,0x688000,0x0,0x0,0x20000,0x1800000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1800000,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x0,0x0,0x20,0x0,0x0,0x2,0x10,0x0,0x1000000,0x1000000,0x2,0x1a,0x0,0xfc020c2,0x20,0xfc000,0xfc000,0xc0,0xc0,0x10c0,0x10c0,0xf00,0xf00,0xfc02002,};
+      jj_la1_1 = new int[] {0x0,0x0,0x20,0x0,0x0,0x2,0x10,0x0,0x2000000,0x2000000,0x2,0x1a,0x0,0x1f8040c2,0x20,0x1f8000,0x1f8000,0xc0,0xc0,0x20c0,0x20c0,0x1f00,0x1f00,0x1f804002,};
    }
 
   /** Constructor with InputStream. */
@@ -1088,7 +1096,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   /** Generate ParseException. */
   static public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[60];
+    boolean[] la1tokens = new boolean[61];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -1105,7 +1113,7 @@ public class minilengcompiler implements minilengcompilerConstants {
         }
       }
     }
-    for (int i = 0; i < 60; i++) {
+    for (int i = 0; i < 61; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
@@ -1127,4 +1135,4 @@ public class minilengcompiler implements minilengcompilerConstants {
   static final public void disable_tracing() {
   }
 
-}
+         }

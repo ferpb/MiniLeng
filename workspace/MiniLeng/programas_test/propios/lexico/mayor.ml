@@ -20,7 +20,7 @@ principio
  escribir (entacar (13), entacar (10));
  escribir("Introduce el segundo número: ");
  leer(segundo);
- 
+
  % Error, tIDENTIFICADOR no puede contener letras con tildes.
  mayor(primero, segundo, solución);
  escribir("El número mayor es: ", solución)

@@ -8,156 +8,196 @@
  * Asignatura: Procesadores de Lenguajes, curso 2019-2020
  **********************************************************************************/
 
+Uso del compilador
+----------------
 
-Uso: minilengcompiler [opciones] [fichero ...]
+Compilador de MiniLeng -- v2.2 (abril de 2020)
+Autor: Fernando Peña Bes (NIA: 756012)
+
+Uso: minilengcompiler [opciones] [fichero]
 
 Opciones:
-    -v, --verbose	Mostrar resumen de los símbolos utilizados en el programa
-    -h, --help	  	Imprimir ayuda (esta pantalla) y salir
-    --version		Imprimir información de la versión y salir
+  -v, --verbose  Mostrar un resumen de los símbolos utilizados en el programa
+  -p, --panic	 Compila con panic mode
+  -t, --tokens   Muestra los tokens que se van reconociendo
+  -h, --help	 Imprimir ayuda (esta pantalla) y salir
+  --version      Imprimir información de la versión y salir
+
 
 Ejemplos de uso:
     minilengcompiler
     minilengcompiler -v
     minilengcompiler -v fichero.ml
-    
+    minlengcompiler -p -v fichero.ml
+
+El fichero con el programa a compilar tiene que tener extensión .ml
+
+
+Entorno de desarrollo
+---------------------
 
 Compilador programado con JavaCC en Eclipse 2019-12
 JavaCC Eclipse Plug-in 1.5.33
 
 
-Características:
-----------------
+Gramática del lenguaje
+----------------------
+Los tokens y la gramática del lenguaje se pueden ver en el fichero 'minilengcompiler.html'
 
-  - Gestión de errores en la llamada al comando:
-	MiniLeng: Opción inválida <error>
 
-  - Opción verbose para generar una tabla con el número de ocurrencias
-    de todos los tokens reconocidos en el programa de entrada. 
-    Ejemplo de tabla:
-	+-------------------------------------+
-	| Número de ocurrencias de los tokens |
-	+-------------------------------------+
-	| Token                         num.  |
-	+-------------------------------------+
-	| Palabras reservadas                 |
-	|     PROGRAMA                     1  |
-	|     PRINCIPIO                    3  |
-	|     FIN                          3  |
-	|     SI                           3  |
-	|     ENT                          3  |
-	|     SI_NO                        2  |
-	|     FSI                          3  |
-	| Caracteres de agrupación            |
-	|     PARENTESIS_IZQ              27  |
-	|     PARENTESIS_DER              27  |
-	| Operadores aritméticos              |
-	|     SUMA                         2  |
-	|     RESTA                        1  |
-	| Operadores lógicos                  |
-	|     AND                          2  |
-	|     OR                           1  |
-	| Tipos de dato                       |
-	|     BOOLEANO                     1  |
-	|     CARACTER                     4  |
-	+-------------------------------------+
+==============================
+Características del compilador
+==============================
 
-  - Opción tokens que muestra por pantalla los nombre de los tokens que
+Opciones
+--------
+  - La opción verbose muestra al final de la compilación una tabla con el número de ocurrencias que
+    se han encontrado de cada token en el programa.
+      Ejemplo de tabla de ocurrencias:
+       +-------------------------------------+
+       | Número de ocurrencias de los tokens |
+       +-------------------------------------+
+       | Token                         num.  |
+       +-------------------------------------+
+       | Palabras reservadas                 |
+       |     PROGRAMA                     1  |
+       |     PRINCIPIO                    3  |
+       |     FIN                          3  |
+       |     SI                           3  |
+       |     ENT                          3  |
+       |     SI_NO                        2  |
+       |     FSI                          3  |
+       | Caracteres de agrupación            |
+       |     PARENTESIS_IZQ              27  |
+       |     PARENTESIS_DER              27  |
+       | Operadores aritméticos              |
+       |     SUMA                         2  |
+       |     RESTA                        1  |
+       | Operadores lógicos                  |
+       |     AND                          2  |
+       |     OR                           1  |
+       | Tipos de dato                       |
+       |     BOOLEANO                     1  |
+       |     CARACTER                     4  |
+       +-------------------------------------+
+
+  - La opción panic, activa el modo pánico durante la compilación. Se entra a este modo cada vez que
+    se produce un error sintáctico porque falta un punto y coma. El analizador descarta todos los
+    token siguientes al error hasta que encuentra un punto y coma o se acaba el fichero, entonces
+    sale del modo y sigue analizando la entrada.
+    Cuando se entra al modo pánico se informa al usuario con las siguientes líneas:
+      MiniLeng: ERROR SINTÁCTICO (línea ..., columna ...): Token incorrecto: '...'. Se esperaba '...'
+      PANIC MODE: Iniciado panic mode
+    Se va mostrando en una línea diferente cada token rechazado:
+        > PANIC MODE: Token descartado: '...'
+    Y cuando se sale del modo se muestra:
+        > PANIC MODE (línea ..., columna ...): Se ha encontrado ';'
+      PANIC MODE: Terminado panic mode
+
+  - La opción tokens que muestra por pantalla los nombre de los tokens que
     se van reconociendo conforme se analiza el programa.
-
-  - Permite definir comentarios de una línea con % y de bloque, con %%.
-
-  - Formato de error de los errores léxico y semántico. Muy detallado! Poner ejemplo
-
-  - Contador de errores al final del programa
-
-  - Opción panic mode que se recupera de los errores de ; y no hay fin en 
-    una acción o programa.
-
-  - Permite definir funciones anidadas
+    Ejemplo:
+      tPROGRAMA
+      tIDENTIFICADOR (Valor: mi_programa)
+      tFIN_SENTENCIA
+      tENTERO
+      tIDENTIFICADOR (Valor: n)
+      tFIN_SENTENCIA
+      ...
+      tFIN
 
 
+Léxico
+------
+  - El analizador no es case-sensitive, no distingue entre mayúsuclas y minúsculas.
 
-Gramática de MiniLeng utilizada en EBNF
----------------------------------------
-
-programa ::= <tPROGRAMA> <tIDENTIFICADOR> <tFIN_SENTENCIA>
-	declaracion_variables  declaracion_acciones
-	bloque_sentencias
-
-declaracion_variables ::= ( declaracion <tFIN_SENTENCIA> )*
-declaracion ::= tipo_variables  identificadores
-tipo_variables ::= <tENTERO> | <tCARACTER> | <tBOOLEANO>
-identificadores ::= <tIDENTIFICADOR> ( <tSEP_VARIABLE> <tIDENTIFICADOR> )*
+  - Se permite la definición de comentarios de una línea con el caracter '%' y multilínea,
+    usando '%%'
 
 
-declaracion_acciones ::= ( declaracion_accion )*
-declaracion_accion ::= cabecera_accion <tFIN_SENTENCIA>
-	declaracion_variables  declaración_acciones  bloque_sentencias
-cabecera_accion ::= <tACCION> <tIDENTIFICADOR> parametros_formales
+Semántico
+---------
+  - Se permiten acciones anidadas con cualquier nivel de profuncidad. Las declaraciones de acciones
+    anidadas deben entre la zona de declaración de las variables y la palabra 'principio' de la
+    función padre:
 
-parametros_formales ::= ( <tPARENTESIS_IZQ> lista_parametros? <tPARENTESIS_DER> )?
-lista_parametros ::= parametros ( <tFIN_SENTENCIA> parametros )*
-parametros ::= clase_parametros  declaracion
-clase_parametros ::= <tVAL> | <tREF>
+      accion accion1;
+        % Declaración de variables de accion1
+        accion accion2;
+          % Declaración de variables de accion2
+          accion accion3;
+            % Declaración de variables de accion3
+          principio
+            % Sentencias de accion3
+          fin
+        principio
+          % Sentencias de accion2
+        fin
+      principio
+        % Sentencias de accion1
+      fin
 
+  - Se permiten bloques 'seleccion' y 'mientras que' anidados con cualquier nivel de profundidad:
 
-bloque_sentencias ::= <tPRINCIPIO> lista_sentencias <tFIN>
-lista_sentencias ::= sentencia ( sentencia )*
-sentencia ::= leer <tFIN_SENTENCIA>
-			| escribir <tFIN_SENTENCIA>
-			| asignacion
-			| invocacion_accion
-			| seleccion
-			| mientras_que
+      SI <condicion> ENT
+        % Sentencias
+        SI <condicion> ENT
+          % Sentencias
+        SI_NO
+          % Sentencias
+        FSI
+        % Sentencias
+      SI_NO
+        % Sentencias
+      FSI
 
-leer ::= <tLEER> <tPARENTESIS_IZQ> lista_asignables <tPARENTESIS_DER>
-lista_asignables ::= identificadores
-escribir ::= <tESCRIBIR> <tPARENTESIS_IZQ> lista_escribibles <tPARENTESIS_DER>
-lista_escribibles ::= lista_expresiones
+      MQ <condicion>
+        % Sentencias
+        MQ <condicion>
+          % Sentencias
+        FMQ
+        % Sentencias
+      FMQ
 
-asignacion ::= <tIDENTIFICADOR> <tOPAS> expresion <tFIN_SENTENCIA>
-
-invocacion_accion ::= <tIDENTIFICADOR> argumentos <tFIN_SENTENCIA>
-
-mientras_que ::= <tMQ> expresion lista_sentencias <tFMQ>
-
-seleccion ::= <tSI> expresion <tENT> lista_sentencias ( <tSI_NO> lista_sentencias )* <tFSI>
-
-argumentos ::= <tPARENTESIS_IZQ> ( lista_expresiones )? <tPARENTESIS_DER>
-
-
-lista_expresiones ::= expresion ( <tSEP_VARIABLE> expresion )*
-
-expresion ::= expresion_simple ( operador_relacional  expresion_simple )*
-operador_relacional ::= <tIGUAL>
-					  | <tMENOR>
-					  | <tMAYOR>
-					  | <tMAI>
-					  | <tMEI>
-					  | <tNI>
-expresion_simple ::= ( <tMAS> | <tMENOS> )? termino ( operador_aditivo termino )*
-operador_aditivo ::= <tMAS>
-				   | <tMENOS>
-				   | <tOR>
-termino ::= factor ( operador_multiplicativo factor )*
-operador_multiplicativo ::= <tPRODUCTO>
-						  | <tDIVISION>
-						  | <tMOD>
-						  | <tAND>
-factor ::= <tMENOS> factor
-		 | <tNOT> factor
-		 | <tPARENTESIS_IZQ> expresion <tPARENTESIS_DER>
-		 | <tENTACAR> <tPARENTESIS_IZQ> expresion <tPARENTESIS_DER>
-		 | <tCARAENT> <tPARENTESIS_IZQ> expresion <tPARENTESIS_DER>
-		 | <tIDENTIFICADOR>
-		 | <tCONSTENTERA>
-		 | <tCONSTCHAR>
-		 | <tCONSTCAD
-		 | <tTRUE>
-		 | <tFALSE>
+  - Cualquier bloque ('principio/fin', 'seleccion' o 'mientras que') debe contener al menos una
+    sentencia.
 
 
+Errores
+-------
+  - Errores en el uso del programa:
+      Si se utiliza una opción inválida o no se especifican correctamente, se muestra el siguiente
+      error:
+        MiniLeng: Opción inválida <error>
 
+      Si el fichero a compilar no tiene extensión .ml se muestra el error:
+        MiniLeng: El fichero a compilar tiene que tener extensión .ml
+                  Fichero introducido: '...'
 
+      Si no se encuentra el fichero a compilar se indica al usuario así:
+        MiniLeng: No se ha encontrado el fichero '...'
+
+  - Errores léxicos:
+      Tienen el siguiente formato:
+        MiniLeng: ERROR LÉXICO (línea ..., columna ...): símbolo no reconocido: '...' (\u...)
+      Si el caracter no reconocido no es ASCII, se muestra escapado con su código Unicode.
+
+  - Errores sintácticos:
+      Tienen el siguiente formato:
+        MiniLeng: ERROR SINTÁCTICO (línea ..., columna ...): Token incorrecto: '...'. Se esperaba '...'
+
+  - Al final de la compilación se muestra un recuento de los errores encontrados:
+      Errores léxicos: ...
+      Errores sintácticos: ...
+      Veces activado panic mode: ...
+
+    Y se muestra:
+      No se ha podido compilar el programa.
+    si ha habido errores durante la compilación o:
+      Compilado sin errores!
+    si la compiación ha sido exitosa
+
+  - Si durante la compilación se ha activado el modo pánico se muestra el siguiente mensaje:
+      Se ha activado el panic mode durante la compilación. Corrige los errores y vuelve a compilar.
+    para indicar al usuario que hace falta volver a compilar.
 

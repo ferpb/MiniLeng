@@ -3,19 +3,17 @@ programa decidemayor;
 %-------------------------------------------------------------------
 entero n;
 
-accion accion1;
 principio
-n := 1;
+
+n := 1 + 1;
+
+accion prueba;
+principio
 fin
 
-principio
+escribir("Cadena de texto", a, 1+2, cadena);
 
-n := a;
-
-si a < 1 ENT
-n := 1;
-fsi
-
+escribir("Otra cadena")
 
 
 fin

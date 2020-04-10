@@ -23,7 +23,7 @@ fin
 principio
 %-------------------------------------------------------------------
 	n := 10;
-	
+
 	factorial(n, solucion);
 
 	escribir(n, "! es: ", solucion);

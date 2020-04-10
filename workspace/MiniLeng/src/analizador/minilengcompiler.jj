@@ -7,10 +7,13 @@
  * Versión:    v2.2
  * Asignatura: Procesadores de Lenguajes, curso 2019-2020
  **********************************************************************************/
-options{  static = true;
+options {
+  static = true;
   ignore_case = true;
   // debug_parser = true;
-  }PARSER_BEGIN(minilengcompiler)
+}
+
+PARSER_BEGIN(minilengcompiler)
 
 package analizador;
 
@@ -32,7 +35,7 @@ public class minilengcompiler {
 
   	private static final String version = "2.2";
   	private static final String fecha_version = "abril de 2020";
-  	private static final String fecha_compilado = "2-04-2020";
+  	private static final String fecha_compilado = "10-04-2020";
 
 
 	protected static Boolean verbose_mode = false;
@@ -41,17 +44,17 @@ public class minilengcompiler {
 
 	private static Boolean compilado_sin_errores = true;
 	private static Boolean entrado_en_panic = false;
-  	
+
 
 	private static void help() {
-		System.out.println("Uso: minilengcompiler [opciones] [fichero ...]\n");
+		System.out.println("Uso: minilengcompiler [opciones] [fichero]\n");
       	System.out.println("Opciones:");
-      	System.out.println("  -v, --verbose  Mostrar resumen de los símbolos utilizados en el programa");
+      	System.out.println("  -v, --verbose  Mostrar un resumen de los símbolos utilizados en el programa");
       	System.out.println("  -p, --panic	 Compila con panic mode");
       	System.out.println("  -t, --tokens   Muestra los tokens que se van reconociendo");
       	System.out.println("  -h, --help	 Imprimir ayuda (esta pantalla) y salir");
       	System.out.println("  --version      Imprimir información de la versión y salir");
-      		
+
       	System.exit(0);
     }
 
@@ -64,14 +67,15 @@ public class minilengcompiler {
 		System.out.println("");
 		System.out.println("  Programado con JavaCC en Eclipse 2019-12");
 		System.out.println("  JavaCC Eclipse Plug-in 1.5.33");
-		
+
       	System.exit(0);
     }
- 	public static void main(String args []) throws ParseException {
+
+	public static void main(String args []) throws ParseException {
 		System.out.println("Compilador de MiniLeng -- v" + version + " (" + fecha_version + ")");
     	System.out.println("Autor: Fernando Peña Bes (NIA: 756012)\n");
-   
-		// Entrada al programa    	
+
+		// Entrada al programa
     	InputStream stream = System.in;
     	String fichero_entrada = null;
 
@@ -97,8 +101,8 @@ public class minilengcompiler {
   			        case "--help":
   			        case "--version":
   			            // Ignorar si aparece ayuda o versión de nuevo
-  			        	break;  	
-  			        	
+  			        	break;
+
   			      	case "-v":
   			      	case "--verbose":
   			      		// Activar modo verboso
@@ -110,7 +114,7 @@ public class minilengcompiler {
   			      		// Activar modo pánico
   			      		panic_mode = true;
   			      		break;
-  			      	
+
   			        case "-t":
   			        case "--tokens":
   			        	// Mostrar tokens conforme se reconocen
@@ -133,14 +137,14 @@ public class minilengcompiler {
 
 		if (fichero_entrada != null) {
 		  	// Lectura del fichero del usuario.
-			
+
 			// Si el fichero no terminal en .ml, error
 			if (!fichero_entrada.endsWith(".ml")) {
         		System.err.println("MiniLeng: El fichero a compilar tiene que tener extensión .ml");
-        		System.err.println("          Fichero introducido: " + fichero_entrada);
+        		System.err.println("          Fichero introducido: '" + fichero_entrada + "'");
         		System.exit(0);
 			}
-			
+
 			// Ejecutar el compilador con los fichero introducidos
 			System.out.println("MiniLeng: Leyendo el fichero " + fichero_entrada + " ...");
       		try {
@@ -148,7 +152,7 @@ public class minilengcompiler {
         		stream = new FileInputStream(fichero_entrada);
       		}
       		catch (FileNotFoundException e) {
-        		System.err.println("MiniLeng: No he encontrado el fichero " + fichero_entrada + " .");
+        		System.err.println("MiniLeng: No se ha encontrado el fichero '" + fichero_entrada + "'");
         		System.exit(0);
       		}
 		}
@@ -157,15 +161,22 @@ public class minilengcompiler {
 		}
 
 
-		// Ejecución del compilador		try {
+		// Ejecución del compilador
+        try {
     		minilengcompiler parser = new minilengcompiler(stream);
-	  		minilengcompiler.programa();		}		catch (Exception e) {
-			// Detectado error sintáctico			// System.out.println("NOK.");			// System.out.println(e.getMessage());		}		catch (Error e) {
+	  		minilengcompiler.programa();
+        }
+        catch (Exception e) {
+			// Detectado error sintáctico
+            // System.out.println("NOK.");
+            // System.out.println(e.getMessage());
+        }
+        catch (Error e) {
 		  	// Detectado error léxico
 			SimpleCharStream entrada = minilengcompilerTokenManager.input_stream;
 			String error;
-			
-			try { 
+
+			try {
 				error = Character.toString(entrada.readChar());
 			}
 			catch (java.io.IOException fin_fichero) {
@@ -176,11 +187,12 @@ public class minilengcompiler {
 		}
 
 		// Imprimir resultados de la compilación
-		resultadosCompilacion();  	}
+		resultadosCompilacion();
+    }
 
 	static void resultadosCompilacion() {
 	  	System.out.println("");
-	  	
+
 	  	// Mostrar contadores de errores
 		if (ErrorLexico.getContadorErrores() > 0) {
 		  	compilado_sin_errores = false;
@@ -207,7 +219,7 @@ public class minilengcompiler {
 		else {
 		  	System.out.println("Compilado sin errores!");
 		}
-	}}PARSER_END(minilengcompiler)
+	}}PARSER_END(minilengcompiler)
 
 
 
@@ -217,9 +229,9 @@ TOKEN_MGR_DECLS : {
   // Crear e inicializar tabla de ocurrencias
   static TablaOcurrencias tabla = new TablaOcurrencias(minilengcompiler.show_tokens);
 }
-SKIP : {  " "| "\r"| "\t"| "\n"
+SKIP : {  " "| "\r"| "\t"| "\n"
 | < "%"~["%"] > : COMENTARIO
-| "%%"          : MULTICOMENTARIO}
+| "%%"          : MULTICOMENTARIO}
 
 // Ignorar comentarios en la entrada
 < COMENTARIO > SKIP : {
@@ -390,6 +402,10 @@ TOKEN : /* OPERADORES */
   {
     tabla.incrementar(TablaOcurrencias.OpAritmeticos.tMOD);
   }
+| < tDIV : "div" >
+  {
+    tabla.incrementar(TablaOcurrencias.OpAritmeticos.tDIV);
+  }
 
   // Lógicos
 | < tAND : "and" >
@@ -429,7 +445,7 @@ TOKEN : /* OPERADORES */
     tabla.incrementar(TablaOcurrencias.OpLogicos.tNI);
   }
 }
-  
+
 
 TOKEN : /* VALORES */
 {
@@ -445,7 +461,7 @@ TOKEN : /* VALORES */
   {
      tabla.incrementar(TablaOcurrencias.Valores.tFALSE, "False");
   }
-  
+
   // Identificadores
 | < tIDENTIFICADOR : (< LETRA > | "_"(< LETRA > | < DIGITO >))(("_")?(< LETRA > | < DIGITO >))* >
   {
@@ -458,19 +474,19 @@ TOKEN : /* VALORES */
   {
     tabla.incrementar(TablaOcurrencias.Valores.tCONSTENTERA, matchedToken.image);
   }
-  
+
    // Caracteres
 | < tCONSTCHAR : "\""(~["\""])?"\"" >
   {
     tabla.incrementar(TablaOcurrencias.Valores.tCONSTCHAR, matchedToken.image);
   }
-  
+
   // Cadena de caracteres
 | < tCONSTCAD : "\""(~["\""])*"\"" >
   {
     tabla.incrementar(TablaOcurrencias.Valores.tCONSTCAD, matchedToken.image);
   }
-}
+}
 
 
 
@@ -481,7 +497,7 @@ TOKEN : /* VALORES */
 int programa() :
 {}
 {
-  try { 
+  try {
   	<tPROGRAMA> identificador() fin_sentencia()
   	declaracion_variables()  declaracion_acciones()
   	bloque_sentencias() < EOF >
@@ -490,14 +506,14 @@ int programa() :
     ErrorSintactico.deteccion(e, "La declaración del programa es incorrecta");
   }
 
-  
+
   {
     if (verbose_mode) {
       token_source.tabla.imprimirTabla();
     }
     return 0;
   }
- 
+
 }
 
 
@@ -505,7 +521,8 @@ int programa() :
 
 void fin_sentencia() :
 {}
-{  try {
+{
+  try {
     < tFIN_SENTENCIA >
   }
   catch (ParseException e) {
@@ -515,7 +532,8 @@ void fin_sentencia() :
     }
     else {
       ErrorSintactico.deteccion(e, "Se esperaba ';'");
-   }  }
+    }
+  }
 }
 void sep_variable() :
 {}
@@ -632,7 +650,7 @@ void identificadores() :
 void declaracion_acciones() :
 {}
 {
-  try { 
+  try {
   	( declaracion_accion() )*
   }
   catch (ParseException e) {
@@ -642,7 +660,7 @@ void declaracion_acciones() :
 void declaracion_accion() :
 {}
 {
-  try { 
+  try {
   	cabecera_accion() fin_sentencia()
   	declaracion_variables()  declaracion_acciones()  bloque_sentencias()
   }
@@ -664,7 +682,7 @@ void cabecera_accion() :
 void parametros_formales() :
 {}
 {
-  try { 
+  try {
 	( parentesis_izq() ( lista_parametros() )? parentesis_der() )?
   }
   catch (ParseException e) {
@@ -674,7 +692,7 @@ void parametros_formales() :
 void lista_parametros() :
 {}
 {
-  try { 
+  try {
   	parametros() ( fin_sentencia() parametros() )*
   }
   catch (ParseException e) {
@@ -694,13 +712,13 @@ void parametros() :
 void clase_parametros() :
 {}
 {
-  try { 
+  try {
   	<tVAL> | <tREF>
   }
   catch (ParseException e) {
     // Esto creo que es semantico
     // ErrorSintactico.deteccion(e, "Tipo de parámetro desconocido. Se esperaba 'val' o 'ref'");
-    ErrorSintactico.deteccion(e, "Se esperaba un tipo de parametro"); 
+    ErrorSintactico.deteccion(e, "Se esperaba un tipo de parametro");
   }
 }
 
@@ -708,7 +726,7 @@ void clase_parametros() :
 void bloque_sentencias() :
 {}
 {
-  try { 
+  try {
     principio() lista_sentencias() fin()
   }
   catch (ParseException e) {
@@ -815,7 +833,7 @@ void mientras_que() :
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba el delimitador de fin de estructura MQ: 'FMQ'");
   }
- 
+
 }
 
 void seleccion() :
@@ -927,6 +945,7 @@ void operador_multiplicativo() :
     <tPRODUCTO>
   | <tDIVISION>
   | <tMOD>
+  | <tDIV>
   | <tAND>
   }
   catch (ParseException e) {

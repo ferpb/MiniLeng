@@ -86,16 +86,18 @@ public class TablaOcurrencias {
         tMENOS,
         tPRODUCTO,
         tDIVISION,
-        tMOD
+        tMOD,
+        tDIV
 	}
 	private static final String[] OpAritmeticosNombres = {
         "MAS",
         "MENOS",
         "PRODUCTO",
         "DIVISION",
-        "MOD"
+        "MOD",
+        "DIV"
 	};
-	private final int nOpAritmeticos = 5;
+	private final int nOpAritmeticos = 6;
 
 	public enum OpLogicos {
         tAND,
