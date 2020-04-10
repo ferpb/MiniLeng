@@ -59,8 +59,7 @@ public class minilengcompiler implements minilengcompilerConstants {
                 System.out.println("Compilador de MiniLeng -- v" + version + " (" + fecha_version + ")");
         System.out.println("Autor: Fernando Pe\u00f1a Bes (NIA: 756012)\u005cn");
 
-        minilengcompiler parser;
-
+                // Entrada al programa    	
         InputStream stream = System.in;
         String fichero_entrada = null;
 
@@ -147,7 +146,7 @@ public class minilengcompiler implements minilengcompilerConstants {
 
 
                 // Ejecución del compilador                try {
-                        parser = new minilengcompiler(stream);
+                minilengcompiler parser = new minilengcompiler(stream);
                         minilengcompiler.programa();
                 }
                 catch (Exception e) {
@@ -172,6 +171,8 @@ public class minilengcompiler implements minilengcompilerConstants {
         }
 
         static void resultadosCompilacion() {
+                System.out.println("");
+
                 // Mostrar contadores de errores
                 if (ErrorLexico.getContadorErrores() > 0) {
                         compilado_sin_errores = false;
@@ -185,7 +186,7 @@ public class minilengcompiler implements minilengcompilerConstants {
 
             if (PanicMode.getContadorErrores() > 0) {
                         entrado_en_panic = true;
-                        System.out.println("Veces entrado en panic mode: " + PanicMode.getContadorErrores());
+                        System.out.println("Veces activado panic mode: " + PanicMode.getContadorErrores());
                 }
 
                 // Resultados compilacion
@@ -193,7 +194,7 @@ public class minilengcompiler implements minilengcompilerConstants {
                         System.out.println("No se ha podido compilar el programa.");
                 }
                 else if (entrado_en_panic) {
-                        System.out.println("Se ha activado el panic mode. Corrige los errores y vuelve a compilar.");
+                        System.out.println("Se ha activado el panic mode durante la compilaci\u00f3n. Corrige los errores y vuelve a compilar.");
                 }
                 else {
                         System.out.println("Compilado sin errores!");
@@ -277,6 +278,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+// Sintaxis del lenguaje
   static final public void identificador() throws ParseException {
     try {
       jj_consume_token(tIDENTIFICADOR);
@@ -522,7 +524,7 @@ public class minilengcompiler implements minilengcompilerConstants {
         escribir();
         break;
       case tIDENTIFICADOR:
-        instruccion();
+        identificacion();
         break;
       case tSI:
         seleccion();
@@ -590,7 +592,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
-  static final public void instruccion() throws ParseException {
+  static final public void identificacion() throws ParseException {
     try {
       identificador();
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {

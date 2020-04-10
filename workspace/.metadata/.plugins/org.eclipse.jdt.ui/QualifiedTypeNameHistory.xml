@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-    <fullyQualifiedTypeName name="analizador.minilengcompiler"/>
     <fullyQualifiedTypeName name="analizador.TokenMgrError"/>
     <fullyQualifiedTypeName name="analizador.SimpleCharStream"/>
+    <fullyQualifiedTypeName name="analizador.ParseException"/>
+    <fullyQualifiedTypeName name="analizador.minilengcompiler"/>
+    <fullyQualifiedTypeName name="analizador.minilengcompilerConstants"/>
 </qualifiedTypeNameHistroy>
