@@ -14,6 +14,7 @@ import lib.lexico.TablaOcurrencias;
 import lib.lexico.ErrorLexico;
 import lib.sintactico.ErrorSintactico;
 import lib.sintactico.PanicMode;
+import lib.semantico.Tabla_simbolos;
 
 public class minilengcompiler implements minilengcompilerConstants {
 
@@ -209,6 +210,10 @@ public class minilengcompiler implements minilengcompilerConstants {
 
 // Inicio programa
   static final public int programa() throws ParseException {
+  int nivel = 0;
+
+  Tabla_simbolos tabla_simbolos = new Tabla_simbolos();
+  Tabla_simbolos.inicializar_tabla();
     try {
       jj_consume_token(tPROGRAMA);
       identificador();

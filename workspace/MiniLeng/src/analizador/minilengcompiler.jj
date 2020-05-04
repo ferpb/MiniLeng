@@ -30,6 +30,7 @@ import lib.lexico.TablaOcurrencias;
 import lib.lexico.ErrorLexico;
 import lib.sintactico.ErrorSintactico;
 import lib.sintactico.PanicMode;
+import lib.semantico.Tabla_simbolos;
 
 public class minilengcompiler {
 
@@ -495,7 +496,12 @@ TOKEN : /* VALORES */
 // Inicio programa
 
 int programa() :
-{}
+{
+  int nivel = 0;
+
+  Tabla_simbolos tabla_simbolos = new Tabla_simbolos();
+  Tabla_simbolos.inicializar_tabla();
+}
 {
   try {
   	<tPROGRAMA> identificador() fin_sentencia()

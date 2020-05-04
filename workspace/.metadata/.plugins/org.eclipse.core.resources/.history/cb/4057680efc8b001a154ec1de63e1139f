@@ -1,0 +1,5 @@
+package lib.semantico;
+
+public class SimboloNoEncontradoException {
+
+}

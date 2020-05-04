@@ -1,0 +1,7 @@
+package lib.semantico;
+
+public class SimboloYaDeclaradoExcepcion extends Exception {
+	
+	public void SimboloYaDeclaradoException() {
+	}
+}

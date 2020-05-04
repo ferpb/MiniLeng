@@ -1,0 +1,9 @@
+package lib.semantico;
+
+public class SimboloNoEncontradoException extends Error {
+	
+	public void SimboloNoEncontradoException() {
+		
+	}
+
+}

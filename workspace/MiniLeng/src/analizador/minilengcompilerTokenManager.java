@@ -11,6 +11,7 @@ import lib.lexico.TablaOcurrencias;
 import lib.lexico.ErrorLexico;
 import lib.sintactico.ErrorSintactico;
 import lib.sintactico.PanicMode;
+import lib.semantico.Tabla_simbolos;
 
 /** Token Manager. */
 public class minilengcompilerTokenManager implements minilengcompilerConstants

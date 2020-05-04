@@ -5,4 +5,12 @@
     <fullyQualifiedTypeName name="analizador.ParseException"/>
     <fullyQualifiedTypeName name="analizador.minilengcompiler"/>
     <fullyQualifiedTypeName name="analizador.minilengcompilerConstants"/>
+    <fullyQualifiedTypeName name="java.util.ArrayList"/>
+    <fullyQualifiedTypeName name="lib.semantico.SimboloNoEncontradoException"/>
+    <fullyQualifiedTypeName name="lib.semantico.SimboloYaDeclaradoExcepcion"/>
+    <fullyQualifiedTypeName name="lib.semantico.Simbolo.Tipo_variable"/>
+    <fullyQualifiedTypeName name="java.util.Collections"/>
+    <fullyQualifiedTypeName name="java.lang.reflect.Array"/>
+    <fullyQualifiedTypeName name="java.util.Arrays"/>
+    <fullyQualifiedTypeName name="java.util.Random"/>
 </qualifiedTypeNameHistroy>

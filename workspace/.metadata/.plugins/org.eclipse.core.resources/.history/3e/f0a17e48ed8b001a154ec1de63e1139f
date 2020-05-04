@@ -1,0 +1,128 @@
+/*********************************************************************************
+ * Clase que define los símbolos que conforman los programas MiniLeng
+ *
+ * Fichero:    Simbolo.java
+ * Autor:      Fernando Peña (NIA: 756012)
+ * Fecha:      20/02/2020
+ * Versión:    v1.0
+ * Asignatura: Procesadores de Lenguajes, curso 2019-2020
+ **********************************************************************************/
+
+package lib.semantico;
+
+public class Simbolo {
+	
+	// Representa el tipo de símbolo
+	enum Tipo_simbolo { PROGRAMA, VARIABLE, ACCION, PARAMETRO };
+	
+	// Representa el tipo de variable
+	enum Tipo_variable { DESCONOCIDO, ENTERO, BOOLEANO, CHAR, CADENA };
+	
+	// Representa la clase de los parámetros en las acciones
+	enum Clase_parametro { VAL, REF };
+	
+	
+	// Atributos
+	String nombre;
+	Integer nivel; // Nivel en el que se ha declarado el símbolo (primer nivel = 0)
+	
+	Tipo_simbolo tipo;
+	Tipo_variable variable;
+	Clase_parametro parametro;
+	
+	Boolean visible; // Indica si el símbolo es visible o no
+	
+	Simbolo lista_parametros[]; // Lista de símbolos que reperesantan los parámetros de una acción
+	
+	Long dir; // Dirección del símbolo
+
+	
+	// Getters y setters
+	
+	public String getNombre() {
+		return nombre;
+	}
+
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
+
+	public Integer getNivel() {
+		return nivel;
+	}
+
+	public void setNivel(Integer nivel) {
+		this.nivel = nivel;
+	}
+
+	public Tipo_simbolo getTipo() {
+		return tipo;
+	}
+
+	public void setTipo(Tipo_simbolo tipo) {
+		this.tipo = tipo;
+	}
+
+	public Tipo_variable getVariable() {
+		return variable;
+	}
+
+	public void setVariable(Tipo_variable variable) {
+		this.variable = variable;
+	}
+
+	public Clase_parametro getParametro() {
+		return parametro;
+	}
+
+	public void setParametro(Clase_parametro parametro) {
+		this.parametro = parametro;
+	}
+
+	public Boolean getVisible() {
+		return visible;
+	}
+
+	public void setVisible(Boolean visible) {
+		this.visible = visible;
+	}
+
+	public Simbolo[] getLista_parametros() {
+		return lista_parametros;
+	}
+
+	public void setLista_parametros(Simbolo[] lista_parametros) {
+		this.lista_parametros = lista_parametros;
+	}
+
+	public Long getDir() {
+		return dir;
+	}
+
+	public void setDir(Long dir) {
+		this.dir = dir;
+	}
+	
+	
+	// Métodos adicionales
+	
+	// Configura los campos símbolo correspondientes a un parámetro
+	public void introducir_parametro(nombre, tipo_var, clase_param, nivel)
+	
+	
+	public Boolean ES_VARIABLE() {
+		return tipo == Tipo_simbolo.VARIABLE;
+	}
+	
+	public Boolean ES_PARAMETRO() {
+		return tipo == Tipo_simbolo.PARAMETRO;
+	}
+	
+	public Boolean ES_ACCION() {
+		return tipo == Tipo_simbolo.ACCION;
+	}
+	
+	public Boolean ES_VALOR() {
+		return tipo == Tipo_simbolo.PARAMETRO && tipo = Tipo_parametro.VALOR;
+	}
+}
