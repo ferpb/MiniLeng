@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
+import java.util.ArrayList;
 import analizador.TokenMgrError;
 import analizador.minilengcompilerTokenManager;
 import analizador.SimpleCharStream;
@@ -11,7 +12,10 @@ import lib.lexico.TablaOcurrencias;
 import lib.lexico.ErrorLexico;
 import lib.sintactico.ErrorSintactico;
 import lib.sintactico.PanicMode;
+import lib.semantico.Simbolo.*;
 import lib.semantico.Tabla_simbolos;
+import lib.semantico.SimboloYaDeclaradoException;
+import lib.semantico.ErrorSemantico;
 
 /** Token Manager. */
 public class minilengcompilerTokenManager implements minilengcompilerConstants

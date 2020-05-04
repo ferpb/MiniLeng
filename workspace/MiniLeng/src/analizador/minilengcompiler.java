@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
+import java.util.ArrayList;
 
 import analizador.TokenMgrError;
 import analizador.minilengcompilerTokenManager;
@@ -14,7 +15,10 @@ import lib.lexico.TablaOcurrencias;
 import lib.lexico.ErrorLexico;
 import lib.sintactico.ErrorSintactico;
 import lib.sintactico.PanicMode;
+import lib.semantico.Simbolo.*;
 import lib.semantico.Tabla_simbolos;
+import lib.semantico.SimboloYaDeclaradoException;
+import lib.semantico.ErrorSemantico;
 
 public class minilengcompiler implements minilengcompilerConstants {
 
@@ -29,6 +33,10 @@ public class minilengcompiler implements minilengcompilerConstants {
 
         private static Boolean compilado_sin_errores = true;
         private static Boolean entrado_en_panic = false;
+
+        private static Tabla_simbolos tabla_simbolos;
+        private static int nivel;
+        private static int dir;
 
 
         private static void help() {
@@ -149,7 +157,8 @@ public class minilengcompiler implements minilengcompilerConstants {
                 // Ejecución del compilador
         try {
                 minilengcompiler parser = new minilengcompiler(stream);
-                        minilengcompiler.programa();
+                tabla_simbolos = new Tabla_simbolos();
+                minilengcompiler.programa();
         }
         catch (Exception e) {
                         // Detectado error sintáctico
@@ -211,12 +220,13 @@ public class minilengcompiler implements minilengcompilerConstants {
 // Inicio programa
   static final public int programa() throws ParseException {
   int nivel = 0;
+  tabla_simbolos.inicializar_tabla();
 
-  Tabla_simbolos tabla_simbolos = new Tabla_simbolos();
-  Tabla_simbolos.inicializar_tabla();
+  Token t;
     try {
       jj_consume_token(tPROGRAMA);
-      identificador();
+      t = identificador();
+                tabla_simbolos.introducir_programa(t.image, 0);
       fin_sentencia();
       declaracion_variables();
       declaracion_acciones();
@@ -288,12 +298,15 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 // Sintaxis del lenguaje
-  static final public void identificador() throws ParseException {
+  static final public Token identificador() throws ParseException {
+  Token t;
     try {
-      jj_consume_token(tIDENTIFICADOR);
+      t = jj_consume_token(tIDENTIFICADOR);
+        {if (true) return t;}
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un identificador");
     }
+    throw new Error("Missing return statement in function");
   }
 
   static final public void declaracion_variables() throws ParseException {
@@ -319,25 +332,39 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
   static final public void declaracion() throws ParseException {
+  ArrayList<Token> ids;
+  Tipo_variable tipo;
     try {
-      tipo_variables();
-      identificadores();
+      tipo = tipo_variables();
+      ids = identificadores();
+          for (Token id : ids) {
+            try {
+              tabla_simbolos.introducir_variable(id.image, tipo, nivel, dir);
+              dir++;
+            }
+            catch (SimboloYaDeclaradoException e) {
+              ErrorSemantico.deteccion(e, id);
+            }
+          }
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una declaraci\u00f3n de variables");
     }
   }
 
-  static final public void tipo_variables() throws ParseException {
+  static final public Tipo_variable tipo_variables() throws ParseException {
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tENTERO:
         jj_consume_token(tENTERO);
+                    {if (true) return Tipo_variable.ENTERO;}
         break;
       case tCARACTER:
         jj_consume_token(tCARACTER);
+                  {if (true) return Tipo_variable.CHAR;}
         break;
       case tBOOLEANO:
         jj_consume_token(tBOOLEANO);
+                  {if (true) return Tipo_variable.CADENA;}
         break;
       default:
         jj_la1[1] = jj_gen;
@@ -349,11 +376,15 @@ public class minilengcompiler implements minilengcompilerConstants {
     // ErrorSintactico.deteccion(e, "Tipo de dato desconocido, se esperaba: 'entero', 'caractero' o 'booleano'");
     ErrorSintactico.deteccion(e, "Se esperaba un tipo de dato");
     }
+    throw new Error("Missing return statement in function");
   }
 
-  static final public void identificadores() throws ParseException {
+  static final public ArrayList<Token> identificadores() throws ParseException {
+        ArrayList<Token> tokens = new ArrayList<Token>();
+        Token t;
     try {
-      identificador();
+      t = identificador();
+          tokens.add(t);
       label_2:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -365,11 +396,14 @@ public class minilengcompiler implements minilengcompilerConstants {
           break label_2;
         }
         sep_variable();
-        identificador();
+        t = identificador();
+            tokens.add(t);
       }
+          {if (true) return tokens;}
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba uno o varios identificadores");
     }
+    throw new Error("Missing return statement in function");
   }
 
   static final public void declaracion_acciones() throws ParseException {
