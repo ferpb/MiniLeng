@@ -218,6 +218,10 @@ public class minilengcompiler implements minilengcompilerConstants {
 /**** Análisis sintáctico ****/
 
 // Inicio programa
+
+/*
+ * programa	::=	<tPROGRAMA> identificador fin_sentencia declaracion_variables declaracion_acciones bloque_sentencias <EOF>
+ */
   static final public int programa() throws ParseException {
   int nivel = 0;
   tabla_simbolos.inicializar_tabla();
@@ -309,6 +313,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     throw new Error("Missing return statement in function");
   }
 
+/*
+ * declaracion_variables ::= ( declaracion fin_sentencia )*
+ */
   static final public void declaracion_variables() throws ParseException {
     try {
       label_1:
@@ -331,6 +338,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * declaracion ::= tipo_variables identificadores
+ */
   static final public void declaracion() throws ParseException {
   ArrayList<Token> ids;
   Tipo_variable tipo;
@@ -351,6 +361,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * tipo_variables	::=	( <tENTERO> | <tCARACTER> | <tBOOLEANO> )
+ */
   static final public Tipo_variable tipo_variables() throws ParseException {
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -379,6 +392,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     throw new Error("Missing return statement in function");
   }
 
+/*
+ * identificadores	::=	identificador ( sep_variable identificador )*
+ */
   static final public ArrayList<Token> identificadores() throws ParseException {
         ArrayList<Token> tokens = new ArrayList<Token>();
         Token t;
@@ -406,6 +422,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     throw new Error("Missing return statement in function");
   }
 
+/*
+ * declaracion_acciones	::=	( declaracion_accion )*
+ */
   static final public void declaracion_acciones() throws ParseException {
     try {
       label_3:
@@ -425,6 +444,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * declaracion_accion	::=	cabecera_accion fin_sentencia declaracion_variables declaracion_acciones bloque_sentencias
+ */
   static final public void declaracion_accion() throws ParseException {
     try {
       cabecera_accion();
@@ -437,6 +459,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * cabecera_accion	::=	<tACCION> identificador parametros_formales
+ */
   static final public void cabecera_accion() throws ParseException {
     try {
       jj_consume_token(tACCION);
@@ -447,6 +472,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * parametros_formales	::=	( parentesis_izq ( lista_parametros )? parentesis_der )?
+ */
   static final public void parametros_formales() throws ParseException {
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -472,6 +500,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * lista_parametros	::=	parametros ( fin_sentencia parametros )*
+ */
   static final public void lista_parametros() throws ParseException {
     try {
       parametros();
@@ -493,6 +524,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * parametros	::=	clase_parametros declaracion
+ */
   static final public void parametros() throws ParseException {
     try {
       clase_parametros();
@@ -502,6 +536,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * clase_parametros	::=	( <tVAL> | <tREF> )
+ */
   static final public void clase_parametros() throws ParseException {
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -523,6 +560,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * bloque_sentencias	::=	principio lista_sentencias fin
+ */
   static final public void bloque_sentencias() throws ParseException {
     try {
       principio();
@@ -533,6 +573,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * lista_sentencias	::=	sentencia ( sentencia )*
+ */
   static final public void lista_sentencias() throws ParseException {
     try {
       sentencia();
@@ -557,6 +600,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * sentencia	::=	( leer | escribir | identificacion | seleccion | mientras_que )
+ */
   static final public void sentencia() throws ParseException {
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -585,6 +631,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * leer	::=	<tLEER> parentesis_izq lista_asignables parentesis_der fin_sentencia
+ */
   static final public void leer() throws ParseException {
     try {
       jj_consume_token(tLEER);
@@ -597,6 +646,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * lista_asignables	::=	identificadores
+ */
   static final public void lista_asignables() throws ParseException {
     try {
       identificadores();
@@ -605,6 +657,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * escribir	::=	<tESCRIBIR> parentesis_izq lista_escribibles parentesis_der fin_sentencia
+ */
   static final public void escribir() throws ParseException {
     try {
       jj_consume_token(tESCRIBIR);
@@ -617,6 +672,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * lista_escribibles	::=	lista_expresiones
+ */
   static final public void lista_escribibles() throws ParseException {
     try {
       lista_expresiones();
@@ -625,6 +683,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * asignacion	::=	<tOPAS> expresion fin_sentencia
+ */
   static final public void asignacion() throws ParseException {
     try {
       jj_consume_token(tOPAS);
@@ -635,6 +696,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * identificacion	::=	identificador ( ( argumentos )? fin_sentencia | asignacion )
+ */
   static final public void identificacion() throws ParseException {
     try {
       identificador();
@@ -664,6 +728,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * mientras_que	::=	<tMQ> expresion lista_sentencias <tFMQ>
+ */
   static final public void mientras_que() throws ParseException {
     jj_consume_token(tMQ);
     expresion();
@@ -675,6 +742,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * seleccion	::=	<tSI> expresion <tENT> lista_sentencias ( <tSI_NO> lista_sentencias )* <tFSI>
+ */
   static final public void seleccion() throws ParseException {
     jj_consume_token(tSI);
     expresion();
@@ -704,6 +774,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * argumentos	::=	parentesis_izq ( lista_expresiones )? parentesis_der
+ */
   static final public void argumentos() throws ParseException {
     try {
       parentesis_izq();
@@ -732,6 +805,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * lista_expresiones	::=	expresion ( sep_variable expresion )*
+ */
   static final public void lista_expresiones() throws ParseException {
     try {
       expresion();
@@ -753,6 +829,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * expresion	::=	expresion_simple ( operador_relacional expresion_simple )?
+ */
   static final public void expresion() throws ParseException {
     try {
       expresion_simple();
@@ -775,6 +854,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * operador_relacional	::=	( <tIGUAL> | <tMENOR> | <tMAYOR> | <tMAI> | <tMEI> | <tNI> )
+ */
   static final public void operador_relacional() throws ParseException {
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -806,6 +888,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * expresion_simple	::=	( <tMAS> | <tMENOS> )? termino ( operador_aditivo termino )*
+ */
   static final public void expresion_simple() throws ParseException {
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -849,6 +934,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * operador_aditivo	::=	( <tMAS> | <tMENOS> | <tOR> )
+ */
   static final public void operador_aditivo() throws ParseException {
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -871,6 +959,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * termino	::=	factor ( operador_multiplicativo factor )*
+ */
   static final public void termino() throws ParseException {
     try {
       factor();
@@ -896,6 +987,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * operador_multiplicativo	::=	( <tPRODUCTO> | <tDIVISION> | <tMOD> | <tAND> )
+ */
   static final public void operador_multiplicativo() throws ParseException {
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -924,6 +1018,14 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * factor	::=	( <tNOT> factor
+ *					| parentesis_izq expresion parentesis_der
+ *					| <tENTACAR> parentesis_izq expresion parentesis_der
+ *					| <tCARAENT> parentesis_izq expresion parentesis_der
+ *					| identificador | <tCONSTENTERA> | <tCONSTCHAR>
+ *					| <tCONSTCAD> | <tTRUE> | <tFALSE> )
+ */
   static final public void factor() throws ParseException {
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {

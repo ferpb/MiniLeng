@@ -504,6 +504,9 @@ TOKEN : /* VALORES */
 
 // Inicio programa
 
+/*
+ * programa	::=	<tPROGRAMA> identificador fin_sentencia declaracion_variables declaracion_acciones bloque_sentencias <EOF>
+ */
 int programa() :
 {
   int nivel = 0;
@@ -628,6 +631,9 @@ Token identificador() :
 }
 
 
+/*
+ * declaracion_variables ::= ( declaracion fin_sentencia )*
+ */
 void declaracion_variables() :
 {}
 {
@@ -638,6 +644,9 @@ void declaracion_variables() :
     ErrorSintactico.deteccion(e, "");
   }
 }
+/*
+ * declaracion ::= tipo_variables identificadores
+ */
 void declaracion() :
 {
   ArrayList<Token> ids;
@@ -663,6 +672,9 @@ void declaracion() :
     ErrorSintactico.deteccion(e, "Se esperaba una declaración de variables");
   }
 }
+/*
+ * tipo_variables	::=	( <tENTERO> | <tCARACTER> | <tBOOLEANO> )
+ */
 Tipo_variable tipo_variables() :
 {}
 {
@@ -677,6 +689,9 @@ Tipo_variable tipo_variables() :
     ErrorSintactico.deteccion(e, "Se esperaba un tipo de dato");
   }
 }
+/*
+ * identificadores	::=	identificador ( sep_variable identificador )*
+ */
 ArrayList<Token> identificadores() :
 {
 	ArrayList<Token> tokens = new ArrayList<Token>();
@@ -702,7 +717,9 @@ ArrayList<Token> identificadores() :
   }
 }
 
-
+/*
+ * declaracion_acciones	::=	( declaracion_accion )*
+ */
 void declaracion_acciones() :
 {}
 {
@@ -713,6 +730,9 @@ void declaracion_acciones() :
     ErrorSintactico.deteccion(e, "");
   }
 }
+/*
+ * declaracion_accion	::=	cabecera_accion fin_sentencia declaracion_variables declaracion_acciones bloque_sentencias
+ */
 void declaracion_accion() :
 {}
 {
@@ -724,6 +744,9 @@ void declaracion_accion() :
     ErrorSintactico.deteccion(e, "Se esperaba una declaración de acción");
   }
 }
+/*
+ * cabecera_accion	::=	<tACCION> identificador parametros_formales
+ */
 void cabecera_accion() :
 {}
 {
@@ -735,6 +758,9 @@ void cabecera_accion() :
   }
 }
 
+/*
+ * parametros_formales	::=	( parentesis_izq ( lista_parametros )? parentesis_der )?
+ */
 void parametros_formales() :
 {}
 {
@@ -745,6 +771,9 @@ void parametros_formales() :
     ErrorSintactico.deteccion(e, "");
   }
 }
+/*
+ * lista_parametros	::=	parametros ( fin_sentencia parametros )*
+ */
 void lista_parametros() :
 {}
 {
@@ -755,6 +784,9 @@ void lista_parametros() :
     ErrorSintactico.deteccion(e, "Se esperaban uno o varios parámetros");
   }
 }
+/*
+ * parametros	::=	clase_parametros declaracion
+ */
 void parametros() :
 {}
 {
@@ -765,6 +797,9 @@ void parametros() :
     ErrorSintactico.deteccion(e, "Se esperaba un parámetro");
   }
 }
+/*
+ * clase_parametros	::=	( <tVAL> | <tREF> )
+ */
 void clase_parametros() :
 {}
 {
@@ -779,6 +814,9 @@ void clase_parametros() :
 }
 
 
+/*
+ * bloque_sentencias	::=	principio lista_sentencias fin
+ */
 void bloque_sentencias() :
 {}
 {
@@ -789,6 +827,9 @@ void bloque_sentencias() :
     ErrorSintactico.deteccion(e, "Se esperaba un bloque se sentencias");
   }
 }
+/*
+ * lista_sentencias	::=	sentencia ( sentencia )*
+ */
 void lista_sentencias() :
 {}
 {
@@ -799,6 +840,9 @@ void lista_sentencias() :
     ErrorSintactico.deteccion(e, "Se esperaban una o más sentencias");
   }
 }
+/*
+ * sentencia	::=	( leer | escribir | identificacion | seleccion | mientras_que )
+ */
 void sentencia() :
 {}
 {
@@ -814,6 +858,9 @@ void sentencia() :
   }
 }
 
+/*
+ * leer	::=	<tLEER> parentesis_izq lista_asignables parentesis_der fin_sentencia
+ */
 void leer() :
 {}
 {
@@ -824,6 +871,9 @@ void leer() :
     ErrorSintactico.deteccion(e, "Se esperaba sentencia leer");
   }
 }
+/*
+ * lista_asignables	::=	identificadores
+ */
 void lista_asignables() :
 {}
 {
@@ -834,6 +884,9 @@ void lista_asignables() :
     ErrorSintactico.deteccion(e, "Se esperaba lista de asignables");
   }
 }
+/*
+ * escribir	::=	<tESCRIBIR> parentesis_izq lista_escribibles parentesis_der fin_sentencia
+ */
 void escribir() :
 {}
 {
@@ -844,6 +897,9 @@ void escribir() :
     ErrorSintactico.deteccion(e, "Se esperaba sentencia escribir");
   }
 }
+/*
+ * lista_escribibles	::=	lista_expresiones
+ */
 void lista_escribibles() :
 {}
 {
@@ -855,6 +911,9 @@ void lista_escribibles() :
   }
 }
 
+/*
+ * asignacion	::=	<tOPAS> expresion fin_sentencia
+ */
 void asignacion() :
 {}
 {
@@ -866,6 +925,9 @@ void asignacion() :
   }
 }
 
+/*
+ * identificacion	::=	identificador ( ( argumentos )? fin_sentencia | asignacion )
+ */
 void identificacion() :
 {}
 {
@@ -877,6 +939,9 @@ void identificacion() :
   }
 }
 
+/*
+ * mientras_que	::=	<tMQ> expresion lista_sentencias <tFMQ>
+ */
 void mientras_que() :
 {}
 {
@@ -892,6 +957,9 @@ void mientras_que() :
 
 }
 
+/*
+ * seleccion	::=	<tSI> expresion <tENT> lista_sentencias ( <tSI_NO> lista_sentencias )* <tFSI>
+ */
 void seleccion() :
 {}
 {
@@ -913,6 +981,9 @@ void seleccion() :
   }
 }
 
+/*
+ * argumentos	::=	parentesis_izq ( lista_expresiones )? parentesis_der
+ */
 void argumentos() :
 {}
 {
@@ -924,7 +995,9 @@ void argumentos() :
   }
 }
 
-
+/*
+ * lista_expresiones	::=	expresion ( sep_variable expresion )*
+ */
 void lista_expresiones() :
 {}
 {
@@ -936,6 +1009,9 @@ void lista_expresiones() :
   }
 }
 
+/*
+ * expresion	::=	expresion_simple ( operador_relacional expresion_simple )?
+ */
 void expresion() :
 {}
 {
@@ -946,6 +1022,9 @@ void expresion() :
     ErrorSintactico.deteccion(e, "Se esperaba una expresión");
   }
 }
+/*
+ * operador_relacional	::=	( <tIGUAL> | <tMENOR> | <tMAYOR> | <tMAI> | <tMEI> | <tNI> )
+ */
 void operador_relacional() :
 {}
 {
@@ -961,6 +1040,9 @@ void operador_relacional() :
    ErrorSintactico.deteccion(e, "Se esperaba un operador relacional: '=', ' >', '<', '<=', '>=', o '!='");
  }
 }
+/*
+ * expresion_simple	::=	( <tMAS> | <tMENOS> )? termino ( operador_aditivo termino )*
+ */
 void expresion_simple() :
 {}
 {
@@ -972,6 +1054,9 @@ void expresion_simple() :
     ErrorSintactico.deteccion(e, "Se esperaba una expresión simple");
   }
 }
+/*
+ * operador_aditivo	::=	( <tMAS> | <tMENOS> | <tOR> )
+ */
 void operador_aditivo() :
 {}
 {
@@ -984,6 +1069,9 @@ void operador_aditivo() :
     ErrorSintactico.deteccion(e, "Se esperaba un operador aditivo: '+', '-', o 'OR'");
   }
 }
+/*
+ * termino	::=	factor ( operador_multiplicativo factor )*
+ */
 void termino() :
 {}
 {
@@ -994,6 +1082,9 @@ void termino() :
     ErrorSintactico.deteccion(e, "Se esperaba un término");
   }
 }
+/*
+ * operador_multiplicativo	::=	( <tPRODUCTO> | <tDIVISION> | <tMOD> | <tAND> )
+ */
 void operador_multiplicativo() :
 {}
 {
@@ -1008,6 +1099,14 @@ void operador_multiplicativo() :
     ErrorSintactico.deteccion(e, "Se esperaba un operador multiplicativo: '*', '/', 'MOD', 'AND'");
   }
 }
+/*
+ * factor	::=	( <tNOT> factor
+ *					| parentesis_izq expresion parentesis_der
+ *					| <tENTACAR> parentesis_izq expresion parentesis_der
+ *					| <tCARAENT> parentesis_izq expresion parentesis_der
+ *					| identificador | <tCONSTENTERA> | <tCONSTCHAR>
+ *					| <tCONSTCAD> | <tTRUE> | <tFALSE> )
+ */
 void factor() :
 {}
 {

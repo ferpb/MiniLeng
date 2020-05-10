@@ -1100,12 +1100,7 @@ void operador_multiplicativo() :
   }
 }
 /*
- * factor	::=	( <tNOT> factor
- *					| parentesis_izq expresion parentesis_der
- *					| <tENTACAR> parentesis_izq expresion parentesis_der
- *					| <tCARAENT> parentesis_izq expresion parentesis_der
- *					| identificador | <tCONSTENTERA> | <tCONSTCHAR>
- *					| <tCONSTCAD> | <tTRUE> | <tFALSE> )
+ * factor	::=	( <tNOT> factor | parentesis_izq expresion parentesis_der | <tENTACAR> parentesis_izq expresion parentesis_der | <tCARAENT> parentesis_izq expresion parentesis_der | identificador | <tCONSTENTERA> | <tCONSTCHAR> | <tCONSTCAD> | <tTRUE> | <tFALSE> )
  */
 void factor() :
 {}

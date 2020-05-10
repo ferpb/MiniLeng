@@ -13,4 +13,7 @@
     <fullyQualifiedTypeName name="java.lang.reflect.Array"/>
     <fullyQualifiedTypeName name="java.util.Arrays"/>
     <fullyQualifiedTypeName name="java.util.Random"/>
+    <fullyQualifiedTypeName name="java.util.Iterator"/>
+    <fullyQualifiedTypeName name="lib.semantico.Simbolo.Tipo_simbolo"/>
+    <fullyQualifiedTypeName name="analizador.Token"/>
 </qualifiedTypeNameHistroy>

@@ -201,3 +201,6 @@ Errores
       Se ha activado el panic mode durante la compilación. Corrige los errores y vuelve a compilar.
     para indicar al usuario que hace falta volver a compilar.
 
+No se van a usar parámetros ocultos. Como estamos trabjando con objetos Java, las acciones pueden
+tener una lista de referencias a los parámetros. Los parámetros se borrarán de la tabla en el
+momento que la función deje de ser visible y se borre.

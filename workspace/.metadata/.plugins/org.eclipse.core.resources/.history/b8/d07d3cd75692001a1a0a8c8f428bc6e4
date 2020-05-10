@@ -235,20 +235,6 @@ public class Tabla_simbolos {
 	}
 
 	/*
-	 * Elimina de la tabla todas las acciones de un nivel. LOS PARAMETROS DE ESTAS
-	 * ACCIONES DEBEN SER ELIMINADOS TAMBIÉN PARA MANTENER LA COHERENCIA DE LA
-	 * TABLA.
-	 */
-	public void eliminar_acciones(int nivel) {
-		eliminar_tipo_en_nivel(nivel, Tipo_simbolo.ACCION);
-		eliminar_tipo_en_nivel(nivel + 1, Tipo_simbolo.PARAMETRO);
-	}
-	
-	
-	
-	// LAS FUNCIONES PARA TRABAJAR CON PARÁMETROS OCULTOS NO SE USAN
-	
-	/*
 	 * Marca todos los parámetros de un nivel como ocultos para que no puedan ser
 	 * encontrados, pero se mantenga la definición completa de la acción donde están
 	 * declarados para verificación de invocaciones a la acción.
@@ -295,5 +281,15 @@ public class Tabla_simbolos {
 				}
 			}
 		}
+	}
+
+	/*
+	 * Elimina de la tabla todas las acciones de un nivel. LOS PARAMETROS DE ESTAS
+	 * ACCIONES DEBEN SER ELIMINADOS TAMBIÉN PARA MANTENER LA COHERENCIA DE LA
+	 * TABLA.
+	 */
+	public void eliminar_acciones(int nivel) {
+		eliminar_tipo_en_nivel(nivel, Tipo_simbolo.ACCION);
+		eliminar_tipo_en_nivel(nivel + 1, Tipo_simbolo.PARAMETRO);
 	}
 }

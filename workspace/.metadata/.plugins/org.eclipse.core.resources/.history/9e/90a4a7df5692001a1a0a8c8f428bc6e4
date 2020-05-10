@@ -246,7 +246,7 @@ public class Tabla_simbolos {
 	
 	
 	
-	// LAS FUNCIONES PARA TRABAJAR CON PARÁMETROS OCULTOS NO SE USAN
+	// LAS FUNCIONES PARA OCULTAR Y BORRAR PARÁMETROS NO SE USAN
 	
 	/*
 	 * Marca todos los parámetros de un nivel como ocultos para que no puedan ser
