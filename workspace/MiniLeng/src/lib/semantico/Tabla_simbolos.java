@@ -17,6 +17,7 @@ import lib.semantico.SimboloYaDeclaradoException;
 
 import java.util.Random;
 import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 public class Tabla_simbolos {
@@ -280,10 +281,10 @@ public class Tabla_simbolos {
 				Simbolo s = iter.next();
 
 				if (s.nivel == nivel && s.tipo == Tipo_simbolo.ACCION) {
-					Simbolo parametros[] = s.getLista_parametros();
+					ArrayList<Simbolo> parametros = s.getLista_parametros();
 					Boolean borrar = false;
-					for (int j = 0; j < parametros.length; j++) {
-						Simbolo parametro = parametros[i];
+					for (int j = 0; j < parametros.size(); j++) {
+						Simbolo parametro = parametros.get(i);
 						if (!parametro.isVisible()) {
 							borrar = true;
 							eliminar_simbolo(parametro.nombre, parametro.nivel);

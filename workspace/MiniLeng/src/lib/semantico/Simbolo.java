@@ -10,6 +10,8 @@
 
 package lib.semantico;
 
+import java.util.ArrayList;
+
 public class Simbolo {
 
 	// Representa el tipo de símbolo
@@ -37,7 +39,7 @@ public class Simbolo {
 
 	Boolean visible; // Indica si el símbolo es visible o no
 
-	Simbolo lista_parametros[]; // Lista de símbolos que representan los parámetros de una acción
+	ArrayList<Simbolo> lista_parametros; // Lista de símbolos que representan los parámetros de una acción
 
 	int dir; // Dirección del símbolo
 
@@ -91,11 +93,11 @@ public class Simbolo {
 		this.visible = visible;
 	}
 
-	public Simbolo[] getLista_parametros() {
+	public ArrayList<Simbolo> getLista_parametros() {
 		return lista_parametros;
 	}
 
-	public void setLista_parametros(Simbolo[] lista_parametros) {
+	public void setLista_parametros(ArrayList<Simbolo> lista_parametros) {
 		this.lista_parametros = lista_parametros;
 	}
 
