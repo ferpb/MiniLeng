@@ -1,0 +1,145 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+\section{Mejoras introducidas}
+% Detallar las mejoras y puntos opcionales que se han desarrollado sobre la propuesta inicial.
+% Especificar detalles de implementación, decisiones de diseño y pruebas/ejemplos de las funcionalidades añadidas.
+% Separar las mejoras en bloques, según correspondan al análisis léxico, semántico o a la generación de código.
+
+\subsection{Mejoras en el comportamiento del compilador}
+
+Errores en el uso del programa
+
+\begin{itemize}
+\item Si se utiliza una opción inválida o no se especifican correctamente, se muestra el siguiente error:
+\begin{codigo}
+MiniLeng: Opción inválida <error>
+\end{codigo}
+
+\item Si el fichero a compilar no tiene extensión \tt{.ml}, se muestra el error:
+\begin{codigo}
+MiniLeng: El fichero a compilar tiene que tener extensión .ml
+          Fichero introducido: '...'
+\end{codigo}
+
+\item Si no se encuentra el fichero a compilar, se indica de la siguiente forma:
+\begin{codigo}
+MiniLeng: No se ha encontrado el fichero '...'
+\end{codigo}
+
+\end{itemize}
+
+Al final de la compilación se muestra un recuento de los errores encontrados:
+\begin{codigo}
+Errores léxicos: ...
+Errores sintácticos: ...
+Veces activado panic mode: ...
+\end{codigo}
+
+Y se muestra
+\begin{codigo}
+No se ha podido compilar el programa
+\end{codigo}
+si ha habido errores durante la compilación, o:
+\begin{codigo}
+Compilado sin errores
+\end{codigo}
+si la compilación ha sido exitosa.
+
+Si durante la compilación se ha activado el modo pánico, se muestra el siguiente mensaje:
+\begin{codigo}
+Se ha activado el panic mode durante la compilación. Corrige los errores y vuelve a compilar.
+\end{codigo}
+para indicar al usuario que tiene que hace falta volver a compilar el programa.
+
+
+
+\subsection{Mejoras en el análisis léxico}
+La opción tokens muestra por pantalla los nombres de los tokens que se van reconociendo conforme se analiza el programa. Ejemplo:
+
+\begin{codigo}
+tPROGRAMA
+tIDENTIFICADOR (Valor: mi_programa)
+tFIN_SENTENCIA
+tENTERO
+tIDENTIFICADOR (Valor: n)
+tFIN_SENTENCIA
+...
+tFIN
+\end{codigo}
+
+\subsection{Mejoras en el análisis semántico}
+  - Se permiten acciones anidadas con cualquier nivel de profuncidad. Las declaraciones de acciones
+    anidadas deben entre la zona de declaración de las variables y la palabra 'principio' de la
+    función padre:
+
+      accion accion1;
+        % Declaración de variables de accion1
+        accion accion2;
+          % Declaración de variables de accion2
+          accion accion3;
+            % Declaración de variables de accion3
+          principio
+            % Sentencias de accion3
+          fin
+        principio
+          % Sentencias de accion2
+        fin
+      principio
+        % Sentencias de accion1
+      fin
+
+  - Se permiten bloques 'seleccion' y 'mientras que' anidados con cualquier nivel de profundidad:
+
+      SI <condicion> ENT
+        % Sentencias
+        SI <condicion> ENT
+          % Sentencias
+        SI_NO
+          % Sentencias
+        FSI
+        % Sentencias
+      SI_NO
+        % Sentencias
+      FSI
+
+      MQ <condicion>
+        % Sentencias
+        MQ <condicion>
+          % Sentencias
+        FMQ
+        % Sentencias
+      FMQ
+
+  - Cualquier bloque ('principio/fin', 'seleccion' o 'mientras que') debe contener al menos una
+    sentencia.
+
+
+
+
+\subsubsection{Panic Mode}
+El compilador dispone de la opción panic (\tt{-p}), que activa el modo pánico durante la compilación. Se entra en este modo cada vez que se produce un error sintáctico porque se esperaba un punto y coma. El analizador descarta todos los tokens siguientes al error hasta que encuentra un carácter \car{;} o el fichero se acaba, entonces sale del modo y sigue analizando la entrada.
+
+Cuando se entra en el modo pánico, se informa al usuario con las siguientes líneas:
+
+\begin{codigo}{text}
+MiniLeng: ERROR SINTÁCTICO (línea ..., columna ...): Token incorrecto: '...'. Se esperaba ';'
+PANIC MODE: Iniciado panic mode
+\end{codigo}
+
+Y se va mostrando en una línea diferente cada token descartado:
+
+\begin{codigo}{text}
+> PANIC MODE: Token descartado: '...'
+\end{codigo}
+
+Cuando se sale del modo, se muestra:
+
+\begin{codigo}{text}
+  > PANIC MODE (línea ..., columna ...): Se ha encontrado ';'
+PANIC MODE: Terminado panic mode
+\end{codigo}
+
+\subsection{Mejoras en la generación de código}
+
+\end{document}

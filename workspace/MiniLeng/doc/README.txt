@@ -1,5 +1,5 @@
 /*********************************************************************************
- * Documento con las características del compilador de Minileng
+ * Documento con las características del compilador de MiniLeng
  *
  * Fichero:    README.txt
  * Autor:      Fernando Peña (NIA: 756012)
@@ -9,7 +9,7 @@
  **********************************************************************************/
 
 Uso del compilador
-----------------
+------------------
 
 Compilador de MiniLeng -- v2.2 (abril de 2020)
 Autor: Fernando Peña Bes (NIA: 756012)
@@ -109,15 +109,15 @@ Opciones
 
 Léxico
 ------
-  - El analizador no es case-sensitive, no distingue entre mayúsuclas y minúsculas.
+  - El analizador no es case-sensitive, no distingue entre mayúsculas y minúsculas.
 
-  - Se permite la definición de comentarios de una línea con el caracter '%' y multilínea,
+  - Se permite la definición de comentarios de una línea con el carácter '%' y multilínea,
     usando '%%'
 
 
 Semántico
 ---------
-  - Se permiten acciones anidadas con cualquier nivel de profuncidad. Las declaraciones de acciones
+  - Se permiten acciones anidadas con cualquier nivel de profundidad. Las declaraciones de acciones
     anidadas deben entre la zona de declaración de las variables y la palabra 'principio' de la
     función padre:
 
@@ -195,12 +195,12 @@ Errores
       No se ha podido compilar el programa.
     si ha habido errores durante la compilación o:
       Compilado sin errores!
-    si la compiación ha sido exitosa
+    si la compilación ha sido exitosa
 
   - Si durante la compilación se ha activado el modo pánico se muestra el siguiente mensaje:
       Se ha activado el panic mode durante la compilación. Corrige los errores y vuelve a compilar.
     para indicar al usuario que hace falta volver a compilar.
 
-No se van a usar parámetros ocultos. Como estamos trabjando con objetos Java, las acciones pueden
+No se van a usar parámetros ocultos. Como estamos trabajando con objetos Java, las acciones pueden
 tener una lista de referencias a los parámetros. Los parámetros se borrarán de la tabla en el
 momento que la función deje de ser visible y se borre.

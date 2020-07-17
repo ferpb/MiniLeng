@@ -1,0 +1,59 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+\section{Análisis sintáctico}
+
+\subsection{Modificaciones sobre la gramática propuesta y decisiones de diseño}
+% Modificaciones sobre la gramática propuesta y decisiones de diseño adoptadas.
+En la gramática propuesta, algunas reglas estaban incompletas, a continuación se detalla como se han completado y las decisiones de diseño adoptadas.
+
+\begin{description}
+\item[Parametros formales] Contiene la definición de los parámetros de una acción, esta estructura es opcional por lo que se ha utilizado el símbolo \car{?}:
+\begin{verbatim}
+parametros_formales	::=	( parentesis_izq ( lista_parametros )? parentesis_der )?
+
+lista_parametros	::=	parametros ( fin_sentencia parametros )*
+
+\end{verbatim}
+
+
+\item[Lista de sentencias]
+
+lista_sentencias	::=	sentencia ( sentencia )*
+
+sentencia	::=	( leer | escribir | identificacion | seleccion | mientras_que )
+
+
+leer	::=	<tLEER> parentesis_izq lista_asignables parentesis_der fin_sentencia
+
+lista_asignables	::=	identificadores
+
+escribir	::=	<tESCRIBIR> parentesis_izq lista_escribibles parentesis_der fin_sentencia
+lista_escribibles	::=	lista_expresiones
+
+
+
+
+seleccion	::=	<tSI> expresion <tENT> lista_sentencias ( <tSI_NO> lista_sentencias )* <tFSI>
+
+
+
+\item[Expresiones]
+
+lista_expresiones	::=	expresion ( sep_variable expresion )*
+
+expresion	::=	expresion_simple ( operador_relacional expresion_simple )?
+operador_relacional	::=	( <tIGUAL> | <tMENOR> | <tMAYOR> | <tMAI> | <tMEI> | <tNI> )
+expresion_simple	::=	( <tMAS> | <tMENOS> )? termino ( operador_aditivo termino )*
+operador_aditivo	::=	( <tMAS> | <tMENOS> | <tOR> )
+termino	::=	factor ( operador_multiplicativo factor )*
+operador_multiplicativo	::=	( <tPRODUCTO> | <tDIVISION> | <tMOD> | <tAND> )
+
+\end{description}
+
+Los símbolos \car{,}, \car{;}, \car{(} y \car{)}  se han sustituido en la gramática por sus tokens correspondientes: \tok{tSEP\_VARIABLE}, \tok{tFIN\_SENTENCIA}, \tok{tPRENTESIS\_IZQ} y \tok{tPARENTESIS\_DER}, de esta forma sería posible cambiar los caracteres en un futuro de forma sencilla.
+
+\subsection{Gestión de errores y avisos (\it{warnings}) sintácticos}
+% Detallar y explicar el manejo de excepciones y la función de error sintáctico implementada.
+
+\end{document}

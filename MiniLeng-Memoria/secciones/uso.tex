@@ -1,0 +1,26 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+\section{Uso del compilador}
+Compilador de MiniLeng -- v2.2 (abril de 2020)
+Autor: Fernando Peña Bes (NIA: 756012)
+
+Uso: minilengcompiler [opciones] [fichero]
+
+Opciones:
+  -v, --verbose  Mostrar un resumen de los símbolos utilizados en el programa
+  -p, --panic	 Compila con panic mode
+  -t, --tokens   Muestra los tokens que se van reconociendo
+  -h, --help	 Imprimir ayuda (esta pantalla) y salir
+  --version      Imprimir información de la versión y salir
+
+
+Ejemplos de uso:
+    minilengcompiler
+    minilengcompiler -v
+    minilengcompiler -v fichero.ml
+    minlengcompiler -p -v fichero.ml
+
+El fichero con el programa a compilar tiene que tener extensión .ml
+
+\end{document}

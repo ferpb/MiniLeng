@@ -1,0 +1,117 @@
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+\section{Análisis léxico}
+El analizador es case-insensitive, no distingue entre mayúsculas y minúsculas.
+
+\subsection{Expresión regular utilizada para los identificadores}
+% Detallar y explicar la expresión regular utilizada para los identificadores.
+Según la especificación del lenguaje, los identificadores están compuestos por letras, números y el símbolo \car{\_}, no pueden comenzar por número y no pueden terminar en \car{\_}.
+
+Una posible expresión regular que reconoce identificadores es la siguiente:
+\begin{codigo}{text}
+< #DIGITO : [ "0"-"9" ] >
+< #LETRA : [ "a"-"z" ] >
+< tIDENTIFICADOR : 
+  (< LETRA > | "_"(< LETRA > | < DIGITO >))(("_")?(< LETRA > | < DIGITO >))* >
+\end{codigo}
+
+\subsection{Procesamiento de comentarios}
+% Detallar y explicar cómo se han procesado los comentarios simples y multilínea.
+En el lenguaje se permiten definir comentarios de una línea (simples) y multilínea.
+
+Los comentarios de una línea se indican con el carácter \car{\%}, todo lo que haya desde ese carácter hasta el indicador de fin de línea se considerará como comentario. Los comentarios multilínea empiezan y terminan con la secuencia \car{\%\%}.
+
+Para implementar los comentarios en JavaCC se han utilizado contextos léxicos.
+Inicialmente el analizador se encuentra en el contexto \tt{DEFAULT}.
+Se puede indicar el contexto al que pertenece una declaración léxica entre los signos \car{\textless} y \car{\textgreater}, de forma que sólo se tendrá en cuenta cuando el contexto actual sea ese. Para realizar un cambio de contexto después de reconocer una expresión utiliza el signo \car{:}.
+
+El objetivo es filtrar los comentarios para que no sean enviados al analizador sintáctico. JavaCC define la declaración léxica \tt{SKIP} que permite justamente descartar la entrada reconocida. Teniendo estos aspectos en cuenta, la implementación propuesta para procesar comentarios es la siguiente:
+
+\begin{codigo}{text}
+SKIP : {  " "| "\r"| "\t"| "\n"
+| < "%"~["%"] > : COMENTARIO
+| "%%"          : MULTICOMENTARIO}
+
+// Ignorar comentarios en la entrada
+<COMENTARIO> SKIP : {
+  "\n" : DEFAULT
+}
+
+<COMENTARIO> MORE : {
+   < ~[] >
+}
+
+<MULTICOMENTARIO> SKIP : {
+  "%%" : DEFAULT
+}
+
+<MULTICOMENTARIO> MORE : {
+   < ~[] >
+}
+\end{codigo}
+
+Las expresiones reconocidas en las declaraciones \tt{MORE} son añadidas como prefijo a la siguiente expresión reconocida. En este caso se ha utilizado la expresión \verb|< ~[] >| dentro de declaraciones \tt{MORE} para descartar la entrada mientras se está dentro de un contexto de comentario.
+
+\subsection{Implementación del modo \it{verbose}}
+% Detallar y explicar cómo se ha implementado el modo verbose
+El compilador dispone de una opción \it{verbose}. Cuando está activada, se muestra al final de la compilación una trabla con el número de ocurrencias de cada token que se han encontrado en el programa. La tabla tiene la siguiente forma:
+\begin{verbatim}
+       +-------------------------------------+
+       | Número de ocurrencias de los tokens |
+       +-------------------------------------+
+       | Token                         num.  |
+       +-------------------------------------+
+       | Palabras reservadas                 |
+       |     PROGRAMA                     1  |
+       |     PRINCIPIO                    3  |
+       |     FIN                          3  |
+       |     SI                           3  |
+       |     ENT                          3  |
+       |     SI_NO                        2  |
+       |     FSI                          3  |
+       | Caracteres de agrupación            |
+       |     PARENTESIS_IZQ              27  |
+       |     PARENTESIS_DER              27  |
+       | Operadores aritméticos              |
+       |     SUMA                         2  |
+       |     RESTA                        1  |
+       | Operadores lógicos                  |
+       |     AND                          2  |
+       |     OR                           1  |
+       | Tipos de dato                       |
+       |     BOOLEANO                     1  |
+       |     CARACTER                     4  |
+       +-------------------------------------+
+\end{verbatim}
+
+Para implementarla se ha creado una clase llamada \tt{TablaOcurrencias} en el paquete \url{lib.lexico}. Esta clase contiene una enumeracion para cada tipo de token (Palabras reservadas, Operadores lógicos, Tipos de dato, Valores...) con los nombres de los tokens que pertenecen al tipo. Cada tipo tiene asociado un vector con un contadores para cada uno de sus tokens, que se van incrementando conforme se reconocen en el código. Para incrementar los contadores, la clase define una función \tt{incrementar} que se llama desde el analizador léxico pasándole el token cuyo contador se quiere incrementar.
+
+La expresión del analizador léxico que reconoce la palabra reservada \tt{PROGRAMA}, realiza la siguiente llamada a la clase:
+
+%%%%% CAMBIAR NOMBRE TABLA
+
+\begin{codigo}{text}
+TOKEN : /* PALABRAS RESERVADAS */
+{
+  < tPROGRAMA : "programa" >
+  {
+    tabla.incrementar(TablaOcurrencias.Reservadas.tPROGRAMA);
+  }
+  ...
+}
+\end{codigo}
+
+\subsection{Gestión de errores léxicos}
+% Detallar y explicar la función de error léxico implementada
+Si mientras se está procesando un programa se encuentra un error léxico, el compilador termina y muestra un error como el siguiente:
+
+\begin{codigo}{text}
+ERROR LÉXICO (línea ..., columna ...): símbolo no reconocido: '...' (\u...)
+\end{codigo}
+
+Si el carácter que ha producido el error no es ASCII, se muestra escapado con su código Unicode.
+
+En JavaCC, los errores léxicos son capturados como excepciones de tipo \tt{Error} durante la ejecución del compilador. Cuando se captura esta excepción, se toma el carácter que ha producido el error junto con su fila y columna en la entrada y se muestran utilizando una función personalizada (definida en la clase \tt{ErrorLexico} de \url{lib.lexico}).
+
+\end{document}

@@ -1,0 +1,191 @@
+\documentclass[a4paper,10pt]{article}
+
+\usepackage{url}
+
+\usepackage[utf8]{inputenc}
+\usepackage[spanish, es-tabla]{babel}
+\usepackage[indent]{parskip}
+
+\clubpenalty=10000
+\widowpenalty=10000
+
+\usepackage[gen]{eurosym}
+
+\usepackage{xcolor}
+\usepackage{setspace}
+\usepackage{float}
+\usepackage{biblatex}
+\addbibresource{fuentes.bib}
+\setlength{\parindent}{0cm}
+\usepackage{amsmath, amssymb}
+
+% Listados de código
+\usepackage{minted}
+\usepackage{caption}
+\newenvironment{code}{\captionsetup{type=listing}}{}
+% \SetupFloatingEnvironment{listing}{name=Source Code}
+\renewcommand{\listingscaption}{Código}
+\BeforeBeginEnvironment{minted}{\medskip}
+\AfterEndEnvironment{minted}{\medskip}
+
+\usepackage{csquotes}
+
+\renewcommand{\it}[1]{\textit{#1}}
+\renewcommand{\bf}[1]{\textbf{#1}}
+\renewcommand{\tt}[1]{\texttt{#1}}
+
+\newcommand{\car}[1]{`\texttt{#1}'}
+\newcommand{\tok}[1]{\texttt{\textless#1\textgreater}}
+
+%%%%%%% Comandos para escribir los comandos %%%%%%%%%%%
+%% \com{el comando}    para comandos en la misma línea
+
+%% begin{comm}           para comentarios en la misma línea
+%%   comandos
+%% end{comm}
+
+%% \tt  es una abreviación para no tener que poner \texttt al usar fuente monoespaciada
+%%%%%%%%
+\newcommand{\com}[1]{\fbox{\mintinline{bash}{$ #1}}}
+
+\newcommand{\BashFancyFormatLine}{%
+  \def\FancyVerbFormatLine##1{\$ ##1}%
+}
+\newcommand{\BashFancyFormatLineDB}{%
+  \def\FancyVerbFormatLine##1{SQL> ##1}%
+}
+\newenvironment{comm}
+ {
+    \VerbatimEnvironment
+    \begin{minted}[frame=single, formatcom=\BashFancyFormatLine, fontsize=\normalsize, xleftmargin=10pt, xrightmargin=10pt]{bash}}
+ {\end{minted}}
+\newenvironment{commdb}
+ {
+    \VerbatimEnvironment
+    \begin{minted}[frame=single, formatcom=\BashFancyFormatLineDB, fontsize=\normalsize, xleftmargin=21pt, xrightmargin=21pt]{bash}}
+ {\end{minted}}
+ 
+ 
+ 
+ \newenvironment{codigo}[1]
+ {
+    \captionsetup{type=listing}
+    \VerbatimEnvironment
+    \begin{minted}[fontsize=\normalsize, xleftmargin=5pt, xrightmargin=5pt, frame=single, framesep=5pt]{#1}}
+    %% Se puede utilizar framesep=10pt para añadir separación entre el marco
+    %% Se puede utilizar frame=single para poner una caja alrededor del texto.
+    %% frame=lines
+ {\end{minted}}
+
+
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables for horizontal lines
+\usepackage{graphicx}
+\graphicspath{{imagenes/}{../imagenes/}} % Declara dos paths, uno con respecto a este documento y otro respecto a la carpeta secciones
+
+\usepackage[margin=3cm, headheight=13.6pt]{geometry}
+ \usepackage{fancyhdr}
+\fancyhf{}
+\lhead{\emph{Procesadores de Lenguajes -- 2019-20}}
+\rhead{\emph{Compilador de MiniLeng}}
+\fancyfoot[C]{\thepage}
+
+\usepackage[titletoc, title]{appendix}
+
+\usepackage{subfiles} % Permite incluir ficheros .tex en el texto
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \includegraphics[width=1 cm]{logoUZ.jpg}
+    
+    \textsc{\large Universidad de Zaragoza}
+    \rule{\textwidth}{1.6pt}\vspace*{-\baselineskip}\vspace*{2pt} % Thick horizontal rule
+    \rule{\textwidth}{0.4pt} % Thin horizontal rule
+    
+    \vfill
+    
+    {\LARGE \scshape Procesadores de Lenguajes}
+                
+    \vspace{2cm}            
+
+    {\bfseries \Huge Compilador de MiniLeng}
+    
+    \vspace{.5cm} 
+    
+    {\bfseries \Large Informe sobre el desarrollo del compilador}
+    
+    \vspace{3cm}    
+    
+   
+
+    % {\large \scshape Autor}
+
+    %\vspace{0.2cm}
+    
+    {\large Fernando Peña Bes (NIA: 756012)}
+    
+    \vfill
+    
+    \large{Zaragoza, España}
+    
+    {Curso 2019\,--\,2020}
+
+    \vfill
+
+    \includegraphics[width=5.0cm]{EINA.png}
+   
+\end{titlepage}
+
+\pagenumbering{Roman}
+
+
+\vspace*{2cm}
+\section*{\hfil Resumen \hfil}
+En este informe de documenta el desarrollo de un compilador para el lenguaje MiniLeng durante la asignatura Procesadores de Lenguajes.
+
+MiniLeng es un lenguaje procedural, estructurado y fuertemente tipado. Su sintaxis está inspirada en Pascal.
+
+Para implementar el compilador, se ha utilizado JavaCC, un metacompilador de código abierto para el lenguaje Java. Se ha desarrollado, principalmente, sobre Eclipse 2020-06 con el plugin JavaCC Eclipse Plug-in 1.5.33
+
+\addcontentsline{toc}{section}{Resumen}
+
+
+\pagebreak
+
+\begin{spacing}{0.1}
+\tableofcontents
+\end{spacing}
+%\listoffigures
+%\listoftables
+
+\pagebreak
+
+\setcounter{page}{1}
+\pagenumbering{arabic}
+
+\pagestyle{fancy}
+
+\subfile{secciones/lexico}
+\subfile{secciones/sintactico}
+\subfile{secciones/tabla-simbolos}
+\subfile{secciones/semantico}
+\subfile{secciones/generacion-codigo}
+\subfile{secciones/mejoras-introducidas}
+\subfile{secciones/pruebas}
+
+\renewcommand\appendixname{Anexo}
+\begin{appendices}
+\subfile{secciones/gramatica}
+\subfile{secciones/uso}
+\end{appendices}
+
+\clearpage{}
+\newpage
+\nocite{*}
+\addcontentsline{toc}{section}{Referencias}
+\printbibliography
+
+
+
+\end{document}
