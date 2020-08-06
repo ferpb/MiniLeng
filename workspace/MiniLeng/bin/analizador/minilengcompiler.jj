@@ -32,7 +32,7 @@ import lib.lexico.ErrorLexico;
 import lib.sintactico.ErrorSintactico;
 import lib.sintactico.PanicMode;
 import lib.semantico.Simbolo.*;
-import lib.semantico.Tabla_simbolos;
+import lib.semantico.TablaSimbolos;
 import lib.semantico.SimboloYaDeclaradoException;
 import lib.semantico.ErrorSemantico;
 
@@ -50,13 +50,13 @@ public class minilengcompiler {
 	private static Boolean compilado_sin_errores = true;
 	private static Boolean entrado_en_panic = false;
 
-	private static Tabla_simbolos tabla_simbolos;
+	private static TablaSimbolos tabla_simbolos;
 	private static int nivel;
 	private static int dir;
 
 
 	private static void help() {
-		System.out.println("Uso: minilengcompiler [opciones] [fichero]\n");
+		System.out.println("Uso: minilengcompiler [opciones] fichero\n");
       	System.out.println("Opciones:");
       	System.out.println("  -v, --verbose  Mostrar un resumen de los símbolos utilizados en el programa");
       	System.out.println("  -p, --panic	 Compila con panic mode");
@@ -166,14 +166,14 @@ public class minilengcompiler {
       		}
 		}
 		else {
-  			System.out.println("MiniLeng: Leyendo de la entrada estándar ...");
+  			help();
 		}
 
 
 		// Ejecución del compilador
         try {
     		minilengcompiler parser = new minilengcompiler(stream);
-    		tabla_simbolos = new Tabla_simbolos();
+    		tabla_simbolos = new TablaSimbolos();
     		minilengcompiler.programa();
         }
         catch (Exception e) {
@@ -237,7 +237,7 @@ public class minilengcompiler {
 
 TOKEN_MGR_DECLS : {
   // Crear e inicializar tabla de ocurrencias
-  static TablaOcurrencias tabla = new TablaOcurrencias(minilengcompiler.show_tokens);
+  static TablaOcurrencias tabla_ocurrencias = new TablaOcurrencias(minilengcompiler.show_tokens);
 }
 SKIP : {  " "| "\r"| "\t"| "\n"
 | < "%"~["%"] > : COMENTARIO
@@ -265,76 +265,76 @@ TOKEN : /* PALABRAS RESERVADAS */
 {
   < tPROGRAMA : "programa" >
   {
-    tabla.incrementar(TablaOcurrencias.Reservadas.tPROGRAMA);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tPROGRAMA);
   }
 | < tVAR : "var" >
   {
-    tabla.incrementar(TablaOcurrencias.Reservadas.tVAR);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tVAR);
   }
 | < tPRINCIPIO : "principio" >
   {
-    tabla.incrementar(TablaOcurrencias.Reservadas.tPRINCIPIO);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tPRINCIPIO);
   }
 | < tFIN : "fin" >
   {
-    tabla.incrementar(TablaOcurrencias.Reservadas.tFIN);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tFIN);
   }
 | < tSI : "si" >
   {
-    tabla.incrementar(TablaOcurrencias.Reservadas.tSI);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tSI);
   }
 | < tENT : "ent" >
   {
-    tabla.incrementar(TablaOcurrencias.Reservadas.tENT);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tENT);
 
   }
 | < tSI_NO : "si_no" >
   {
-    tabla.incrementar(TablaOcurrencias.Reservadas.tSI_NO);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tSI_NO);
   }
 | < tFSI : "fsi" >
   {
-    tabla.incrementar(TablaOcurrencias.Reservadas.tFSI);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tFSI);
   }
 | < tMQ : "mq" >
   {
-    tabla.incrementar(TablaOcurrencias.Reservadas.tMQ);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tMQ);
   }
 | < tFMQ : "fmq" >
   {
-    tabla.incrementar(TablaOcurrencias.Reservadas.tFMQ);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tFMQ);
   }
 | < tESCRIBIR : "escribir" >
   {
-    tabla.incrementar(TablaOcurrencias.Reservadas.tESCRIBIR);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tESCRIBIR);
   }
 | < tLEER : "leer" >
   {
-    tabla.incrementar(TablaOcurrencias.Reservadas.tLEER);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tLEER);
   }
 
   // Funciones predefinidas
 | < tENTACAR : "entacar" >
   {
-    tabla.incrementar(TablaOcurrencias.Reservadas.tENTACAR);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tENTACAR);
   }
 | < tCARAENT : "caraent" >
   {
-    tabla.incrementar(TablaOcurrencias.Reservadas.tCARAENT);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tCARAENT);
   }
 
   // Funciones
 | < tACCION : "accion" >
   {
-    tabla.incrementar(TablaOcurrencias.Reservadas.tACCION);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tACCION);
   }
 | < tVAL : "val" >
   {
-    tabla.incrementar(TablaOcurrencias.Reservadas.tVAL);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tVAL);
   }
 |  < tREF : "ref" >
   {
-    tabla.incrementar(TablaOcurrencias.Reservadas.tREF);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tREF);
   }
 }
 
@@ -343,15 +343,15 @@ TOKEN : /* TIPOS DE DATOS */
 {
   < tENTERO : "entero" >
   {
-    tabla.incrementar(TablaOcurrencias.Tipos.tENTERO);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Tipos.tENTERO);
   }
 | < tBOOLEANO : "booleano" >
   {
-    tabla.incrementar(TablaOcurrencias.Tipos.tBOOLEANO);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Tipos.tBOOLEANO);
   }
 | < tCARACTER : "caracter" >
   {
-    tabla.incrementar(TablaOcurrencias.Tipos.tCARACTER);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Tipos.tCARACTER);
   }
 }
 
@@ -360,19 +360,19 @@ TOKEN : /* AGRUPACIONES */
 {
   < tLLAVE_IZQ : "{" >
   {
-    tabla.incrementar(TablaOcurrencias.Agrupaciones.tLLAVE_IZQ);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Agrupaciones.tLLAVE_IZQ);
   }
 | < tLLAVE_DER : "}" >
   {
-    tabla.incrementar(TablaOcurrencias.Agrupaciones.tLLAVE_DER);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Agrupaciones.tLLAVE_DER);
   }
 | < tPARENTESIS_IZQ : "(" >
   {
-    tabla.incrementar(TablaOcurrencias.Agrupaciones.tPARENTESIS_IZQ);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Agrupaciones.tPARENTESIS_IZQ);
   }
 | < tPARENTESIS_DER : ")" >
   {
-    tabla.incrementar(TablaOcurrencias.Agrupaciones.tPARENTESIS_DER);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Agrupaciones.tPARENTESIS_DER);
   }
 }
 
@@ -381,78 +381,78 @@ TOKEN : /* OPERADORES */
 {
   < tOPAS : ":=" >
   {
-    tabla.incrementar(TablaOcurrencias.Operadores.tOPAS);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Operadores.tOPAS);
   }
 
 | < tFIN_SENTENCIA : ";" > {
-    tabla.incrementar(TablaOcurrencias.Operadores.tFIN_SENTENCIA);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Operadores.tFIN_SENTENCIA);
   }
 | < tSEP_VARIABLE : "," > {
-    tabla.incrementar(TablaOcurrencias.Operadores.tSEP_VARIABLE);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Operadores.tSEP_VARIABLE);
   }
 
   // Aritméticos
 | < tMAS : "+" >
   {
-    tabla.incrementar(TablaOcurrencias.OpAritmeticos.tMAS);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpAritmeticos.tMAS);
   }
 | < tMENOS : "-" >
   {
-    tabla.incrementar(TablaOcurrencias.OpAritmeticos.tMENOS);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpAritmeticos.tMENOS);
   }
 | < tPRODUCTO : "*" >
   {
-    tabla.incrementar(TablaOcurrencias.OpAritmeticos.tPRODUCTO);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpAritmeticos.tPRODUCTO);
   }
 | < tDIVISION : "/" >
   {
-    tabla.incrementar(TablaOcurrencias.OpAritmeticos.tDIVISION);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpAritmeticos.tDIVISION);
   }
 | < tMOD : "mod" >
   {
-    tabla.incrementar(TablaOcurrencias.OpAritmeticos.tMOD);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpAritmeticos.tMOD);
   }
 | < tDIV : "div" >
   {
-    tabla.incrementar(TablaOcurrencias.OpAritmeticos.tDIV);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpAritmeticos.tDIV);
   }
 
   // Lógicos
 | < tAND : "and" >
   {
-    tabla.incrementar(TablaOcurrencias.OpLogicos.tAND);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpLogicos.tAND);
   }
 | < tOR : "or" >
   {
-    tabla.incrementar(TablaOcurrencias.OpLogicos.tOR);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpLogicos.tOR);
   }
 | < tNOT : "not" >
   {
-    tabla.incrementar(TablaOcurrencias.OpLogicos.tNOT);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpLogicos.tNOT);
   }
 | < tMAYOR : ">" >
   {
-    tabla.incrementar(TablaOcurrencias.OpLogicos.tMAYOR);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpLogicos.tMAYOR);
   }
 | < tMENOR : "<" >
   {
-    tabla.incrementar(TablaOcurrencias.OpLogicos.tMENOR);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpLogicos.tMENOR);
   }
 | < tIGUAL : "=" >
   {
-    tabla.incrementar(TablaOcurrencias.OpLogicos.tIGUAL);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpLogicos.tIGUAL);
   }
 | < tMAI : ">=" >
   {
-    tabla.incrementar(TablaOcurrencias.OpLogicos.tMAI);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpLogicos.tMAI);
   }
 | < tMEI : "<=" >
   {
-    tabla.incrementar(TablaOcurrencias.OpLogicos.tMEI);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpLogicos.tMEI);
   }
 | < tNI : "<>" >
   {
-    tabla.incrementar(TablaOcurrencias.OpLogicos.tNI);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpLogicos.tNI);
   }
 }
 
@@ -465,36 +465,36 @@ TOKEN : /* VALORES */
   // Booleanos
 | < tTRUE : "true" >
   {
-    tabla.incrementar(TablaOcurrencias.Valores.tTRUE, "True");
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Valores.tTRUE, "True");
   }
 | < tFALSE : "false" >
   {
-     tabla.incrementar(TablaOcurrencias.Valores.tFALSE, "False");
+     tabla_ocurrencias.incrementar(TablaOcurrencias.Valores.tFALSE, "False");
   }
 
   // Identificadores
 | < tIDENTIFICADOR : (< LETRA > | "_"(< LETRA > | < DIGITO >))(("_")?(< LETRA > | < DIGITO >))* >
   {
-    tabla.incrementar(TablaOcurrencias.Valores.tIDENTIFICADOR, matchedToken.image);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Valores.tIDENTIFICADOR, matchedToken.image);
   }
 
   // Enteros
   // | < tCONSTENTERA : ("+" | "-")?(["0"-"9"])+ >
 | < tCONSTENTERA : (["0"-"9"])+ >
   {
-    tabla.incrementar(TablaOcurrencias.Valores.tCONSTENTERA, matchedToken.image);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Valores.tCONSTENTERA, matchedToken.image);
   }
 
    // Caracteres
 | < tCONSTCHAR : "\""(~["\""])?"\"" >
   {
-    tabla.incrementar(TablaOcurrencias.Valores.tCONSTCHAR, matchedToken.image);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Valores.tCONSTCHAR, matchedToken.image);
   }
 
   // Cadena de caracteres
 | < tCONSTCAD : "\""(~["\""])*"\"" >
   {
-    tabla.incrementar(TablaOcurrencias.Valores.tCONSTCAD, matchedToken.image);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Valores.tCONSTCAD, matchedToken.image);
   }
 }
 
@@ -532,7 +532,7 @@ int programa() :
 
   {
     if (verbose_mode) {
-      token_source.tabla.imprimirTabla();
+      token_source.tabla_ocurrencias.imprimirTabla();
     }
     return 0;
   }

@@ -13,7 +13,7 @@ import lib.lexico.ErrorLexico;
 import lib.sintactico.ErrorSintactico;
 import lib.sintactico.PanicMode;
 import lib.semantico.Simbolo.*;
-import lib.semantico.Tabla_simbolos;
+import lib.semantico.TablaSimbolos;
 import lib.semantico.SimboloYaDeclaradoException;
 import lib.semantico.ErrorSemantico;
 
@@ -21,7 +21,7 @@ import lib.semantico.ErrorSemantico;
 public class minilengcompilerTokenManager implements minilengcompilerConstants
 {
   // Crear e inicializar tabla de ocurrencias
-  static TablaOcurrencias tabla = new TablaOcurrencias(minilengcompiler.show_tokens);
+  static TablaOcurrencias tabla_ocurrencias = new TablaOcurrencias(minilengcompiler.show_tokens);
 
   /** Debug output. */
   public static  java.io.PrintStream debugStream = System.out;
@@ -1037,212 +1037,212 @@ static void TokenLexicalActions(Token matchedToken)
    {
       case 11 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Reservadas.tPROGRAMA);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tPROGRAMA);
          break;
       case 12 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Reservadas.tVAR);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tVAR);
          break;
       case 13 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Reservadas.tPRINCIPIO);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tPRINCIPIO);
          break;
       case 14 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Reservadas.tFIN);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tFIN);
          break;
       case 15 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Reservadas.tSI);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tSI);
          break;
       case 16 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Reservadas.tENT);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tENT);
          break;
       case 17 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Reservadas.tSI_NO);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tSI_NO);
          break;
       case 18 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Reservadas.tFSI);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tFSI);
          break;
       case 19 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Reservadas.tMQ);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tMQ);
          break;
       case 20 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Reservadas.tFMQ);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tFMQ);
          break;
       case 21 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Reservadas.tESCRIBIR);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tESCRIBIR);
          break;
       case 22 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Reservadas.tLEER);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tLEER);
          break;
       case 23 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Reservadas.tENTACAR);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tENTACAR);
          break;
       case 24 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Reservadas.tCARAENT);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tCARAENT);
          break;
       case 25 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Reservadas.tACCION);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tACCION);
          break;
       case 26 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Reservadas.tVAL);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tVAL);
          break;
       case 27 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Reservadas.tREF);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tREF);
          break;
       case 28 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Tipos.tENTERO);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Tipos.tENTERO);
          break;
       case 29 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Tipos.tBOOLEANO);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Tipos.tBOOLEANO);
          break;
       case 30 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Tipos.tCARACTER);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Tipos.tCARACTER);
          break;
       case 31 :
         image.append(jjstrLiteralImages[31]);
         lengthOfMatch = jjstrLiteralImages[31].length();
-    tabla.incrementar(TablaOcurrencias.Agrupaciones.tLLAVE_IZQ);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Agrupaciones.tLLAVE_IZQ);
          break;
       case 32 :
         image.append(jjstrLiteralImages[32]);
         lengthOfMatch = jjstrLiteralImages[32].length();
-    tabla.incrementar(TablaOcurrencias.Agrupaciones.tLLAVE_DER);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Agrupaciones.tLLAVE_DER);
          break;
       case 33 :
         image.append(jjstrLiteralImages[33]);
         lengthOfMatch = jjstrLiteralImages[33].length();
-    tabla.incrementar(TablaOcurrencias.Agrupaciones.tPARENTESIS_IZQ);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Agrupaciones.tPARENTESIS_IZQ);
          break;
       case 34 :
         image.append(jjstrLiteralImages[34]);
         lengthOfMatch = jjstrLiteralImages[34].length();
-    tabla.incrementar(TablaOcurrencias.Agrupaciones.tPARENTESIS_DER);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Agrupaciones.tPARENTESIS_DER);
          break;
       case 35 :
         image.append(jjstrLiteralImages[35]);
         lengthOfMatch = jjstrLiteralImages[35].length();
-    tabla.incrementar(TablaOcurrencias.Operadores.tOPAS);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Operadores.tOPAS);
          break;
       case 36 :
         image.append(jjstrLiteralImages[36]);
         lengthOfMatch = jjstrLiteralImages[36].length();
-    tabla.incrementar(TablaOcurrencias.Operadores.tFIN_SENTENCIA);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Operadores.tFIN_SENTENCIA);
          break;
       case 37 :
         image.append(jjstrLiteralImages[37]);
         lengthOfMatch = jjstrLiteralImages[37].length();
-    tabla.incrementar(TablaOcurrencias.Operadores.tSEP_VARIABLE);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Operadores.tSEP_VARIABLE);
          break;
       case 38 :
         image.append(jjstrLiteralImages[38]);
         lengthOfMatch = jjstrLiteralImages[38].length();
-    tabla.incrementar(TablaOcurrencias.OpAritmeticos.tMAS);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpAritmeticos.tMAS);
          break;
       case 39 :
         image.append(jjstrLiteralImages[39]);
         lengthOfMatch = jjstrLiteralImages[39].length();
-    tabla.incrementar(TablaOcurrencias.OpAritmeticos.tMENOS);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpAritmeticos.tMENOS);
          break;
       case 40 :
         image.append(jjstrLiteralImages[40]);
         lengthOfMatch = jjstrLiteralImages[40].length();
-    tabla.incrementar(TablaOcurrencias.OpAritmeticos.tPRODUCTO);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpAritmeticos.tPRODUCTO);
          break;
       case 41 :
         image.append(jjstrLiteralImages[41]);
         lengthOfMatch = jjstrLiteralImages[41].length();
-    tabla.incrementar(TablaOcurrencias.OpAritmeticos.tDIVISION);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpAritmeticos.tDIVISION);
          break;
       case 42 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.OpAritmeticos.tMOD);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpAritmeticos.tMOD);
          break;
       case 43 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.OpAritmeticos.tDIV);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpAritmeticos.tDIV);
          break;
       case 44 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.OpLogicos.tAND);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpLogicos.tAND);
          break;
       case 45 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.OpLogicos.tOR);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpLogicos.tOR);
          break;
       case 46 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.OpLogicos.tNOT);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpLogicos.tNOT);
          break;
       case 47 :
         image.append(jjstrLiteralImages[47]);
         lengthOfMatch = jjstrLiteralImages[47].length();
-    tabla.incrementar(TablaOcurrencias.OpLogicos.tMAYOR);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpLogicos.tMAYOR);
          break;
       case 48 :
         image.append(jjstrLiteralImages[48]);
         lengthOfMatch = jjstrLiteralImages[48].length();
-    tabla.incrementar(TablaOcurrencias.OpLogicos.tMENOR);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpLogicos.tMENOR);
          break;
       case 49 :
         image.append(jjstrLiteralImages[49]);
         lengthOfMatch = jjstrLiteralImages[49].length();
-    tabla.incrementar(TablaOcurrencias.OpLogicos.tIGUAL);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpLogicos.tIGUAL);
          break;
       case 50 :
         image.append(jjstrLiteralImages[50]);
         lengthOfMatch = jjstrLiteralImages[50].length();
-    tabla.incrementar(TablaOcurrencias.OpLogicos.tMAI);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpLogicos.tMAI);
          break;
       case 51 :
         image.append(jjstrLiteralImages[51]);
         lengthOfMatch = jjstrLiteralImages[51].length();
-    tabla.incrementar(TablaOcurrencias.OpLogicos.tMEI);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpLogicos.tMEI);
          break;
       case 52 :
         image.append(jjstrLiteralImages[52]);
         lengthOfMatch = jjstrLiteralImages[52].length();
-    tabla.incrementar(TablaOcurrencias.OpLogicos.tNI);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.OpLogicos.tNI);
          break;
       case 55 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Valores.tTRUE, "True");
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Valores.tTRUE, "True");
          break;
       case 56 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-     tabla.incrementar(TablaOcurrencias.Valores.tFALSE, "False");
+     tabla_ocurrencias.incrementar(TablaOcurrencias.Valores.tFALSE, "False");
          break;
       case 57 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Valores.tIDENTIFICADOR, matchedToken.image);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Valores.tIDENTIFICADOR, matchedToken.image);
          break;
       case 58 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Valores.tCONSTENTERA, matchedToken.image);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Valores.tCONSTENTERA, matchedToken.image);
          break;
       case 59 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Valores.tCONSTCHAR, matchedToken.image);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Valores.tCONSTCHAR, matchedToken.image);
          break;
       case 60 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
-    tabla.incrementar(TablaOcurrencias.Valores.tCONSTCAD, matchedToken.image);
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Valores.tCONSTCAD, matchedToken.image);
          break;
       default :
          break;

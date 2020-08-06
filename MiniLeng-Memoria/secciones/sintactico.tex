@@ -5,7 +5,8 @@
 
 \subsection{Modificaciones sobre la gramática propuesta y decisiones de diseño}
 % Modificaciones sobre la gramática propuesta y decisiones de diseño adoptadas.
-En la gramática propuesta, algunas reglas estaban incompletas, a continuación se detalla como se han completado y las decisiones de diseño adoptadas.
+En la gramática propuesta, algunas reglas estaban incompletas.
+A continuación, se detalla como se han completado y cuáles han sido las decisiones de diseño adoptadas.
 
 \begin{description}
 \item[Parametros formales] Contiene la definición de los parámetros de una acción, esta estructura es opcional por lo que se ha utilizado el símbolo \car{?}:
@@ -18,6 +19,8 @@ lista_parametros	::=	parametros ( fin_sentencia parametros )*
 
 
 \item[Lista de sentencias]
+
+\begin{verbatim}
 
 lista_sentencias	::=	sentencia ( sentencia )*
 
@@ -36,9 +39,12 @@ lista_escribibles	::=	lista_expresiones
 
 seleccion	::=	<tSI> expresion <tENT> lista_sentencias ( <tSI_NO> lista_sentencias )* <tFSI>
 
+\end{verbatim}
 
 
 \item[Expresiones]
+
+\begin{verbatim}
 
 lista_expresiones	::=	expresion ( sep_variable expresion )*
 
@@ -48,6 +54,8 @@ expresion_simple	::=	( <tMAS> | <tMENOS> )? termino ( operador_aditivo termino )
 operador_aditivo	::=	( <tMAS> | <tMENOS> | <tOR> )
 termino	::=	factor ( operador_multiplicativo factor )*
 operador_multiplicativo	::=	( <tPRODUCTO> | <tDIVISION> | <tMOD> | <tAND> )
+
+\end{verbatim}
 
 \end{description}
 

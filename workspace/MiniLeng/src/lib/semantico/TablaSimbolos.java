@@ -20,7 +20,7 @@ import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class Tabla_simbolos {
+public class TablaSimbolos {
 	// TODO: Elegir tamaño de la tabla y ponerlo en decisiones de diseño
 	private final int M = 256;
 
@@ -39,7 +39,7 @@ public class Tabla_simbolos {
 
 	private LinkedList<Simbolo> tabla_hash[];
 
-	public Tabla_simbolos() {
+	public TablaSimbolos() {
 		// Crea la tabla hash
 		tabla_hash = new LinkedList[M];
 
@@ -56,7 +56,7 @@ public class Tabla_simbolos {
 		}
 
 		// Generar vector T
-		for (int i = 0; i < 256; i++) {
+		for (int i = 0; i < M; i++) {
 			T[i] = i;
 		}
 
@@ -124,6 +124,8 @@ public class Tabla_simbolos {
 		return simbolo;
 	}
 
+
+
 	/*
 	 * Si existe un símbolo en la tabla del mismo nivel y con el mismo, nombre,
 	 * lanza una excepción. De lo contrario, introduce el símbolo pasado como
@@ -179,7 +181,6 @@ public class Tabla_simbolos {
 	public Simbolo introducir_parametro(String nombre, Tipo_variable variable, Clase_parametro parametro, int nivel,
 			int dir) throws SimboloYaDeclaradoException {
 		Simbolo simbolo = new Simbolo();
-
 		simbolo.introducir_parametro(nombre, variable, parametro, nivel, dir);
 		simbolo.setVisible(true);
 
@@ -244,11 +245,12 @@ public class Tabla_simbolos {
 		eliminar_tipo_en_nivel(nivel, Tipo_simbolo.ACCION);
 		eliminar_tipo_en_nivel(nivel + 1, Tipo_simbolo.PARAMETRO);
 	}
-	
-	
-	
+
+
+
+
 	// LAS FUNCIONES PARA TRABAJAR CON PARÁMETROS OCULTOS NO SE USAN
-	
+
 	/*
 	 * Marca todos los parámetros de un nivel como ocultos para que no puedan ser
 	 * encontrados, pero se mantenga la definición completa de la acción donde están
@@ -281,7 +283,7 @@ public class Tabla_simbolos {
 				Simbolo s = iter.next();
 
 				if (s.nivel == nivel && s.tipo == Tipo_simbolo.ACCION) {
-					ArrayList<Simbolo> parametros = s.getLista_parametros();
+					ArrayList<Simbolo> parametros = s.getListaParametros();
 					Boolean borrar = false;
 					for (int j = 0; j < parametros.size(); j++) {
 						Simbolo parametro = parametros.get(i);

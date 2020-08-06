@@ -16,7 +16,7 @@ import lib.lexico.ErrorLexico;
 import lib.sintactico.ErrorSintactico;
 import lib.sintactico.PanicMode;
 import lib.semantico.Simbolo.*;
-import lib.semantico.Tabla_simbolos;
+import lib.semantico.TablaSimbolos;
 import lib.semantico.SimboloYaDeclaradoException;
 import lib.semantico.ErrorSemantico;
 
@@ -34,13 +34,13 @@ public class minilengcompiler implements minilengcompilerConstants {
         private static Boolean compilado_sin_errores = true;
         private static Boolean entrado_en_panic = false;
 
-        private static Tabla_simbolos tabla_simbolos;
+        private static TablaSimbolos tabla_simbolos;
         private static int nivel;
         private static int dir;
 
 
         private static void help() {
-                System.out.println("Uso: minilengcompiler [opciones] [fichero]\u005cn");
+                System.out.println("Uso: minilengcompiler [opciones] fichero\u005cn");
         System.out.println("Opciones:");
         System.out.println("  -v, --verbose  Mostrar un resumen de los s\u00edmbolos utilizados en el programa");
         System.out.println("  -p, --panic\u0009 Compila con panic mode");
@@ -150,14 +150,14 @@ public class minilengcompiler implements minilengcompilerConstants {
                 }
                 }
                 else {
-                        System.out.println("MiniLeng: Leyendo de la entrada est\u00e1ndar ...");
+                        help();
                 }
 
 
                 // Ejecución del compilador
         try {
                 minilengcompiler parser = new minilengcompiler(stream);
-                tabla_simbolos = new Tabla_simbolos();
+                tabla_simbolos = new TablaSimbolos();
                 minilengcompiler.programa();
         }
         catch (Exception e) {
@@ -240,7 +240,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     ErrorSintactico.deteccion(e, "La declaraci\u00f3n del programa es incorrecta");
     }
     if (verbose_mode) {
-      token_source.tabla.imprimirTabla();
+      token_source.tabla_ocurrencias.imprimirTabla();
     }
     {if (true) return 0;}
     throw new Error("Missing return statement in function");

@@ -29,19 +29,23 @@ public class Simbolo {
 		VAL, REF
 	};
 
-	// Atributos
+
+	/////////////////////////////
+	//  Atributos del símbolo  //
+	/////////////////////////////
+
 	String nombre;
 	int nivel; // Nivel en el que se ha declarado el símbolo (primer nivel = 0)
+	int dir; // Dirección del símbolo
+	Boolean visible; // Indica si el símbolo es visible o no
 
 	Tipo_simbolo tipo;
 	Tipo_variable variable;
 	Clase_parametro parametro;
 
-	Boolean visible; // Indica si el símbolo es visible o no
-
 	ArrayList<Simbolo> lista_parametros; // Lista de símbolos que representan los parámetros de una acción
 
-	int dir; // Dirección del símbolo
+
 
 	// Getters y setters
 
@@ -93,12 +97,16 @@ public class Simbolo {
 		this.visible = visible;
 	}
 
-	public ArrayList<Simbolo> getLista_parametros() {
+	public ArrayList<Simbolo> getListaParametros() {
 		return lista_parametros;
 	}
 
-	public void setLista_parametros(ArrayList<Simbolo> lista_parametros) {
+	public void setListaParametros(ArrayList<Simbolo> lista_parametros) {
 		this.lista_parametros = lista_parametros;
+	}
+
+	public void addParametro(Simbolo parametro) {
+		this.lista_parametros.add(parametro);
 	}
 
 	public int getDir() {
@@ -108,6 +116,7 @@ public class Simbolo {
 	public void setDir(int dir) {
 		this.dir = dir;
 	}
+
 
 	// Métodos para construir los tipos de símbolos
 

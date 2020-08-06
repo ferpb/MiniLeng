@@ -12,44 +12,51 @@ Errores en el uso del programa
 
 \begin{itemize}
 \item Si se utiliza una opción inválida o no se especifican correctamente, se muestra el siguiente error:
-\begin{codigo}
+\begin{codigo}{text}
 MiniLeng: Opción inválida <error>
 \end{codigo}
 
 \item Si el fichero a compilar no tiene extensión \tt{.ml}, se muestra el error:
-\begin{codigo}
+\begin{codigo}{text}
 MiniLeng: El fichero a compilar tiene que tener extensión .ml
           Fichero introducido: '...'
 \end{codigo}
 
 \item Si no se encuentra el fichero a compilar, se indica de la siguiente forma:
-\begin{codigo}
+\begin{codigo}{text}
 MiniLeng: No se ha encontrado el fichero '...'
 \end{codigo}
 
 \end{itemize}
 
 Al final de la compilación se muestra un recuento de los errores encontrados:
-\begin{codigo}
+
+\begin{codigo}{text}
 Errores léxicos: ...
 Errores sintácticos: ...
 Veces activado panic mode: ...
 \end{codigo}
 
 Y se muestra
-\begin{codigo}
+
+\begin{codigo}{text}
 No se ha podido compilar el programa
 \end{codigo}
+
 si ha habido errores durante la compilación, o:
-\begin{codigo}
+
+\begin{codigo}{text}
 Compilado sin errores
 \end{codigo}
+
 si la compilación ha sido exitosa.
 
 Si durante la compilación se ha activado el modo pánico, se muestra el siguiente mensaje:
-\begin{codigo}
+
+\begin{codigo}{text}
 Se ha activado el panic mode durante la compilación. Corrige los errores y vuelve a compilar.
 \end{codigo}
+
 para indicar al usuario que tiene que hace falta volver a compilar el programa.
 
 
@@ -57,7 +64,7 @@ para indicar al usuario que tiene que hace falta volver a compilar el programa.
 \subsection{Mejoras en el análisis léxico}
 La opción tokens muestra por pantalla los nombres de los tokens que se van reconociendo conforme se analiza el programa. Ejemplo:
 
-\begin{codigo}
+\begin{codigo}{text}
 tPROGRAMA
 tIDENTIFICADOR (Valor: mi_programa)
 tFIN_SENTENCIA
@@ -73,6 +80,7 @@ tFIN
     anidadas deben entre la zona de declaración de las variables y la palabra 'principio' de la
     función padre:
 
+  \begin{verbatim}
       accion accion1;
         % Declaración de variables de accion1
         accion accion2;
@@ -88,9 +96,11 @@ tFIN
       principio
         % Sentencias de accion1
       fin
+  \end{verbatim}
 
   - Se permiten bloques 'seleccion' y 'mientras que' anidados con cualquier nivel de profundidad:
 
+  \begin{verbatim}
       SI <condicion> ENT
         % Sentencias
         SI <condicion> ENT
@@ -110,6 +120,7 @@ tFIN
         FMQ
         % Sentencias
       FMQ
+  \end{verbatim}
 
   - Cualquier bloque ('principio/fin', 'seleccion' o 'mientras que') debe contener al menos una
     sentencia.

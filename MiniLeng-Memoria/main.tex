@@ -3,6 +3,7 @@
 \usepackage{url}
 
 \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage[spanish, es-tabla]{babel}
 \usepackage[indent]{parskip}
 
@@ -11,11 +12,23 @@
 
 \usepackage[gen]{eurosym}
 
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true, % make the links colored
+    linkcolor=blue, % color TOC links in blue
+    urlcolor=red, % color URLs in red
+    linktoc=all % 'all' will create links for everything in the TOC
+}
+
 \usepackage{xcolor}
 \usepackage{setspace}
 \usepackage{float}
+
+
 \usepackage{biblatex}
-\addbibresource{fuentes.bib}
+\bibliography{fuentes.bib}
+
+
 \setlength{\parindent}{0cm}
 \usepackage{amsmath, amssymb}
 
@@ -26,7 +39,7 @@
 % \SetupFloatingEnvironment{listing}{name=Source Code}
 \renewcommand{\listingscaption}{Código}
 \BeforeBeginEnvironment{minted}{\medskip}
-\AfterEndEnvironment{minted}{\medskip}
+% \AfterEndEnvironment{minted}{\medskip}
 
 \usepackage{csquotes}
 
@@ -45,7 +58,8 @@
 %% end{comm}
 
 %% \tt  es una abreviación para no tener que poner \texttt al usar fuente monoespaciada
-%%%%%%%%
+%%%%
+
 \newcommand{\com}[1]{\fbox{\mintinline{bash}{$ #1}}}
 
 \newcommand{\BashFancyFormatLine}{%
@@ -64,14 +78,14 @@
     \VerbatimEnvironment
     \begin{minted}[frame=single, formatcom=\BashFancyFormatLineDB, fontsize=\normalsize, xleftmargin=21pt, xrightmargin=21pt]{bash}}
  {\end{minted}}
- 
- 
- 
+
+
+
  \newenvironment{codigo}[1]
  {
     \captionsetup{type=listing}
     \VerbatimEnvironment
-    \begin{minted}[fontsize=\normalsize, xleftmargin=5pt, xrightmargin=5pt, frame=single, framesep=5pt]{#1}}
+    \begin{minted}[fontsize=\normalsize, xleftmargin=5pt, xrightmargin=5pt, frame=single]{#1}}
     %% Se puede utilizar framesep=10pt para añadir separación entre el marco
     %% Se puede utilizar frame=single para poner una caja alrededor del texto.
     %% frame=lines
@@ -98,43 +112,43 @@
 \begin{titlepage}
     \centering
     \includegraphics[width=1 cm]{logoUZ.jpg}
-    
+
     \textsc{\large Universidad de Zaragoza}
     \rule{\textwidth}{1.6pt}\vspace*{-\baselineskip}\vspace*{2pt} % Thick horizontal rule
     \rule{\textwidth}{0.4pt} % Thin horizontal rule
-    
+
     \vfill
-    
+
     {\LARGE \scshape Procesadores de Lenguajes}
-                
-    \vspace{2cm}            
+
+    \vspace{2cm}
 
     {\bfseries \Huge Compilador de MiniLeng}
-    
-    \vspace{.5cm} 
-    
+
+    \vspace{.5cm}
+
     {\bfseries \Large Informe sobre el desarrollo del compilador}
-    
-    \vspace{3cm}    
-    
-   
+
+    \vspace{3cm}
+
+
 
     % {\large \scshape Autor}
 
     %\vspace{0.2cm}
-    
+
     {\large Fernando Peña Bes (NIA: 756012)}
-    
+
     \vfill
-    
+
     \large{Zaragoza, España}
-    
+
     {Curso 2019\,--\,2020}
 
     \vfill
 
     \includegraphics[width=5.0cm]{EINA.png}
-   
+
 \end{titlepage}
 
 \pagenumbering{Roman}
@@ -146,16 +160,15 @@ En este informe de documenta el desarrollo de un compilador para el lenguaje Min
 
 MiniLeng es un lenguaje procedural, estructurado y fuertemente tipado. Su sintaxis está inspirada en Pascal.
 
-Para implementar el compilador, se ha utilizado JavaCC, un metacompilador de código abierto para el lenguaje Java. Se ha desarrollado, principalmente, sobre Eclipse 2020-06 con el plugin JavaCC Eclipse Plug-in 1.5.33
+Para implementar el compilador, se ha utilizado JavaCC, un metacompilador de código abierto para el lenguaje Java.
+Se ha desarrollado, principalmente, sobre Eclipse 2020-06 con el plugin JavaCC Eclipse Plug-in 1.5.33.
 
 \addcontentsline{toc}{section}{Resumen}
 
 
 \pagebreak
 
-\begin{spacing}{0.1}
 \tableofcontents
-\end{spacing}
 %\listoffigures
 %\listoftables
 
@@ -185,7 +198,5 @@ Para implementar el compilador, se ha utilizado JavaCC, un metacompilador de có
 \nocite{*}
 \addcontentsline{toc}{section}{Referencias}
 \printbibliography
-
-
 
 \end{document}
