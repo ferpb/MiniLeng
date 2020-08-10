@@ -13,10 +13,10 @@ package lib.sintactico;
 import analizador.ParseException;
 
 public class ErrorSintactico {
-	
+
 	private static int contadorErrores = 0;
-	
-	
+
+
 	public static void deteccion(ParseException e, String mensaje) {
 		contadorErrores++;
         /*
@@ -29,10 +29,10 @@ public class ErrorSintactico {
 				", columna " + (e.currentToken.next.beginColumn) + "): Token incorrecto: '" +
                 e.currentToken.next + "'. " + mensaje);
 	}
-	
+
 	public static int getContadorErrores() {
 		return contadorErrores;
 	}
-	
+
 
 }

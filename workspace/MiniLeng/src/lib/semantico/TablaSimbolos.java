@@ -15,6 +15,8 @@ import lib.semantico.Simbolo.*;
 import lib.semantico.SimboloNoEncontradoException;
 import lib.semantico.SimboloYaDeclaradoException;
 
+import lib.aviso.Aviso;
+
 import java.util.Random;
 import java.util.LinkedList;
 import java.util.ArrayList;
@@ -85,9 +87,15 @@ public class TablaSimbolos {
 	 */
 	private int h(String cadena) {
 		int h = 0;
-		for (int i = 1; i <= 256; i++) {
+
+		System.out.println("Se va a generar clave de: " + cadena);
+
+		for (int i = 0; i < cadena.length(); i++) {
 			h = T[h ^ cadena.charAt(i)];
 		}
+
+		System.out.println("Generada clave: " + h);
+
 		return h;
 	}
 
@@ -99,7 +107,7 @@ public class TablaSimbolos {
 	public Simbolo buscar_simbolo(String nombre) throws SimboloNoEncontradoException {
 		int clave = h(nombre);
 		for (Simbolo s : tabla_hash[clave]) {
-			if (s.nombre.equals(nombre) && s.isVisible()) {
+			if (s.nombre.equals(nombre)) {
 				return s;
 			}
 		}
@@ -117,12 +125,13 @@ public class TablaSimbolos {
 		Simbolo simbolo = new Simbolo();
 		simbolo.introducir_programa(nombre, 0, dir);
 		simbolo.setDir(dir);
-		simbolo.setVisible(true);
 
 		int clave = h(nombre);
 		tabla_hash[clave].addFirst(simbolo);
+
 		return simbolo;
 	}
+
 
 
 
@@ -132,19 +141,37 @@ public class TablaSimbolos {
 	 * parámetro.
 	 */
 	private Simbolo introducir_simbolo(Simbolo simbolo) throws SimboloYaDeclaradoException {
-		int clave = h(simbolo.nombre);
+
+		System.out.println("Introducir simbolo");
+
+		int clave = h(simbolo.getNombre());
+
+		System.out.println("Clave: " + clave);
 
 		for (Simbolo s : tabla_hash[clave]) {
-			// Si el símbolo ya existe se lanza una excepción
-			if (s.nombre.equals(simbolo.nombre) && s.nivel == simbolo.nivel && s.isVisible()) {
+			// Si el símbolo ya está declarado en ese mismo nivel, lanzar una excepción
+			if (s.getNombre().equals(simbolo.getNombre()) && s.getNivel() == simbolo.getNivel()) {
 				throw new SimboloYaDeclaradoException();
+			}
+			// Si hay un símbolo ya declarado con ese nombre en otro nivel, mostrar un aviso
+			else if (s.getNombre().equals(simbolo.getNombre())) {
+				Aviso.deteccion("El símbolo '" +
+						simbolo.nombre + "' definido en el nivel " + simbolo.nivel
+						+ " va a ocultar a otro definido con el mismo nombre en el nivel " + s.nivel + "");
 			}
 		}
 
 		// Si no, se añade
 		tabla_hash[clave].addFirst(simbolo);
+
+		System.out.println("Introducido simbolo");
+
+
 		return simbolo;
 	}
+
+
+
 
 	/*
 	 * Si existe un símbolo en la tabla del mismo nivel y con el mismo nombre, lanza
@@ -153,10 +180,11 @@ public class TablaSimbolos {
 	 */
 	public Simbolo introducir_variable(String nombre, Tipo_variable variable, int nivel, int dir)
 			throws SimboloYaDeclaradoException {
+
+		System.out.println("Introducir variable: " + nombre + " " + variable + " " + nivel + " " + dir);
 		Simbolo simbolo = new Simbolo();
 		simbolo.introducir_variable(nombre, variable, nivel, dir);
-		simbolo.setVisible(true);
-
+		System.out.println("Introducir variable");
 		return introducir_simbolo(simbolo);
 	}
 
@@ -167,8 +195,8 @@ public class TablaSimbolos {
 	 */
 	public Simbolo introducir_accion(String nombre, int nivel, int dir) throws SimboloYaDeclaradoException {
 		Simbolo simbolo = new Simbolo();
+		System.out.println("Introduccir accion " + nombre + " " + nivel);
 		simbolo.introducir_accion(nombre, nivel, dir);
-		simbolo.setVisible(true);
 
 		return introducir_simbolo(simbolo);
 	}
@@ -182,7 +210,6 @@ public class TablaSimbolos {
 			int dir) throws SimboloYaDeclaradoException {
 		Simbolo simbolo = new Simbolo();
 		simbolo.introducir_parametro(nombre, variable, parametro, nivel, dir);
-		simbolo.setVisible(true);
 
 		return introducir_simbolo(simbolo);
 	}
@@ -237,66 +264,43 @@ public class TablaSimbolos {
 	}
 
 	/*
+	 * Elimina de la tabla todos los parametros de un nivel.
+	 */
+	public void eliminar_parametros(int nivel) {
+		eliminar_tipo_en_nivel(nivel, Tipo_simbolo.PARAMETRO);
+	}
+
+	/*
 	 * Elimina de la tabla todas las acciones de un nivel. LOS PARAMETROS DE ESTAS
 	 * ACCIONES DEBEN SER ELIMINADOS TAMBIÉN PARA MANTENER LA COHERENCIA DE LA
 	 * TABLA.
 	 */
 	public void eliminar_acciones(int nivel) {
 		eliminar_tipo_en_nivel(nivel, Tipo_simbolo.ACCION);
-		eliminar_tipo_en_nivel(nivel + 1, Tipo_simbolo.PARAMETRO);
 	}
 
 
-
-
-	// LAS FUNCIONES PARA TRABAJAR CON PARÁMETROS OCULTOS NO SE USAN
-
 	/*
-	 * Marca todos los parámetros de un nivel como ocultos para que no puedan ser
-	 * encontrados, pero se mantenga la definición completa de la acción donde están
-	 * declarados para verificación de invocaciones a la acción.
+	 * Imprime por pantalla los contendios de la tabla de símbolos
 	 */
-	public void ocultar_parametros(int nivel) {
-		for (int i = 0; i < M; i++) {
-			Iterator<Simbolo> iter = tabla_hash[i].iterator();
-			while (iter.hasNext()) {
-				Simbolo s = iter.next();
-				if (s.nivel == nivel && s.tipo == Tipo_simbolo.PARAMETRO) {
-					s.setVisible(false);
-				}
-			}
-		}
-	}
+	public void imprimirTabla() {
+		System.out.println("+" + new String(new char[59]).replace("\0", "-") + "+");
+		System.out.println("| Tabla de símbolos                                         |");
+		System.out.println("+" + new String(new char[59]).replace("\0", "-") + "+");
 
-	/*
-	 * Elimina de la tabla todos los parámetros que hayan sido ocultados
-	 * previamente. LAS ACCIONES DONDE ESTABAN DECLARADOS DEBEN SER ELIMINADOS
-	 * TAMBIÉN PARA MANTENER LA COHERENCIA DE LA TABLA.
-	 */
-	public void eliminar_parametros_ocultos(int nivel) {
-		// Recorrer todas las acciones y eliminar las que tengan parametros ocultos,
-		// después borrar sus parámetros
-		for (int i = 0; i < M; i++) {
-			Iterator<Simbolo> iter = tabla_hash[i].iterator();
+		for (int i = 0; i < tabla_hash.length; i++) {
+			if (!tabla_hash[i].isEmpty()) {
+				Simbolo s = tabla_hash[i].getFirst();
+				System.out.format("| %5d  %-50s |\n", i, s);
 
-			while (iter.hasNext()) {
-				Simbolo s = iter.next();
-
-				if (s.nivel == nivel && s.tipo == Tipo_simbolo.ACCION) {
-					ArrayList<Simbolo> parametros = s.getListaParametros();
-					Boolean borrar = false;
-					for (int j = 0; j < parametros.size(); j++) {
-						Simbolo parametro = parametros.get(i);
-						if (!parametro.isVisible()) {
-							borrar = true;
-							eliminar_simbolo(parametro.nombre, parametro.nivel);
-						}
-					}
-					if (borrar) {
-						eliminar_simbolo(s.nombre, s.nivel);
+				if (tabla_hash[i].size() > 1) {
+					for (Simbolo resto : tabla_hash[i].subList(1, tabla_hash[i].size())) {
+						System.out.format("|        %-50s |\n", resto);
 					}
 				}
 			}
 		}
+
+		System.out.println("+" + new String(new char[59]).replace("\0", "-") + "+");
 	}
 }

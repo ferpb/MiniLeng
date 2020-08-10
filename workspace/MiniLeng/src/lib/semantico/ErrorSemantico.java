@@ -12,21 +12,31 @@ package lib.semantico;
 import analizador.Token;
 
 public class ErrorSemantico {
-	
+
 	private static int contadorErrores = 0;
-	
-	public static void deteccion(Exception e, Token token) {
+
+	public static void deteccion(SimboloYaDeclaradoException e, Token t) {
 		contadorErrores++;
-		
-		// Imprime el caracter erroneo, si puede no ser imprimible por la terminal,
-		// imprime su equivalente escapado.
-		System.err.println("MiniLeng: ERROR LÉXICO (línea " +
-			", columna ");
+		System.err.println("MiniLeng: ERROR LÉXICO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+				"Símbolo: '" + t.image + "'. No se puede redefinir el símbolo");
 	}
-	
+
+	public static void deteccion(SimboloNoEncontradoException e, Token t) {
+		contadorErrores++;
+		System.err.println("MiniLeng: ERROR LÉXICO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+				"Símbolo: '" + t.image + "' No se ha encontrado el símbolo");
+	}
+
+	public static void deteccion(String mensaje, Token t) {
+		contadorErrores++;
+		System.err.println("MiniLeng: ERROR LÉXICO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+				"Símbolo: '" + t.image + "'." + mensaje);
+	}
+
+
 	public static int getContadorErrores() {
 		return contadorErrores;
 	}
-	
+
 
 }

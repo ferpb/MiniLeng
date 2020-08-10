@@ -37,7 +37,6 @@ public class Simbolo {
 	String nombre;
 	int nivel; // Nivel en el que se ha declarado el símbolo (primer nivel = 0)
 	int dir; // Dirección del símbolo
-	Boolean visible; // Indica si el símbolo es visible o no
 
 	Tipo_simbolo tipo;
 	Tipo_variable variable;
@@ -89,14 +88,6 @@ public class Simbolo {
 		this.parametro = parametro;
 	}
 
-	public Boolean isVisible() {
-		return visible;
-	}
-
-	public void setVisible(Boolean visible) {
-		this.visible = visible;
-	}
-
 	public ArrayList<Simbolo> getListaParametros() {
 		return lista_parametros;
 	}
@@ -122,12 +113,14 @@ public class Simbolo {
 
 	// Configura los campos del símbolo correspondientes a un programa
 	public void introducir_programa(String nombre, int nivel, int dir) {
+		this.nombre = nombre;
 		this.tipo = Tipo_simbolo.PROGRAMA;
 		this.nivel = nivel;
 	}
 
 	// Configura los campos del símbolo correspondiente a una variable
 	public void introducir_variable(String nombre, Tipo_variable tipo_var, int nivel, int dir) {
+		this.nombre = nombre;
 		this.tipo = Tipo_simbolo.VARIABLE;
 		this.variable = tipo_var;
 		this.nivel = nivel;
@@ -136,7 +129,8 @@ public class Simbolo {
 
 	// Configura los campos del símbolo correspondiente a una acción
 	public void introducir_accion(String nombre, int nivel, int dir) {
-		this.tipo = Tipo_simbolo.VARIABLE;
+		this.nombre = nombre;
+		this.tipo = Tipo_simbolo.ACCION;
 		this.nivel = nivel;
 		this.dir = dir;
 	}
@@ -144,6 +138,7 @@ public class Simbolo {
 	// Configura los campos del símbolo correspondiente a un parámetro
 	public void introducir_parametro(String nombre, Tipo_variable tipo_var, Clase_parametro clase_param, int nivel,
 			int dir) {
+		this.nombre = nombre;
 		this.tipo = Tipo_simbolo.PARAMETRO;
 		this.variable = tipo_var;
 		this.parametro = clase_param;
@@ -171,5 +166,86 @@ public class Simbolo {
 
 	public Boolean ES_REFERENCIA() {
 		return (tipo == Tipo_simbolo.PARAMETRO) && (parametro == Clase_parametro.REF);
+	}
+
+
+	// Función toString()
+
+	private String getVariableString() {
+		String res = "";
+		switch (variable) {
+		case DESCONOCIDO:
+			res = "DESCONOCIDO";
+			break;
+		case ENTERO:
+			res = "ENTERO";
+			break;
+		case BOOLEANO:
+			res = "BOOLEANO";
+			break;
+		case CHAR:
+			res = "CHAR";
+			break;
+		case CADENA:
+			res = "CADENA";
+			break;
+		}
+		return res;
+	}
+
+	private String getParametroString() {
+		String res = "";
+		switch (parametro) {
+		case VAL:
+			res = "VAL";
+			break;
+		case REF:
+			res = "REF";
+			break;
+		}
+		return res;
+	}
+
+	@Override
+	public String toString() {
+		String res;
+
+		switch (tipo) {
+		case PROGRAMA:
+			res = String.format("%-25s %s [%d, %d]", "PROGRAMA:", nombre, nivel, dir);
+			break;
+
+		case VARIABLE:
+			res = String.format("%-25s %s [%d, %d]",
+					"VARIABLE " + getVariableString() + ":", nombre, nivel, dir);
+			break;
+
+		case ACCION:
+			String signatura = nombre + "(";
+			boolean primero = true;
+			for (Simbolo par : lista_parametros) {
+				if (primero) {
+					primero = false;
+				}
+				else {
+					signatura += ", ";
+				}
+				signatura += par.nombre;
+			}
+			signatura += ")";
+			res = String.format("%-25s %s [%d, %d]", "ACCION:", signatura, nivel, dir);
+			break;
+
+		case PARAMETRO:
+			res = String.format("%-25s %s [%d, %d]",
+					"PARAMETRO " + getParametroString() + " " + getVariableString() + ":", nombre, nivel, dir);
+			break;
+
+		default:
+			res = String.format("%-25s %s [%d, %d]", "SIMBOLO DESCONOCIDO", nombre, nivel, dir);
+			break;
+		}
+
+		return res;
 	}
 }
