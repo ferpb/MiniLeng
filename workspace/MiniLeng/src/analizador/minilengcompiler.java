@@ -15,10 +15,12 @@ import lib.lexico.TablaOcurrencias;
 import lib.lexico.ErrorLexico;
 import lib.sintactico.ErrorSintactico;
 import lib.sintactico.PanicMode;
+import lib.semantico.Simbolo;
 import lib.semantico.Simbolo.*;
 import lib.semantico.TablaSimbolos;
 import lib.semantico.SimboloYaDeclaradoException;
 import lib.semantico.ErrorSemantico;
+import lib.semantico.RegistroExpr;
 
 public class minilengcompiler implements minilengcompilerConstants {
 
@@ -161,9 +163,8 @@ public class minilengcompiler implements minilengcompilerConstants {
                 minilengcompiler.programa();
         }
         catch (Exception e) {
-                        // Detectado error sintáctico
-            // System.out.println("NOK.");
             // System.out.println(e.getMessage());
+                throw e;
         }
         catch (Error e) {
                         // Detectado error léxico
@@ -230,6 +231,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     try {
       jj_consume_token(tPROGRAMA);
       t = identificador();
+                System.out.println("Le\u00eddo programa " + t.image);
                 tabla_simbolos.introducir_programa(t.image, 0);
       fin_sentencia();
       declaracion_variables();
@@ -239,6 +241,16 @@ public class minilengcompiler implements minilengcompilerConstants {
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "La declaraci\u00f3n del programa es incorrecta");
     }
+      System.out.println("Antes de cerrar programa. nivel " + nivel);
+      tabla_simbolos.imprimirTabla();
+
+          // Cerrar el programa y limpiar la tabla de símbolos
+          tabla_simbolos.eliminar_variables(nivel);
+          tabla_simbolos.eliminar_acciones(nivel);
+          tabla_simbolos.eliminar_programa();
+
+          System.out.println("Despu\u00e9s de cerrar programa");
+          tabla_simbolos.imprimirTabla();
     if (verbose_mode) {
       token_source.tabla_ocurrencias.imprimirTabla();
     }
@@ -318,6 +330,7 @@ public class minilengcompiler implements minilengcompilerConstants {
  */
   static final public void declaracion_variables() throws ParseException {
     try {
+      System.out.println("Entrado en declaracion de variables");
       label_1:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -342,13 +355,15 @@ public class minilengcompiler implements minilengcompilerConstants {
  * declaracion ::= tipo_variables identificadores
  */
   static final public void declaracion() throws ParseException {
-  ArrayList<Token> ids;
   Tipo_variable tipo;
+  ArrayList<Token> listaIdentificadores;
     try {
       tipo = tipo_variables();
-      ids = identificadores();
-          for (Token id : ids) {
+      listaIdentificadores = identificadores();
+          System.out.println("Entrado en declaracion");
+          for (Token id : listaIdentificadores) {
             try {
+              System.out.println("Se va a introducir una variable: " + id.image);
               tabla_simbolos.introducir_variable(id.image, tipo, nivel, dir);
               dir++;
             }
@@ -385,8 +400,6 @@ public class minilengcompiler implements minilengcompilerConstants {
         throw new ParseException();
       }
     } catch (ParseException e) {
-    // Esto creo que es semantico
-    // ErrorSintactico.deteccion(e, "Tipo de dato desconocido, se esperaba: 'entero', 'caractero' o 'booleano'");
     ErrorSintactico.deteccion(e, "Se esperaba un tipo de dato");
     }
     throw new Error("Missing return statement in function");
@@ -400,6 +413,7 @@ public class minilengcompiler implements minilengcompilerConstants {
         Token t;
     try {
       t = identificador();
+          System.out.println("Leido el identificador: " + t.image);
           tokens.add(t);
       label_2:
       while (true) {
@@ -413,6 +427,7 @@ public class minilengcompiler implements minilengcompilerConstants {
         }
         sep_variable();
         t = identificador();
+            System.out.println("Leido el identificador: " + t.image);
             tokens.add(t);
       }
           {if (true) return tokens;}
@@ -454,6 +469,17 @@ public class minilengcompiler implements minilengcompilerConstants {
       declaracion_variables();
       declaracion_acciones();
       bloque_sentencias();
+          System.out.println("Antes de cerrar accion. nivel " + nivel);
+      tabla_simbolos.imprimirTabla();
+
+          // Cerrar el bloque y limpiar la tabla de símbolos
+          tabla_simbolos.eliminar_variables(nivel);
+          tabla_simbolos.eliminar_parametros(nivel);
+          tabla_simbolos.eliminar_acciones(nivel);
+          nivel--;
+
+          System.out.println("Despu\u00e9s de cerrar acci\u00f3n");
+          tabla_simbolos.imprimirTabla();
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una declaraci\u00f3n de acci\u00f3n");
     }
@@ -463,10 +489,27 @@ public class minilengcompiler implements minilengcompilerConstants {
  * cabecera_accion	::=	<tACCION> identificador parametros_formales
  */
   static final public void cabecera_accion() throws ParseException {
+  Token t;
+  Simbolo s = new Simbolo();
+  boolean ok = false;
+  ArrayList<Simbolo> parametros = new ArrayList<Simbolo>();
     try {
       jj_consume_token(tACCION);
-      identificador();
-      parametros_formales();
+      t = identificador();
+          // Procesar símbolo del identificador
+          try {
+            System.out.println("Se va a introducir una accion " + t.image);
+            s = tabla_simbolos.introducir_accion(t.image, nivel, dir);
+            ok = true;
+          }
+          catch (SimboloYaDeclaradoException e) {
+            ErrorSemantico.deteccion(e, t);
+          }
+          nivel++;
+      parametros = parametros_formales(t.image);
+          if (ok) {
+            s.setListaParametros(parametros);
+          }
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Falta la cabecera de la acci\u00f3n");
     }
@@ -475,7 +518,8 @@ public class minilengcompiler implements minilengcompilerConstants {
 /*
  * parametros_formales	::=	( parentesis_izq ( lista_parametros )? parentesis_der )?
  */
-  static final public void parametros_formales() throws ParseException {
+  static final public ArrayList<Simbolo> parametros_formales(String nombreAccion) throws ParseException {
+  ArrayList<Simbolo> parametros = new ArrayList<Simbolo>();
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tPARENTESIS_IZQ:
@@ -483,7 +527,7 @@ public class minilengcompiler implements minilengcompilerConstants {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case tVAL:
         case tREF:
-          lista_parametros();
+          parametros = lista_parametros();
           break;
         default:
           jj_la1[4] = jj_gen;
@@ -495,17 +539,21 @@ public class minilengcompiler implements minilengcompilerConstants {
         jj_la1[5] = jj_gen;
         ;
       }
+          {if (true) return parametros;}
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "");
     }
+    throw new Error("Missing return statement in function");
   }
 
 /*
  * lista_parametros	::=	parametros ( fin_sentencia parametros )*
  */
-  static final public void lista_parametros() throws ParseException {
+  static final public ArrayList<Simbolo> lista_parametros() throws ParseException {
+  ArrayList<Simbolo> parametros;
+  ArrayList<Simbolo> parametrosAux;
     try {
-      parametros();
+      parametros = parametros();
       label_4:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -517,36 +565,66 @@ public class minilengcompiler implements minilengcompilerConstants {
           break label_4;
         }
         fin_sentencia();
-        parametros();
+        parametrosAux = parametros();
+            parametros.addAll(parametrosAux);
       }
+          {if (true) return parametros;}
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaban uno o varios par\u00e1metros");
     }
+    throw new Error("Missing return statement in function");
   }
 
 /*
- * parametros	::=	clase_parametros declaracion
+ * parametros	::=	clase_parametros tipo_variables identificadores
  */
-  static final public void parametros() throws ParseException {
+  static final public ArrayList<Simbolo> parametros() throws ParseException {
+  Clase_parametro clase;
+  Tipo_variable tipo;
+  ArrayList<Token> listaIdentificadores = new ArrayList<Token>();
+
+  Simbolo s;
+  ArrayList<Simbolo> parametros = new ArrayList<Simbolo>();
     try {
-      clase_parametros();
-      declaracion();
+      clase = clase_parametros();
+      tipo = tipo_variables();
+      listaIdentificadores = identificadores();
+          for (Token id : listaIdentificadores) {
+            try {
+              System.out.println("Se va a introducir un parametro: " + id.image + " " + tipo + " " + clase);
+              s = tabla_simbolos.introducir_parametro(id.image, tipo, clase, nivel, dir);
+              parametros.add(s);
+            }
+            catch (SimboloYaDeclaradoException e) {
+              // Si el símbolo está ya declarado, se introduce como un parámetro anónimo
+              // en la lista de parametros para poder hacer la comprobación de signatura
+              // al llamar a la función, pero no se mete en la tabla de simbolos. 
+              ErrorSemantico.deteccion(e, id);
+              s = new Simbolo();
+              s.introducir_parametro("__anonymus", tipo, clase, nivel, dir);
+              parametros.add(s);
+            }
+          }
+          {if (true) return parametros;}
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un par\u00e1metro");
     }
+    throw new Error("Missing return statement in function");
   }
 
 /*
  * clase_parametros	::=	( <tVAL> | <tREF> )
  */
-  static final public void clase_parametros() throws ParseException {
+  static final public Clase_parametro clase_parametros() throws ParseException {
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tVAL:
         jj_consume_token(tVAL);
+                 {if (true) return Clase_parametro.VAL;}
         break;
       case tREF:
         jj_consume_token(tREF);
+               {if (true) return Clase_parametro.REF;}
         break;
       default:
         jj_la1[7] = jj_gen;
@@ -554,10 +632,9 @@ public class minilengcompiler implements minilengcompilerConstants {
         throw new ParseException();
       }
     } catch (ParseException e) {
-    // Esto creo que es semantico
-    // ErrorSintactico.deteccion(e, "Tipo de parámetro desconocido. Se esperaba 'val' o 'ref'");
     ErrorSintactico.deteccion(e, "Se esperaba un tipo de parametro");
     }
+    throw new Error("Missing return statement in function");
   }
 
 /*
@@ -627,7 +704,7 @@ public class minilengcompiler implements minilengcompilerConstants {
         throw new ParseException();
       }
     } catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba una sentencia.");
+    ErrorSintactico.deteccion(e, "Se esperaba una sentencia");
     }
   }
 
@@ -642,7 +719,7 @@ public class minilengcompiler implements minilengcompilerConstants {
       parentesis_der();
       fin_sentencia();
     } catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba sentencia leer");
+    ErrorSintactico.deteccion(e, "Se esperaba la sentencia leer");
     }
   }
 
@@ -653,7 +730,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     try {
       identificadores();
     } catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba lista de asignables");
+    ErrorSintactico.deteccion(e, "Se esperaba una lista de asignables");
     }
   }
 
@@ -668,7 +745,7 @@ public class minilengcompiler implements minilengcompilerConstants {
       parentesis_der();
       fin_sentencia();
     } catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba sentencia escribir");
+    ErrorSintactico.deteccion(e, "Se esperaba la sentencia escribir");
     }
   }
 
@@ -679,7 +756,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     try {
       lista_expresiones();
     } catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba lista de escribibles");
+    ErrorSintactico.deteccion(e, "Se esperaba una lista de escribibles");
     }
   }
 
@@ -784,7 +861,6 @@ public class minilengcompiler implements minilengcompilerConstants {
       case tENTACAR:
       case tCARAENT:
       case tPARENTESIS_IZQ:
-      case tMAS:
       case tMENOS:
       case tNOT:
       case tTRUE:
@@ -893,26 +969,6 @@ public class minilengcompiler implements minilengcompilerConstants {
  */
   static final public void expresion_simple() throws ParseException {
     try {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case tMAS:
-      case tMENOS:
-        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case tMAS:
-          jj_consume_token(tMAS);
-          break;
-        case tMENOS:
-          jj_consume_token(tMENOS);
-          break;
-        default:
-          jj_la1[17] = jj_gen;
-          jj_consume_token(-1);
-          throw new ParseException();
-        }
-        break;
-      default:
-        jj_la1[18] = jj_gen;
-        ;
-      }
       termino();
       label_8:
       while (true) {
@@ -923,7 +979,7 @@ public class minilengcompiler implements minilengcompilerConstants {
           ;
           break;
         default:
-          jj_la1[19] = jj_gen;
+          jj_la1[17] = jj_gen;
           break label_8;
         }
         operador_aditivo();
@@ -950,7 +1006,7 @@ public class minilengcompiler implements minilengcompilerConstants {
         jj_consume_token(tOR);
         break;
       default:
-        jj_la1[20] = jj_gen;
+        jj_la1[18] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -976,7 +1032,7 @@ public class minilengcompiler implements minilengcompilerConstants {
           ;
           break;
         default:
-          jj_la1[21] = jj_gen;
+          jj_la1[19] = jj_gen;
           break label_9;
         }
         operador_multiplicativo();
@@ -1009,7 +1065,7 @@ public class minilengcompiler implements minilengcompilerConstants {
         jj_consume_token(tAND);
         break;
       default:
-        jj_la1[22] = jj_gen;
+        jj_la1[20] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -1026,12 +1082,28 @@ public class minilengcompiler implements minilengcompilerConstants {
  *					| identificador | <tCONSTENTERA> | <tCONSTCHAR>
  *					| <tCONSTCAD> | <tTRUE> | <tFALSE> )
  */
-  static final public void factor() throws ParseException {
+  static final public RegistroExpr factor() throws ParseException {
+  Token t = null;
+  RegistroExpr expr = new RegistroExpr();
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tMENOS:
+        t = jj_consume_token(tMENOS);
+        expr = factor();
+      if (!expr.esDesc() && !expr.esEnt()) {
+        ErrorSemantico.deteccion("Tipo incompatible. Se esperaba entero", t);
+      }
+      // TODO
+      {if (true) return expr;}
+        break;
       case tNOT:
-        jj_consume_token(tNOT);
-        factor();
+        t = jj_consume_token(tNOT);
+        expr = factor();
+      if (!expr.esDesc() && !expr.esBool()) {
+        ErrorSemantico.deteccion("Tipo incompatible. Se esperaba booleano", t);
+      }
+      // TODO
+      {if (true) return expr;}
         break;
       case tPARENTESIS_IZQ:
         parentesis_izq();
@@ -1054,28 +1126,44 @@ public class minilengcompiler implements minilengcompilerConstants {
         identificador();
         break;
       case tCONSTENTERA:
-        jj_consume_token(tCONSTENTERA);
+        t = jj_consume_token(tCONSTENTERA);
+      expr = new RegistroExpr();
+      expr.setTipoEnt();
+      expr.setValorEnt(Integer.parseInt(t.image));
         break;
       case tCONSTCHAR:
-        jj_consume_token(tCONSTCHAR);
+        t = jj_consume_token(tCONSTCHAR);
+      expr = new RegistroExpr();
+      expr.setTipoChar();
+      expr.setValorChar(t.image.charAt(0));
         break;
       case tCONSTCAD:
         jj_consume_token(tCONSTCAD);
+      expr = new RegistroExpr();
+      expr.setTipoCad();
+      expr.setValorCad(t.image);
         break;
       case tTRUE:
         jj_consume_token(tTRUE);
+      expr = new RegistroExpr();
+      expr.setTipoBool();
+      expr.setValorBool(true);
         break;
       case tFALSE:
         jj_consume_token(tFALSE);
+      expr = new RegistroExpr();
+      expr.setTipoBool();
+      expr.setValorBool(false);
         break;
       default:
-        jj_la1[23] = jj_gen;
+        jj_la1[21] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un factor");
     }
+    throw new Error("Missing return statement in function");
   }
 
   static private boolean jj_initialized_once = false;
@@ -1088,7 +1176,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   static public Token jj_nt;
   static private int jj_ntk;
   static private int jj_gen;
-  static final private int[] jj_la1 = new int[24];
+  static final private int[] jj_la1 = new int[22];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -1096,10 +1184,10 @@ public class minilengcompiler implements minilengcompilerConstants {
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x70000000,0x70000000,0x0,0x2000000,0xc000000,0x0,0x0,0xc000000,0x688000,0x688000,0x0,0x0,0x20000,0x1800000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1800000,};
+      jj_la1_0 = new int[] {0x70000000,0x70000000,0x0,0x2000000,0xc000000,0x0,0x0,0xc000000,0x688000,0x688000,0x0,0x0,0x20000,0x1800000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1800000,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x0,0x0,0x20,0x0,0x0,0x2,0x10,0x0,0x2000000,0x2000000,0x2,0x1a,0x0,0x1f8040c2,0x20,0x1f8000,0x1f8000,0xc0,0xc0,0x20c0,0x20c0,0x1f00,0x1f00,0x1f804002,};
+      jj_la1_1 = new int[] {0x0,0x0,0x20,0x0,0x0,0x2,0x10,0x0,0x2000000,0x2000000,0x2,0x1a,0x0,0x1f804082,0x20,0x1f8000,0x1f8000,0x20c0,0x20c0,0x1f00,0x1f00,0x1f804082,};
    }
 
   /** Constructor with InputStream. */
@@ -1120,7 +1208,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1134,7 +1222,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -1151,7 +1239,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1161,7 +1249,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -1177,7 +1265,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1186,7 +1274,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 22; i++) jj_la1[i] = -1;
   }
 
   static private Token jj_consume_token(int kind) throws ParseException {
@@ -1242,7 +1330,7 @@ public class minilengcompiler implements minilengcompilerConstants {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 24; i++) {
+    for (int i = 0; i < 22; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {

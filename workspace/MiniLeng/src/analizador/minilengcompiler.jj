@@ -31,10 +31,12 @@ import lib.lexico.TablaOcurrencias;
 import lib.lexico.ErrorLexico;
 import lib.sintactico.ErrorSintactico;
 import lib.sintactico.PanicMode;
+import lib.semantico.Simbolo;
 import lib.semantico.Simbolo.*;
 import lib.semantico.TablaSimbolos;
 import lib.semantico.SimboloYaDeclaradoException;
 import lib.semantico.ErrorSemantico;
+import lib.semantico.RegistroExpr;
 
 public class minilengcompiler {
 
@@ -177,9 +179,8 @@ public class minilengcompiler {
     		minilengcompiler.programa();
         }
         catch (Exception e) {
-			// Detectado error sintáctico
-            // System.out.println("NOK.");
             // System.out.println(e.getMessage());
+           	throw e;
         }
         catch (Error e) {
 		  	// Detectado error léxico
@@ -517,9 +518,12 @@ int programa() :
 {
   try {
   	<tPROGRAMA> 
-  	t = identificador() {
+  	t = identificador()
+  	{
+  	  	System.out.println("Leído programa " + t.image);
   		tabla_simbolos.introducir_programa(t.image, 0);
   	}
+  	
   	fin_sentencia()
   	declaracion_variables()
   	declaracion_acciones()
@@ -529,6 +533,18 @@ int programa() :
     ErrorSintactico.deteccion(e, "La declaración del programa es incorrecta");
   }
 
+  {
+      System.out.println("Antes de cerrar programa. nivel " + nivel);
+      tabla_simbolos.imprimirTabla();
+      
+  	  // Cerrar el programa y limpiar la tabla de símbolos
+  	  tabla_simbolos.eliminar_variables(nivel);
+  	  tabla_simbolos.eliminar_acciones(nivel);
+  	  tabla_simbolos.eliminar_programa();
+
+  	  System.out.println("Después de cerrar programa");
+  	  tabla_simbolos.imprimirTabla();
+  }
 
   {
     if (verbose_mode) {
@@ -638,6 +654,9 @@ void declaracion_variables() :
 {}
 {
   try {
+    {
+      System.out.println("Entrado en declaracion de variables");
+    }
   	( declaracion() fin_sentencia() )*
   }
   catch (ParseException e) {
@@ -649,16 +668,20 @@ void declaracion_variables() :
  */
 void declaracion() :
 {
-  ArrayList<Token> ids;
   Tipo_variable tipo;
+  ArrayList<Token> listaIdentificadores;
 }
 {
   try {
   	tipo = tipo_variables()
-  	ids = identificadores()
+  	listaIdentificadores = identificadores()
   	{
-  	  for (Token id : ids) {
+  	  System.out.println("Entrado en declaracion");
+  	}
+  	{
+  	  for (Token id : listaIdentificadores) {
   	    try {
+  	      System.out.println("Se va a introducir una variable: " + id.image);
   	      tabla_simbolos.introducir_variable(id.image, tipo, nivel, dir);
   	      dir++;
   	    }
@@ -684,8 +707,6 @@ Tipo_variable tipo_variables() :
   | <tBOOLEANO> { return Tipo_variable.CADENA; }
   }
   catch (ParseException e) {
-    // Esto creo que es semantico
-    // ErrorSintactico.deteccion(e, "Tipo de dato desconocido, se esperaba: 'entero', 'caractero' o 'booleano'");
     ErrorSintactico.deteccion(e, "Se esperaba un tipo de dato");
   }
 }
@@ -699,12 +720,17 @@ ArrayList<Token> identificadores() :
 }
 {
   try {
-  	t = identificador() {
+  	t = identificador()
+  	{
+  	  System.out.println("Leido el identificador: " + t.image);
   	  tokens.add(t);
   	}
+  	
   	(
   	  sep_variable()
-  	  t = identificador() {
+  	  t = identificador()
+  	  {
+  	    System.out.println("Leido el identificador: " + t.image);
   	    tokens.add(t);
   	  }
   	)*
@@ -738,7 +764,25 @@ void declaracion_accion() :
 {
   try {
   	cabecera_accion() fin_sentencia()
-  	declaracion_variables()  declaracion_acciones()  bloque_sentencias()
+  	declaracion_variables()
+  	declaracion_acciones()
+  	bloque_sentencias()
+
+  	{
+
+  	  System.out.println("Antes de cerrar accion. nivel " + nivel);
+      tabla_simbolos.imprimirTabla();
+      
+  	  // Cerrar el bloque y limpiar la tabla de símbolos
+  	  tabla_simbolos.eliminar_variables(nivel);
+  	  tabla_simbolos.eliminar_parametros(nivel);
+  	  tabla_simbolos.eliminar_acciones(nivel);
+  	  nivel--;
+
+  	  System.out.println("Después de cerrar acción");
+  	  tabla_simbolos.imprimirTabla();
+  	  
+  	}
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una declaración de acción");
@@ -748,10 +792,36 @@ void declaracion_accion() :
  * cabecera_accion	::=	<tACCION> identificador parametros_formales
  */
 void cabecera_accion() :
-{}
+{
+  Token t;
+  Simbolo s = new Simbolo();
+  boolean ok = false;
+  ArrayList<Simbolo> parametros = new ArrayList<Simbolo>();
+}
 {
   try {
-  <tACCION> identificador() parametros_formales()
+  	<tACCION>
+  	
+  	t = identificador()
+  	{
+  	  // Procesar símbolo del identificador
+  	  try {
+  	    System.out.println("Se va a introducir una accion " + t.image);
+  	    s = tabla_simbolos.introducir_accion(t.image, nivel, dir);
+  	    ok = true;
+  	  }
+  	  catch (SimboloYaDeclaradoException e) {
+  	    ErrorSemantico.deteccion(e, t);
+  	  }
+  	  nivel++;
+  	}
+  	
+  	parametros = parametros_formales(t.image)
+  	{
+  	  if (ok) {
+  	    s.setListaParametros(parametros);
+  	  } 
+  	}
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Falta la cabecera de la acción");
@@ -761,11 +831,16 @@ void cabecera_accion() :
 /*
  * parametros_formales	::=	( parentesis_izq ( lista_parametros )? parentesis_der )?
  */
-void parametros_formales() :
-{}
+ArrayList<Simbolo> parametros_formales(String nombreAccion) :
+{
+  ArrayList<Simbolo> parametros = new ArrayList<Simbolo>();
+}
 {
   try {
-	( parentesis_izq() ( lista_parametros() )? parentesis_der() )?
+	( parentesis_izq() ( parametros = lista_parametros() )? parentesis_der() )?
+	{
+	  return parametros;
+	}
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "");
@@ -774,24 +849,65 @@ void parametros_formales() :
 /*
  * lista_parametros	::=	parametros ( fin_sentencia parametros )*
  */
-void lista_parametros() :
-{}
+ArrayList<Simbolo> lista_parametros() :
+{
+  ArrayList<Simbolo> parametros;
+  ArrayList<Simbolo> parametrosAux;
+}
 {
   try {
-  	parametros() ( fin_sentencia() parametros() )*
+  	parametros = parametros()
+  	(
+  	  fin_sentencia()
+  	  parametrosAux = parametros()
+  	  {
+  	    parametros.addAll(parametrosAux);
+  	  }
+  	)*
+  	{
+  	  return parametros;
+  	}
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaban uno o varios parámetros");
   }
 }
 /*
- * parametros	::=	clase_parametros declaracion
+ * parametros	::=	clase_parametros tipo_variables identificadores
  */
-void parametros() :
-{}
+ArrayList<Simbolo> parametros() :
+{
+  Clase_parametro clase;
+  Tipo_variable tipo;
+  ArrayList<Token> listaIdentificadores = new ArrayList<Token>();
+
+  Simbolo s;
+  ArrayList<Simbolo> parametros = new ArrayList<Simbolo>();
+}
 {
   try {
-  	clase_parametros()  declaracion()
+  	clase = clase_parametros()
+  	tipo = tipo_variables()
+  	listaIdentificadores = identificadores()
+  	{
+  	  for (Token id : listaIdentificadores) {
+  	    try {
+  	      System.out.println("Se va a introducir un parametro: " + id.image + " " + tipo + " " + clase);
+  	      s = tabla_simbolos.introducir_parametro(id.image, tipo, clase, nivel, dir);
+  	      parametros.add(s);
+  	    }
+  	    catch (SimboloYaDeclaradoException e) {
+  	      // Si el símbolo está ya declarado, se introduce como un parámetro anónimo
+  	      // en la lista de parametros para poder hacer la comprobación de signatura
+  	      // al llamar a la función, pero no se mete en la tabla de simbolos. 
+  	      ErrorSemantico.deteccion(e, id);
+  	      s = new Simbolo();
+  	      s.introducir_parametro("__anonymus", tipo, clase, nivel, dir);
+  	      parametros.add(s);
+  	    }
+  	  }
+  	  return parametros;
+  	}
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un parámetro");
@@ -800,15 +916,14 @@ void parametros() :
 /*
  * clase_parametros	::=	( <tVAL> | <tREF> )
  */
-void clase_parametros() :
+Clase_parametro clase_parametros() :
 {}
 {
   try {
-  	<tVAL> | <tREF>
+  	<tVAL> { return Clase_parametro.VAL; }
+    | <tREF> { return Clase_parametro.REF; }
   }
   catch (ParseException e) {
-    // Esto creo que es semantico
-    // ErrorSintactico.deteccion(e, "Tipo de parámetro desconocido. Se esperaba 'val' o 'ref'");
     ErrorSintactico.deteccion(e, "Se esperaba un tipo de parametro");
   }
 }
@@ -854,7 +969,7 @@ void sentencia() :
   | mientras_que()
   }
   catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba una sentencia.");
+    ErrorSintactico.deteccion(e, "Se esperaba una sentencia");
   }
 }
 
@@ -868,7 +983,7 @@ void leer() :
   	<tLEER> parentesis_izq() lista_asignables() parentesis_der() fin_sentencia()
   }
   catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba sentencia leer");
+    ErrorSintactico.deteccion(e, "Se esperaba la sentencia leer");
   }
 }
 /*
@@ -881,7 +996,7 @@ void lista_asignables() :
   	identificadores()
   }
   catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba lista de asignables");
+    ErrorSintactico.deteccion(e, "Se esperaba una lista de asignables");
   }
 }
 /*
@@ -894,7 +1009,7 @@ void escribir() :
   	<tESCRIBIR> parentesis_izq() lista_escribibles() parentesis_der()  fin_sentencia()
   }
   catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba sentencia escribir");
+    ErrorSintactico.deteccion(e, "Se esperaba la sentencia escribir");
   }
 }
 /*
@@ -907,7 +1022,7 @@ void lista_escribibles() :
   	lista_expresiones()
   }
   catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba lista de escribibles");
+    ErrorSintactico.deteccion(e, "Se esperaba una lista de escribibles");
   }
 }
 
@@ -1047,8 +1162,7 @@ void expresion_simple() :
 {}
 {
   try {
-    ( <tMAS> | <tMENOS> )? termino() ( operador_aditivo() termino() )*
-    // termino() ( operador_aditivo() termino() )*
+    termino() ( operador_aditivo() termino() )*
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una expresión simple");
@@ -1107,21 +1221,63 @@ void operador_multiplicativo() :
  *					| identificador | <tCONSTENTERA> | <tCONSTCHAR>
  *					| <tCONSTCAD> | <tTRUE> | <tFALSE> )
  */
-void factor() :
-{}
+RegistroExpr factor() :
+{
+  Token t = null;
+  RegistroExpr expr = new RegistroExpr();
+}
 {
   try {
-    // <tMENOS> factor()
-    <tNOT> factor()
+    t = <tMENOS> expr = factor()
+    {
+      if (!expr.esDesc() && !expr.esEnt()) {
+        ErrorSemantico.deteccion("Tipo incompatible. Se esperaba entero", t);
+      }
+      // TODO
+      return expr;
+    }
+  | t = <tNOT> expr = factor()
+    {
+      if (!expr.esDesc() && !expr.esBool()) {
+        ErrorSemantico.deteccion("Tipo incompatible. Se esperaba booleano", t);
+      }
+      // TODO
+      return expr;
+    }
   | parentesis_izq() expresion() parentesis_der()
   | <tENTACAR> parentesis_izq() expresion() parentesis_der()
   | <tCARAENT> parentesis_izq() expresion() parentesis_der()
   | identificador()
-  | <tCONSTENTERA>
-  | <tCONSTCHAR>
+  | t = <tCONSTENTERA>
+    {
+      expr = new RegistroExpr();
+      expr.setTipoEnt();
+      expr.setValorEnt(Integer.parseInt(t.image));
+    }
+  | t = <tCONSTCHAR>
+    {
+      expr = new RegistroExpr();
+      expr.setTipoChar();
+      expr.setValorChar(t.image.charAt(0));
+    }
   | <tCONSTCAD>
+    {
+      expr = new RegistroExpr();
+      expr.setTipoCad();
+      expr.setValorCad(t.image);
+    }
   | <tTRUE>
+    {
+      expr = new RegistroExpr();
+      expr.setTipoBool();
+      expr.setValorBool(true);
+    }
   | <tFALSE>
+    {
+      expr = new RegistroExpr();
+      expr.setTipoBool();
+      expr.setValorBool(false);
+    }
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un factor");

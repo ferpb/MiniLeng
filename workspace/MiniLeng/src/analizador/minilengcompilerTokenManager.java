@@ -12,10 +12,12 @@ import lib.lexico.TablaOcurrencias;
 import lib.lexico.ErrorLexico;
 import lib.sintactico.ErrorSintactico;
 import lib.sintactico.PanicMode;
+import lib.semantico.Simbolo;
 import lib.semantico.Simbolo.*;
 import lib.semantico.TablaSimbolos;
 import lib.semantico.SimboloYaDeclaradoException;
 import lib.semantico.ErrorSemantico;
+import lib.semantico.RegistroExpr;
 
 /** Token Manager. */
 public class minilengcompilerTokenManager implements minilengcompilerConstants

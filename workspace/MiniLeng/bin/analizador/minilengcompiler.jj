@@ -1221,21 +1221,63 @@ void operador_multiplicativo() :
  *					| identificador | <tCONSTENTERA> | <tCONSTCHAR>
  *					| <tCONSTCAD> | <tTRUE> | <tFALSE> )
  */
-void factor() :
-{}
+RegistroExpr factor() :
+{
+  Token t = null;
+  RegistroExpr expr = new RegistroExpr();
+}
 {
   try {
-    // <tMENOS> factor()
-    <tNOT> factor()
+    t = <tMENOS> expr = factor()
+    {
+      if (!expr.esDesc() && !expr.esEnt()) {
+        ErrorSemantico.deteccion("Tipo incompatible. Se esperaba entero", t);
+      }
+      // TODO
+      return expr;
+    }
+  | t = <tNOT> expr = factor()
+    {
+      if (!expr.esDesc() && !expr.esBool()) {
+        ErrorSemantico.deteccion("Tipo incompatible. Se esperaba booleano", t);
+      }
+      // TODO
+      return expr;
+    }
   | parentesis_izq() expresion() parentesis_der()
   | <tENTACAR> parentesis_izq() expresion() parentesis_der()
   | <tCARAENT> parentesis_izq() expresion() parentesis_der()
   | identificador()
-  | <tCONSTENTERA>
-  | <tCONSTCHAR>
+  | t = <tCONSTENTERA>
+    {
+      expr = new RegistroExpr();
+      expr.setTipoEnt();
+      expr.setValorEnt(Integer.parseInt(t.image));
+    }
+  | t = <tCONSTCHAR>
+    {
+      expr = new RegistroExpr();
+      expr.setTipoChar();
+      expr.setValorChar(t.image.charAt(0));
+    }
   | <tCONSTCAD>
+    {
+      expr = new RegistroExpr();
+      expr.setTipoCad();
+      expr.setValorCad(t.image);
+    }
   | <tTRUE>
+    {
+      expr = new RegistroExpr();
+      expr.setTipoBool();
+      expr.setValorBool(true);
+    }
   | <tFALSE>
+    {
+      expr = new RegistroExpr();
+      expr.setTipoBool();
+      expr.setValorBool(false);
+    }
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un factor");
