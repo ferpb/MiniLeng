@@ -9,6 +9,7 @@
  **********************************************************************************/
 
 package lib.semantico;
+
 import analizador.Token;
 
 public class ErrorSemantico {

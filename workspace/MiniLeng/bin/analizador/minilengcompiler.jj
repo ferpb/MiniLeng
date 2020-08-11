@@ -37,6 +37,8 @@ import lib.semantico.TablaSimbolos;
 import lib.semantico.SimboloYaDeclaradoException;
 import lib.semantico.ErrorSemantico;
 import lib.semantico.RegistroExpr;
+import lib.semantico.RegistroOp;
+
 
 public class minilengcompiler {
 
@@ -1124,14 +1126,48 @@ void lista_expresiones() :
   }
 }
 
+
+
+
+
+
+
+
+
+
+
+// HACER LAS EXPRESIONES
+
+
 /*
  * expresion	::=	expresion_simple ( operador_relacional expresion_simple )?
  */
-void expresion() :
-{}
+RegistroExpr expresion() :
+{
+  RegistroExpr reg1 = new RegistroExpr();
+  RegistroExpr reg2 = new RegistroExpr();
+  RegistroOp op;
+}
 {
   try {
-  	expresion_simple()  ( operador_relacional()  expresion_simple() )?
+  	reg1 = expresion_simple()
+  	(
+  	  op = operador_relacional()
+  	  reg2 = expresion_simple()
+  	  {
+  	    if (!reg1.esDesc() && !reg2.esDesc() && reg1.getTipo() != reg2.getTipo()) {
+  	      ErrorSemantico.deteccion("Los dos operandos deben ser del mismo tipo", op.getToken());
+  	    }
+  	    else {
+  	      // TODO realizar operación si no son desconocidos
+  	      // La comprobación de desconocidos se puede meter en una función dentro de RegistroExpr
+  	    }
+  	    reg1.setTipoBool();
+  	  }
+  	)?
+  	{
+  	  return reg1;
+  	}
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una expresión");
@@ -1140,29 +1176,47 @@ void expresion() :
 /*
  * operador_relacional	::=	( <tIGUAL> | <tMENOR> | <tMAYOR> | <tMAI> | <tMEI> | <tNI> )
  */
-void operador_relacional() :
-{}
+RegistroOp operador_relacional() :
+{
+  Token t;
+  RegistroOp op;
+}
 {
   try {
-  	<tIGUAL>
-  | <tMENOR>
-  | <tMAYOR>
-  | <tMAI>
-  | <tMEI>
-  | <tNI>
+  	t = <tIGUAL> { return new RegistroOp(t, RegistroOp.Operador.IGUAL); }
+  | t = <tMENOR> { return new RegistroOp(t, RegistroOp.Operador.MENOR); }
+  | t = <tMAYOR> { return new RegistroOp(t, RegistroOp.Operador.MAYOR); }
+  | t = <tMAI>   { return new RegistroOp(t, RegistroOp.Operador.MAI); }
+  | t = <tMEI>   { return new RegistroOp(t, RegistroOp.Operador.MEI); }
+  | t = <tNI>    { return new RegistroOp(t, RegistroOp.Operador.NI); }
  }
  catch (ParseException e) {
    ErrorSintactico.deteccion(e, "Se esperaba un operador relacional: '=', ' >', '<', '<=', '>=', o '!='");
  }
 }
 /*
- * expresion_simple	::=	( <tMAS> | <tMENOS> )? termino ( operador_aditivo termino )*
+ * expresion_simple	::=	termino ( operador_aditivo termino )*
  */
-void expresion_simple() :
-{}
+RegistroExpr expresion_simple() :
+{
+  RegistroExpr reg1 = new RegistroExpr();
+  RegistroExpr reg2 = new RegistroExpr();
+  RegistroOp op;
+}
 {
   try {
-    termino() ( operador_aditivo() termino() )*
+    reg1 = termino()
+    (
+      op = operador_aditivo()
+      reg2 = termino()
+      {
+        // Meter una función que calcule el resultado y haga las comprobaciones de tipos
+        // y devuelva un reg expresión adecuado
+
+        // También acordarse de añadir errores si aparecen overflows y underflows
+        
+      }
+    )*
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una expresión simple");
@@ -1171,13 +1225,16 @@ void expresion_simple() :
 /*
  * operador_aditivo	::=	( <tMAS> | <tMENOS> | <tOR> )
  */
-void operador_aditivo() :
-{}
+RegistroOp operador_aditivo() :
+{
+  Token t;
+  RegistroOp op;
+}
 {
   try {
-    <tMAS>
-  | <tMENOS>
-  | <tOR>
+    t = <tMAS>   { return new RegistroOp(t, RegistroOp.Operador.MAS); }
+  | t = <tMENOS> { return new RegistroOp(t, RegistroOp.Operador.MENOS); }
+  | t = <tOR>    { return new RegistroOp(t, RegistroOp.Operador.OR); }
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un operador aditivo: '+', '-', o 'OR'");
@@ -1186,11 +1243,25 @@ void operador_aditivo() :
 /*
  * termino	::=	factor ( operador_multiplicativo factor )*
  */
-void termino() :
-{}
+RegistroExpr termino() :
+{
+  RegistroExpr reg1 = new RegistroExpr();
+  RegistroExpr reg2 = new RegistroExpr();
+  RegistroOp op;
+}
 {
   try {
-    factor() ( operador_multiplicativo() factor() )*
+    reg1 = factor()
+    (
+      op = operador_multiplicativo()
+      reg2 = factor()
+      {
+        // Meter una función que calcule el resultado y haga las comprobaciones de tipos
+        // y devuelva un reg expresión adecuado
+
+        // Comprobaciones: División por 0, Módulo por 0, overflow / undeflow
+      }
+    )*
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un término");
@@ -1200,21 +1271,26 @@ void termino() :
  * operador_multiplicativo	::=	( <tPRODUCTO> | <tDIVISION> | <tMOD> | <tAND> )
  */
 void operador_multiplicativo() :
-{}
+{
+  Token t;
+  RegistroOp op;
+}
 {
   try {
-    <tPRODUCTO>
-  | <tDIVISION>
-  | <tMOD>
-  | <tDIV>
-  | <tAND>
+    t = <tPRODUCTO> { return new RegistroOp(t, RegistroOp.Operador.PRODUCTO); }
+  | t = <tDIVISION> { return new RegistroOp(t, RegistroOp.Operador.DIVISION); }
+  | t = <tMOD>      { return new RegistroOp(t, RegistroOp.Operador.MOD); }
+  | t = <tDIV>      { return new RegistroOp(t, RegistroOp.Operador.DIV); }
+  | t = <tAND>      { return new RegistroOp(t, RegistroOp.Operador.AND); }
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un operador multiplicativo: '*', '/', 'MOD', 'AND'");
   }
 }
 /*
- * factor	::=	( <tNOT> factor
+ * factor	::=	( <tMENOS> factor
+ *                  | <tMAS> factor
+ *                  |  <tNOT> factor
  *					| parentesis_izq expresion parentesis_der
  *					| <tENTACAR> parentesis_izq expresion parentesis_der
  *					| <tCARAENT> parentesis_izq expresion parentesis_der
@@ -1224,59 +1300,122 @@ void operador_multiplicativo() :
 RegistroExpr factor() :
 {
   Token t = null;
-  RegistroExpr expr = new RegistroExpr();
+  RegistroExpr reg = new RegistroExpr();
+  Simbolo s;
 }
 {
   try {
-    t = <tMENOS> expr = factor()
+    t = <tMENOS> reg = factor()
     {
-      if (!expr.esDesc() && !expr.esEnt()) {
+      if (!reg.esEnt() && !reg.esDesc()) {
         ErrorSemantico.deteccion("Tipo incompatible. Se esperaba entero", t);
       }
       // TODO
-      return expr;
+
     }
-  | t = <tNOT> expr = factor()
+ |  t = <tMAS> reg = factor()
     {
-      if (!expr.esDesc() && !expr.esBool()) {
+      if (!reg.esEnt() && !reg.esDesc()) {
+        ErrorSemantico.deteccion("Tipo incompatible. Se esperaba entero", t);
+      }
+      // TODO
+
+    }
+  | t = <tNOT> reg = factor()
+    {
+      if (!reg.esBool() && !reg.esDesc()) {
         ErrorSemantico.deteccion("Tipo incompatible. Se esperaba booleano", t);
       }
       // TODO
-      return expr;
+
     }
-  | parentesis_izq() expresion() parentesis_der()
-  | <tENTACAR> parentesis_izq() expresion() parentesis_der()
-  | <tCARAENT> parentesis_izq() expresion() parentesis_der()
-  | identificador()
+  | parentesis_izq() reg = expresion() parentesis_der()
+    {
+     // No se realiza ninguna comprobación
+    }
+  | t = <tENTACAR> parentesis_izq() reg = expresion() parentesis_der()
+ 	{
+ 	  if (!reg.esEnt() && !reg.esDesc()) {
+ 	    ErrorSemantico.deteccion("La expresión no se puede convertir en un carácter válido", t);
+ 	  }
+ 	  else if (reg.esEnt()) {
+ 	    Integer carNum = reg.getValorEnt();
+ 	    if (carNum < 0 || carNum > 256) {
+ 	      ErrorSemantico.deteccion("La expresión no produce un entero ASCII válido", t);
+ 	    }
+ 	    else {
+ 	      reg.setValorChar((char)carNum.intValue());
+ 	    }
+ 	  }
+ 	  reg.setTipoChar();
+	}
+  | t = <tCARAENT> parentesis_izq() expresion() parentesis_der()
+    {
+      if (!reg.esChar() && !reg.esDesc()) {
+        ErrorSemantico.deteccion("La expresión no se puede convertir en un entero válido", t);
+      }
+      else if (reg.esChar()) {
+        Character car = reg.getValorChar();
+        if (Character.isWhitespace(car)) {
+          reg.setValorEnt(0);
+        }
+        else {
+          // El caracter es ASCII, si no se habría producido un error léxico
+       	  reg.setValorEnt((int) t.image.charAt(0));
+       }
+      }
+      reg.setTipoEnt();
+    }
+  | t = identificador()
+    {
+      try {
+      	s = tabla_simbolos.buscar_simbolo(t.image);
+      	// TODO
+      	if (s.ES_VARIABLE) {
+      	  reg;
+      	}
+      	else if (s.ES_ACCION) {
+      	  reg;
+      	}
+      	else if (s.ES_PARAMETRO) {
+      	  reg;
+      	}
+      	// TODO
+      }
+      catch (SimboloNoEncontradoException e) {
+        ErrorSemantico.deteccion(e, t);
+        reg.setTipoDesc();
+      }
+    }
   | t = <tCONSTENTERA>
     {
-      expr = new RegistroExpr();
-      expr.setTipoEnt();
-      expr.setValorEnt(Integer.parseInt(t.image));
+      reg = new RegistroExpr();
+      reg.setTipoEnt();
+      reg.setValorEnt(Integer.parseInt(t.image));
     }
   | t = <tCONSTCHAR>
     {
-      expr = new RegistroExpr();
-      expr.setTipoChar();
-      expr.setValorChar(t.image.charAt(0));
+      reg = new RegistroExpr();
+      reg.setTipoChar();
+      reg.setValorChar(t.image.charAt(0));
     }
-  | <tCONSTCAD>
+  | t = <tCONSTCAD>
     {
-      expr = new RegistroExpr();
-      expr.setTipoCad();
-      expr.setValorCad(t.image);
+      reg = new RegistroExpr();
+      reg.setTipoCad();
+      reg.setValorCad(t.image);
     }
   | <tTRUE>
     {
-      expr = new RegistroExpr();
-      expr.setTipoBool();
-      expr.setValorBool(true);
+      reg = new RegistroExpr();
+      reg.setTipoBool();
+      reg.setValorBool(true);
     }
   | <tFALSE>
     {
-      expr = new RegistroExpr();
-      expr.setTipoBool();
-      expr.setValorBool(false);
+      reg = new RegistroExpr();
+      reg.setTipoBool();
+      reg.setValorBool(false);
     }
   }
   catch (ParseException e) {

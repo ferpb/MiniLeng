@@ -21,6 +21,8 @@ import lib.semantico.TablaSimbolos;
 import lib.semantico.SimboloYaDeclaradoException;
 import lib.semantico.ErrorSemantico;
 import lib.semantico.RegistroExpr;
+import lib.semantico.RegistroOp;
+
 
 public class minilengcompiler implements minilengcompilerConstants {
 
@@ -861,6 +863,7 @@ public class minilengcompiler implements minilengcompilerConstants {
       case tENTACAR:
       case tCARAENT:
       case tPARENTESIS_IZQ:
+      case tMAS:
       case tMENOS:
       case tNOT:
       case tTRUE:
@@ -905,12 +908,18 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+// HACER LAS EXPRESIONES
+
+
 /*
  * expresion	::=	expresion_simple ( operador_relacional expresion_simple )?
  */
-  static final public void expresion() throws ParseException {
+  static final public RegistroExpr expresion() throws ParseException {
+  RegistroExpr reg1 = new RegistroExpr();
+  RegistroExpr reg2 = new RegistroExpr();
+  RegistroOp op;
     try {
-      expresion_simple();
+      reg1 = expresion_simple();
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tMAYOR:
       case tMENOR:
@@ -918,41 +927,59 @@ public class minilengcompiler implements minilengcompilerConstants {
       case tMAI:
       case tMEI:
       case tNI:
-        operador_relacional();
-        expresion_simple();
+        op = operador_relacional();
+        reg2 = expresion_simple();
+            if (!reg1.esDesc() && !reg2.esDesc() && reg1.getTipo() != reg2.getTipo()) {
+              ErrorSemantico.deteccion("Los dos operandos deben ser del mismo tipo", op.getToken());
+            }
+            else {
+              // TODO realizar operación si no son desconocidos
+              // La comprobación de desconocidos se puede meter en una función dentro de RegistroExpr
+            }
+            reg1.setTipoBool();
         break;
       default:
         jj_la1[15] = jj_gen;
         ;
       }
+          {if (true) return reg1;}
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una expresi\u00f3n");
     }
+    throw new Error("Missing return statement in function");
   }
 
 /*
  * operador_relacional	::=	( <tIGUAL> | <tMENOR> | <tMAYOR> | <tMAI> | <tMEI> | <tNI> )
  */
-  static final public void operador_relacional() throws ParseException {
+  static final public RegistroOp operador_relacional() throws ParseException {
+  Token t;
+  RegistroOp op;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tIGUAL:
-        jj_consume_token(tIGUAL);
+        t = jj_consume_token(tIGUAL);
+                       {if (true) return new RegistroOp(t, RegistroOp.Operador.IGUAL);}
         break;
       case tMENOR:
-        jj_consume_token(tMENOR);
+        t = jj_consume_token(tMENOR);
+                   {if (true) return new RegistroOp(t, RegistroOp.Operador.MENOR);}
         break;
       case tMAYOR:
-        jj_consume_token(tMAYOR);
+        t = jj_consume_token(tMAYOR);
+                   {if (true) return new RegistroOp(t, RegistroOp.Operador.MAYOR);}
         break;
       case tMAI:
-        jj_consume_token(tMAI);
+        t = jj_consume_token(tMAI);
+                   {if (true) return new RegistroOp(t, RegistroOp.Operador.MAI);}
         break;
       case tMEI:
-        jj_consume_token(tMEI);
+        t = jj_consume_token(tMEI);
+                   {if (true) return new RegistroOp(t, RegistroOp.Operador.MEI);}
         break;
       case tNI:
-        jj_consume_token(tNI);
+        t = jj_consume_token(tNI);
+                   {if (true) return new RegistroOp(t, RegistroOp.Operador.NI);}
         break;
       default:
         jj_la1[16] = jj_gen;
@@ -962,14 +989,18 @@ public class minilengcompiler implements minilengcompilerConstants {
     } catch (ParseException e) {
    ErrorSintactico.deteccion(e, "Se esperaba un operador relacional: '=', ' >', '<', '<=', '>=', o '!='");
     }
+    throw new Error("Missing return statement in function");
   }
 
 /*
- * expresion_simple	::=	( <tMAS> | <tMENOS> )? termino ( operador_aditivo termino )*
+ * expresion_simple	::=	termino ( operador_aditivo termino )*
  */
-  static final public void expresion_simple() throws ParseException {
+  static final public RegistroExpr expresion_simple() throws ParseException {
+  RegistroExpr reg1 = new RegistroExpr();
+  RegistroExpr reg2 = new RegistroExpr();
+  RegistroOp op;
     try {
-      termino();
+      reg1 = termino();
       label_8:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -982,8 +1013,9 @@ public class minilengcompiler implements minilengcompilerConstants {
           jj_la1[17] = jj_gen;
           break label_8;
         }
-        operador_aditivo();
-        termino();
+        op = operador_aditivo();
+        reg2 = termino();
+
       }
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una expresi\u00f3n simple");
@@ -993,17 +1025,22 @@ public class minilengcompiler implements minilengcompilerConstants {
 /*
  * operador_aditivo	::=	( <tMAS> | <tMENOS> | <tOR> )
  */
-  static final public void operador_aditivo() throws ParseException {
+  static final public RegistroOp operador_aditivo() throws ParseException {
+  Token t;
+  RegistroOp op;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tMAS:
-        jj_consume_token(tMAS);
+        t = jj_consume_token(tMAS);
+                   {if (true) return new RegistroOp(t, RegistroOp.Operador.MAS);}
         break;
       case tMENOS:
-        jj_consume_token(tMENOS);
+        t = jj_consume_token(tMENOS);
+                   {if (true) return new RegistroOp(t, RegistroOp.Operador.MENOS);}
         break;
       case tOR:
-        jj_consume_token(tOR);
+        t = jj_consume_token(tOR);
+                   {if (true) return new RegistroOp(t, RegistroOp.Operador.OR);}
         break;
       default:
         jj_la1[18] = jj_gen;
@@ -1013,14 +1050,18 @@ public class minilengcompiler implements minilengcompilerConstants {
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un operador aditivo: '+', '-', o 'OR'");
     }
+    throw new Error("Missing return statement in function");
   }
 
 /*
  * termino	::=	factor ( operador_multiplicativo factor )*
  */
-  static final public void termino() throws ParseException {
+  static final public RegistroExpr termino() throws ParseException {
+  RegistroExpr reg1 = new RegistroExpr();
+  RegistroExpr reg2 = new RegistroExpr();
+  RegistroOp op;
     try {
-      factor();
+      reg1 = factor();
       label_9:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1035,8 +1076,9 @@ public class minilengcompiler implements minilengcompilerConstants {
           jj_la1[19] = jj_gen;
           break label_9;
         }
-        operador_multiplicativo();
-        factor();
+        op = operador_multiplicativo();
+        reg2 = factor();
+
       }
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un t\u00e9rmino");
@@ -1047,22 +1089,29 @@ public class minilengcompiler implements minilengcompilerConstants {
  * operador_multiplicativo	::=	( <tPRODUCTO> | <tDIVISION> | <tMOD> | <tAND> )
  */
   static final public void operador_multiplicativo() throws ParseException {
+  Token t;
+  RegistroOp op;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tPRODUCTO:
-        jj_consume_token(tPRODUCTO);
+        t = jj_consume_token(tPRODUCTO);
+                      {if (true) return new RegistroOp(t, RegistroOp.Operador.PRODUCTO);}
         break;
       case tDIVISION:
-        jj_consume_token(tDIVISION);
+        t = jj_consume_token(tDIVISION);
+                      {if (true) return new RegistroOp(t, RegistroOp.Operador.DIVISION);}
         break;
       case tMOD:
-        jj_consume_token(tMOD);
+        t = jj_consume_token(tMOD);
+                      {if (true) return new RegistroOp(t, RegistroOp.Operador.MOD);}
         break;
       case tDIV:
-        jj_consume_token(tDIV);
+        t = jj_consume_token(tDIV);
+                      {if (true) return new RegistroOp(t, RegistroOp.Operador.DIV);}
         break;
       case tAND:
-        jj_consume_token(tAND);
+        t = jj_consume_token(tAND);
+                      {if (true) return new RegistroOp(t, RegistroOp.Operador.AND);}
         break;
       default:
         jj_la1[20] = jj_gen;
@@ -1075,7 +1124,9 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * factor	::=	( <tNOT> factor
+ * factor	::=	( <tMENOS> factor
+ *                  | <tMAS> factor
+ *                  |  <tNOT> factor
  *					| parentesis_izq expresion parentesis_der
  *					| <tENTACAR> parentesis_izq expresion parentesis_der
  *					| <tCARAENT> parentesis_izq expresion parentesis_der
@@ -1084,76 +1135,132 @@ public class minilengcompiler implements minilengcompilerConstants {
  */
   static final public RegistroExpr factor() throws ParseException {
   Token t = null;
-  RegistroExpr expr = new RegistroExpr();
+  RegistroExpr reg = new RegistroExpr();
+  Simbolo s;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tMENOS:
         t = jj_consume_token(tMENOS);
-        expr = factor();
-      if (!expr.esDesc() && !expr.esEnt()) {
+        reg = factor();
+      if (!reg.esEnt() && !reg.esDesc()) {
         ErrorSemantico.deteccion("Tipo incompatible. Se esperaba entero", t);
       }
       // TODO
-      {if (true) return expr;}
+
+        break;
+      case tMAS:
+        t = jj_consume_token(tMAS);
+        reg = factor();
+      if (!reg.esEnt() && !reg.esDesc()) {
+        ErrorSemantico.deteccion("Tipo incompatible. Se esperaba entero", t);
+      }
+      // TODO
+
         break;
       case tNOT:
         t = jj_consume_token(tNOT);
-        expr = factor();
-      if (!expr.esDesc() && !expr.esBool()) {
+        reg = factor();
+      if (!reg.esBool() && !reg.esDesc()) {
         ErrorSemantico.deteccion("Tipo incompatible. Se esperaba booleano", t);
       }
       // TODO
-      {if (true) return expr;}
+
         break;
       case tPARENTESIS_IZQ:
         parentesis_izq();
-        expresion();
+        reg = expresion();
         parentesis_der();
+
         break;
       case tENTACAR:
-        jj_consume_token(tENTACAR);
+        t = jj_consume_token(tENTACAR);
         parentesis_izq();
-        expresion();
+        reg = expresion();
         parentesis_der();
+          if (!reg.esEnt() && !reg.esDesc()) {
+            ErrorSemantico.deteccion("La expresi\u00f3n no se puede convertir en un car\u00e1cter v\u00e1lido", t);
+          }
+          else if (reg.esEnt()) {
+            Integer carNum = reg.getValorEnt();
+            if (carNum < 0 || carNum > 256) {
+              ErrorSemantico.deteccion("La expresi\u00f3n no produce un entero ASCII v\u00e1lido", t);
+            }
+            else {
+              reg.setValorChar((char)carNum.intValue());
+            }
+          }
+          reg.setTipoChar();
         break;
       case tCARAENT:
-        jj_consume_token(tCARAENT);
+        t = jj_consume_token(tCARAENT);
         parentesis_izq();
         expresion();
         parentesis_der();
+      if (!reg.esChar() && !reg.esDesc()) {
+        ErrorSemantico.deteccion("La expresi\u00f3n no se puede convertir en un entero v\u00e1lido", t);
+      }
+      else if (reg.esChar()) {
+        Character car = reg.getValorChar();
+        if (Character.isWhitespace(car)) {
+          reg.setValorEnt(0);
+        }
+        else {
+          // El caracter es ASCII, si no se habría producido un error léxico
+          reg.setValorEnt((int) t.image.charAt(0));
+       }
+      }
+      reg.setTipoEnt();
         break;
       case tIDENTIFICADOR:
-        identificador();
+        t = identificador();
+      try {
+        s = tabla_simbolos.buscar_simbolo(t.image);
+        // TODO
+        if (s.ES_VARIABLE) {
+          reg;
+        }
+        else if (s.ES_ACCION) {
+          reg;
+        }
+        else if (s.ES_PARAMETRO) {
+          reg;
+        }
+        // TODO
+      }
+      catch (SimboloNoEncontradoException e) {
+        ErrorSemantico.deteccion(e, t);
+        reg.setTipoDesc();
+      }
         break;
       case tCONSTENTERA:
         t = jj_consume_token(tCONSTENTERA);
-      expr = new RegistroExpr();
-      expr.setTipoEnt();
-      expr.setValorEnt(Integer.parseInt(t.image));
+      reg = new RegistroExpr();
+      reg.setTipoEnt();
+      reg.setValorEnt(Integer.parseInt(t.image));
         break;
       case tCONSTCHAR:
         t = jj_consume_token(tCONSTCHAR);
-      expr = new RegistroExpr();
-      expr.setTipoChar();
-      expr.setValorChar(t.image.charAt(0));
+      reg = new RegistroExpr();
+      reg.setTipoChar();
+      reg.setValorChar(t.image.charAt(0));
         break;
       case tCONSTCAD:
-        jj_consume_token(tCONSTCAD);
-      expr = new RegistroExpr();
-      expr.setTipoCad();
-      expr.setValorCad(t.image);
+        t = jj_consume_token(tCONSTCAD);
+      reg = new RegistroExpr();
+      reg.setTipoCad();
+      reg.setValorCad(t.image);
         break;
       case tTRUE:
         jj_consume_token(tTRUE);
-      expr = new RegistroExpr();
-      expr.setTipoBool();
-      expr.setValorBool(true);
+      reg = new RegistroExpr();
+      reg.setTipoBool();
+      reg.setValorBool(true);
         break;
       case tFALSE:
         jj_consume_token(tFALSE);
-      expr = new RegistroExpr();
-      expr.setTipoBool();
-      expr.setValorBool(false);
+      reg = new RegistroExpr();
+      reg.setTipoBool();
+      reg.setValorBool(false);
         break;
       default:
         jj_la1[21] = jj_gen;
@@ -1163,7 +1270,6 @@ public class minilengcompiler implements minilengcompilerConstants {
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un factor");
     }
-    throw new Error("Missing return statement in function");
   }
 
   static private boolean jj_initialized_once = false;
@@ -1187,7 +1293,7 @@ public class minilengcompiler implements minilengcompilerConstants {
       jj_la1_0 = new int[] {0x70000000,0x70000000,0x0,0x2000000,0xc000000,0x0,0x0,0xc000000,0x688000,0x688000,0x0,0x0,0x20000,0x1800000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1800000,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x0,0x0,0x20,0x0,0x0,0x2,0x10,0x0,0x2000000,0x2000000,0x2,0x1a,0x0,0x1f804082,0x20,0x1f8000,0x1f8000,0x20c0,0x20c0,0x1f00,0x1f00,0x1f804082,};
+      jj_la1_1 = new int[] {0x0,0x0,0x20,0x0,0x0,0x2,0x10,0x0,0x2000000,0x2000000,0x2,0x1a,0x0,0x1f8040c2,0x20,0x1f8000,0x1f8000,0x20c0,0x20c0,0x1f00,0x1f00,0x1f8040c2,};
    }
 
   /** Constructor with InputStream. */

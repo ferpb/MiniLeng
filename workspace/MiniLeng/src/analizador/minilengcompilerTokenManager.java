@@ -18,6 +18,7 @@ import lib.semantico.TablaSimbolos;
 import lib.semantico.SimboloYaDeclaradoException;
 import lib.semantico.ErrorSemantico;
 import lib.semantico.RegistroExpr;
+import lib.semantico.RegistroOp;
 
 /** Token Manager. */
 public class minilengcompilerTokenManager implements minilengcompilerConstants

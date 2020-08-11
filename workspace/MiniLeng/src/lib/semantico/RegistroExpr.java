@@ -11,6 +11,7 @@
 package lib.semantico;
 
 import lib.semantico.Simbolo.*;
+import lib.semantico.RegistroOp.*;
 
 public class RegistroExpr {
 
