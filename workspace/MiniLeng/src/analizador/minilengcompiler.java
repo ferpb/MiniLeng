@@ -19,6 +19,7 @@ import lib.semantico.Simbolo;
 import lib.semantico.Simbolo.*;
 import lib.semantico.TablaSimbolos;
 import lib.semantico.SimboloYaDeclaradoException;
+import lib.semantico.SimboloNoEncontradoException;
 import lib.semantico.ErrorSemantico;
 import lib.semantico.RegistroExpr;
 import lib.semantico.RegistroOp;
@@ -929,14 +930,7 @@ public class minilengcompiler implements minilengcompilerConstants {
       case tNI:
         op = operador_relacional();
         reg2 = expresion_simple();
-            if (!reg1.esDesc() && !reg2.esDesc() && reg1.getTipo() != reg2.getTipo()) {
-              ErrorSemantico.deteccion("Los dos operandos deben ser del mismo tipo", op.getToken());
-            }
-            else {
-              // TODO realizar operación si no son desconocidos
-              // La comprobación de desconocidos se puede meter en una función dentro de RegistroExpr
-            }
-            reg1.setTipoBool();
+                reg1 = RegistroExpr.operar(op, reg1, reg2);
         break;
       default:
         jj_la1[15] = jj_gen;
@@ -1015,11 +1009,13 @@ public class minilengcompiler implements minilengcompilerConstants {
         }
         op = operador_aditivo();
         reg2 = termino();
-
+        reg1 = RegistroExpr.operar(op, reg1, reg2);
       }
+      {if (true) return reg1;}
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una expresi\u00f3n simple");
     }
+    throw new Error("Missing return statement in function");
   }
 
 /*
@@ -1078,17 +1074,19 @@ public class minilengcompiler implements minilengcompilerConstants {
         }
         op = operador_multiplicativo();
         reg2 = factor();
-
+        reg1 = RegistroExpr.operar(op, reg1, reg2);
       }
+      {if (true) return reg1;}
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un t\u00e9rmino");
     }
+    throw new Error("Missing return statement in function");
   }
 
 /*
  * operador_multiplicativo	::=	( <tPRODUCTO> | <tDIVISION> | <tMOD> | <tAND> )
  */
-  static final public void operador_multiplicativo() throws ParseException {
+  static final public RegistroOp operador_multiplicativo() throws ParseException {
   Token t;
   RegistroOp op;
     try {
@@ -1121,6 +1119,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un operador multiplicativo: '*', '/', 'MOD', 'AND'");
     }
+    throw new Error("Missing return statement in function");
   }
 
 /*
@@ -1144,27 +1143,30 @@ public class minilengcompiler implements minilengcompilerConstants {
         reg = factor();
       if (!reg.esEnt() && !reg.esDesc()) {
         ErrorSemantico.deteccion("Tipo incompatible. Se esperaba entero", t);
+        reg.setTipoEnt();
       }
-      // TODO
-
+      else if (reg.esEnt()) {
+        reg.setValorEnt(-reg.getValorEnt());
+      }
         break;
       case tMAS:
         t = jj_consume_token(tMAS);
         reg = factor();
       if (!reg.esEnt() && !reg.esDesc()) {
         ErrorSemantico.deteccion("Tipo incompatible. Se esperaba entero", t);
+        reg.setTipoEnt();
       }
-      // TODO
-
         break;
       case tNOT:
         t = jj_consume_token(tNOT);
         reg = factor();
       if (!reg.esBool() && !reg.esDesc()) {
         ErrorSemantico.deteccion("Tipo incompatible. Se esperaba booleano", t);
+        reg.setTipoBool();
       }
-      // TODO
-
+      else if (reg.esBool()) {
+        reg.setValorBool(!reg.getValorBool());
+      }
         break;
       case tPARENTESIS_IZQ:
         parentesis_izq();
@@ -1194,7 +1196,7 @@ public class minilengcompiler implements minilengcompilerConstants {
       case tCARAENT:
         t = jj_consume_token(tCARAENT);
         parentesis_izq();
-        expresion();
+        reg = expresion();
         parentesis_der();
       if (!reg.esChar() && !reg.esDesc()) {
         ErrorSemantico.deteccion("La expresi\u00f3n no se puede convertir en un entero v\u00e1lido", t);
@@ -1215,17 +1217,23 @@ public class minilengcompiler implements minilengcompilerConstants {
         t = identificador();
       try {
         s = tabla_simbolos.buscar_simbolo(t.image);
-        // TODO
-        if (s.ES_VARIABLE) {
-          reg;
+        if (s.ES_VARIABLE()) {
+          reg.setTipo(s.getVariable());
         }
-        else if (s.ES_ACCION) {
-          reg;
+        else if (s.ES_PARAMETRO()) {
+          reg.setTipo(s.getVariable());
         }
-        else if (s.ES_PARAMETRO) {
-          reg;
+        else if (s.ES_ACCION()) {
+          ErrorSemantico.deteccion("No se puede utilizar una acci\u00f3n dentro de una expresi\u00f3n", t);
+          reg.setTipoDesc();
         }
-        // TODO
+        else if (s.ES_PROGRAMA()) {
+          ErrorSemantico.deteccion("No se puede utilizar un programa dentro de una expresi\u00f3n", t);
+          reg.setTipoDesc();
+        }
+        else {
+          reg.setTipoDesc();
+        }
       }
       catch (SimboloNoEncontradoException e) {
         ErrorSemantico.deteccion(e, t);
@@ -1269,7 +1277,10 @@ public class minilengcompiler implements minilengcompilerConstants {
       }
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un factor");
+    } finally {
+    {if (true) return reg;}
     }
+    throw new Error("Missing return statement in function");
   }
 
   static private boolean jj_initialized_once = false;

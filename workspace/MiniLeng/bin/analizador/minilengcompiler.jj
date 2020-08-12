@@ -35,6 +35,7 @@ import lib.semantico.Simbolo;
 import lib.semantico.Simbolo.*;
 import lib.semantico.TablaSimbolos;
 import lib.semantico.SimboloYaDeclaradoException;
+import lib.semantico.SimboloNoEncontradoException;
 import lib.semantico.ErrorSemantico;
 import lib.semantico.RegistroExpr;
 import lib.semantico.RegistroOp;
@@ -387,10 +388,12 @@ TOKEN : /* OPERADORES */
     tabla_ocurrencias.incrementar(TablaOcurrencias.Operadores.tOPAS);
   }
 
-| < tFIN_SENTENCIA : ";" > {
+| < tFIN_SENTENCIA : ";" >
+  {
     tabla_ocurrencias.incrementar(TablaOcurrencias.Operadores.tFIN_SENTENCIA);
   }
-| < tSEP_VARIABLE : "," > {
+| < tSEP_VARIABLE : "," >
+  {
     tabla_ocurrencias.incrementar(TablaOcurrencias.Operadores.tSEP_VARIABLE);
   }
 
@@ -1155,14 +1158,7 @@ RegistroExpr expresion() :
   	  op = operador_relacional()
   	  reg2 = expresion_simple()
   	  {
-  	    if (!reg1.esDesc() && !reg2.esDesc() && reg1.getTipo() != reg2.getTipo()) {
-  	      ErrorSemantico.deteccion("Los dos operandos deben ser del mismo tipo", op.getToken());
-  	    }
-  	    else {
-  	      // TODO realizar operación si no son desconocidos
-  	      // La comprobación de desconocidos se puede meter en una función dentro de RegistroExpr
-  	    }
-  	    reg1.setTipoBool();
+  	   	reg1 = RegistroExpr.operar(op, reg1, reg2);
   	  }
   	)?
   	{
@@ -1210,13 +1206,12 @@ RegistroExpr expresion_simple() :
       op = operador_aditivo()
       reg2 = termino()
       {
-        // Meter una función que calcule el resultado y haga las comprobaciones de tipos
-        // y devuelva un reg expresión adecuado
-
-        // También acordarse de añadir errores si aparecen overflows y underflows
-        
+        reg1 = RegistroExpr.operar(op, reg1, reg2); 
       }
     )*
+    {
+      return reg1;
+    }
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una expresión simple");
@@ -1256,12 +1251,12 @@ RegistroExpr termino() :
       op = operador_multiplicativo()
       reg2 = factor()
       {
-        // Meter una función que calcule el resultado y haga las comprobaciones de tipos
-        // y devuelva un reg expresión adecuado
-
-        // Comprobaciones: División por 0, Módulo por 0, overflow / undeflow
+        reg1 = RegistroExpr.operar(op, reg1, reg2);
       }
     )*
+    { 
+      return reg1;
+  	}
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un término");
@@ -1270,7 +1265,7 @@ RegistroExpr termino() :
 /*
  * operador_multiplicativo	::=	( <tPRODUCTO> | <tDIVISION> | <tMOD> | <tAND> )
  */
-void operador_multiplicativo() :
+RegistroOp operador_multiplicativo() :
 {
   Token t;
   RegistroOp op;
@@ -1309,24 +1304,28 @@ RegistroExpr factor() :
     {
       if (!reg.esEnt() && !reg.esDesc()) {
         ErrorSemantico.deteccion("Tipo incompatible. Se esperaba entero", t);
+        reg.setTipoEnt();
       }
-      // TODO
-
+      else if (reg.esEnt()) { 
+        reg.setValorEnt(-reg.getValorEnt());
+      }
     }
  |  t = <tMAS> reg = factor()
     {
       if (!reg.esEnt() && !reg.esDesc()) {
         ErrorSemantico.deteccion("Tipo incompatible. Se esperaba entero", t);
+        reg.setTipoEnt();
       }
-      // TODO
-
     }
   | t = <tNOT> reg = factor()
     {
       if (!reg.esBool() && !reg.esDesc()) {
         ErrorSemantico.deteccion("Tipo incompatible. Se esperaba booleano", t);
+        reg.setTipoBool();
       }
-      // TODO
+      else if (reg.esBool()) {
+        reg.setValorBool(!reg.getValorBool());
+      }
 
     }
   | parentesis_izq() reg = expresion() parentesis_der()
@@ -1349,7 +1348,7 @@ RegistroExpr factor() :
  	  }
  	  reg.setTipoChar();
 	}
-  | t = <tCARAENT> parentesis_izq() expresion() parentesis_der()
+  | t = <tCARAENT> parentesis_izq() reg = expresion() parentesis_der()
     {
       if (!reg.esChar() && !reg.esDesc()) {
         ErrorSemantico.deteccion("La expresión no se puede convertir en un entero válido", t);
@@ -1370,17 +1369,23 @@ RegistroExpr factor() :
     {
       try {
       	s = tabla_simbolos.buscar_simbolo(t.image);
-      	// TODO
-      	if (s.ES_VARIABLE) {
-      	  reg;
+      	if (s.ES_VARIABLE()) {
+      	  reg.setTipo(s.getVariable());
       	}
-      	else if (s.ES_ACCION) {
-      	  reg;
+      	else if (s.ES_PARAMETRO()) {
+      	  reg.setTipo(s.getVariable());
       	}
-      	else if (s.ES_PARAMETRO) {
-      	  reg;
+      	else if (s.ES_ACCION()) {
+      	  ErrorSemantico.deteccion("No se puede utilizar una acción dentro de una expresión", t);
+      	  reg.setTipoDesc();
       	}
-      	// TODO
+      	else if (s.ES_PROGRAMA()) {
+      	  ErrorSemantico.deteccion("No se puede utilizar un programa dentro de una expresión", t);
+      	  reg.setTipoDesc();
+      	}
+      	else {
+      	  reg.setTipoDesc();
+      	}
       }
       catch (SimboloNoEncontradoException e) {
         ErrorSemantico.deteccion(e, t);
@@ -1420,5 +1425,8 @@ RegistroExpr factor() :
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un factor");
+  }
+  finally {
+    return reg;
   }
 }
