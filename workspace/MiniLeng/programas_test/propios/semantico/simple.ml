@@ -1,23 +1,29 @@
 %-------------------------------------------------------------------
 programa factorial;
 %-------------------------------------------------------------------
-entero n, j;
+booleano n, j;
+
+entero ent1;
+caracter ent2;
 
 %-------------------------------------------------------------------
 accion miaccion (val entero a; ref entero b; ref entero c);
 %-------------------------------------------------------------------
 caracter d;
 
-accion miotra (val entero f);
+accion miotra;
+entero f;
+
 principio
-    escribir(f);
+    escribir(a);
 fin
 
 principio
     escribir(d);
+
+    miotra;
 fin
 
-
 principio
-    escribir(d);
+   miaccion("a", b, c);
 fin

@@ -18,38 +18,26 @@ public class ErrorSemantico {
 
 	public static void deteccion(SimboloYaDeclaradoException e, Token t) {
 		contadorErrores++;
-		System.err.println("MiniLeng: ERROR LÉXICO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+		System.err.println("MiniLeng: ERROR SEMÁNTICO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
 				"Símbolo: '" + t.image + "'. No se puede redefinir el símbolo");
 	}
 
 	public static void deteccion(SimboloNoEncontradoException e, Token t) {
 		contadorErrores++;
-		System.err.println("MiniLeng: ERROR LÉXICO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
-				"Símbolo: '" + t.image + "' No se ha encontrado el símbolo");
+		System.err.println("MiniLeng: ERROR SEMÁNTICO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+				"Símbolo: '" + t.image + "'. El símbolo no está definido");
 	}
-	
-	public static void deteccion(UnderflowException e, Token t) {
+
+	public static void deteccion(InvocacionAccionException e, String mensaje, Token t) {
 		contadorErrores++;
-		System.err.println("MiniLeng: ERROR LÉXICO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
-				"Símbolo: '" + t.image + "' La operación produce undeflow");
-	}
-	
-	public static void deteccion(OverflowException e, Token t) {
-		contadorErrores++;
-		System.err.println("MiniLeng: ERROR LÉXICO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
-				"Símbolo: '" + t.image + "' La operación produce overflow");
-	}
-	
-	public static void deteccion(DivisionPorCeroException e, Token t) {
-		contadorErrores++;
-		System.err.println("MiniLeng: ERROR LÉXICO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
-				"Símbolo: '" + t.image + "' La operación produce una división por cero");
+		System.err.println("MiniLeng: ERROR SEMÁNTICO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+				"Error al invocar a: '" + t.image + "'. " + mensaje);
 	}
 
 	public static void deteccion(String mensaje, Token t) {
 		contadorErrores++;
-		System.err.println("MiniLeng: ERROR LÉXICO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
-				"Símbolo: '" + t.image + "'." + mensaje);
+		System.err.println("MiniLeng: ERROR SEMÁNTICO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+				"Símbolo: '" + t.image + "'. " + mensaje);
 	}
 
 	public static int getContadorErrores() {

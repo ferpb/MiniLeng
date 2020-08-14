@@ -4,6 +4,11 @@ Programa noventa_y_nueve;
 
 entero x,y,n,m;
 
+accion miaccion;
+principio
+escribir("hola");
+fin
+
 %--------------------------------------------------------
 Principio
 %--------------------------------------------------------
@@ -15,10 +20,18 @@ Principio
 
         escribir(n," se convierte en ");
 
+        miaccion();
+
+
+
+        x := 1 mod 1;
+
+        x := 1 - 999999999;
+
         x := n div 10;
         y := n mod 10;
         m := 10*y + x;
-        
+
         Si n > m ent
                 n := n - m;
         si_no

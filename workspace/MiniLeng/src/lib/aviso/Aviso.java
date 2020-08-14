@@ -1,7 +1,7 @@
 /*********************************************************************************
- * Tratamiento de errores sintácticos
+ * Tratamiento de avisos
  *
- * Fichero:    ErrorSintactico.java
+ * Fichero:    Aviso.java
  * Autor:      Fernando Peña (NIA: 756012)
  * Fecha:      29/03/2020
  * Versión:    v2.0
@@ -10,22 +10,42 @@
 
 package lib.aviso;
 
-import analizador.ParseException;
-import lib.semantico.Simbolo;
+import analizador.Token;
+import lib.semantico.DivisionPorCeroException;
+import lib.semantico.OverflowException;
+import lib.semantico.UnderflowException;
 
 public class Aviso {
 
 	private static int contadorAvisos = 0;
 
 
-	public static void deteccion(String mensaje) {
+	public static void deteccion(String mensaje, Token t) {
 		contadorAvisos++;
-		System.err.println("MiniLeng: AVISO. " + mensaje);
+		System.err.println("MiniLeng: AVISO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+				"Símbolo: '" + t.image + "'. " + mensaje);
 	}
 
-	public static int getContadorErrores() {
+	public static void deteccion(UnderflowException e, Token t) {
+		contadorAvisos++;
+		System.err.println("MiniLeng: AVISO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+				"Símbolo: '" + t.image + "' La operación produce undeflow");
+	}
+
+	public static void deteccion(OverflowException e, Token t) {
+		contadorAvisos++;
+		System.err.println("MiniLeng: AVISO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+				"Símbolo: '" + t.image + "' La operación produce overflow");
+	}
+
+	public static void deteccion(DivisionPorCeroException e, Token t) {
+		contadorAvisos++;
+		System.err.println("MiniLeng: AVISO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+				"Símbolo: '" + t.image + "' La operación produce una división por cero");
+	}
+
+	public static int getContadorAvisos() {
 		return contadorAvisos;
 	}
-
 
 }

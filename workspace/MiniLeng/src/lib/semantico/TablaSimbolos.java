@@ -18,6 +18,9 @@ import lib.semantico.SimboloYaDeclaradoException;
 import lib.aviso.Aviso;
 
 import java.util.Random;
+
+import analizador.minilengcompiler;
+
 import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -155,9 +158,14 @@ public class TablaSimbolos {
 			}
 			// Si hay un símbolo ya declarado con ese nombre en otro nivel, mostrar un aviso
 			else if (s.getNombre().equals(simbolo.getNombre())) {
+				/*
 				Aviso.deteccion("El símbolo '" +
 						simbolo.nombre + "' definido en el nivel " + simbolo.nivel
 						+ " va a ocultar a otro definido con el mismo nombre en el nivel " + s.nivel + "");
+			     */
+				Aviso.deteccion("Este símbolo, definido en el nivel " + simbolo.nivel +
+						", va a ocultar a otro definido con el mismo nombre en el nivel " + s.nivel + "",
+						minilengcompiler.getToken(0));
 			}
 		}
 

@@ -15,8 +15,8 @@ accion a2 (val entero b);
 	accion a1;
 	Principio
 		a1:=a1+1;
-		caca(j);
-		caca(j);
+	    caca(j);
+	    caca(j);
 		fallo:="hola"="hola";
 		fallo:="a">="c";
 		fallo:="hola">2;

@@ -148,16 +148,20 @@ public class Simbolo {
 
 	// Comprobadores del tipo de símbolo
 
+	public Boolean ES_PROGRAMA() {
+		return tipo == Tipo_simbolo.PROGRAMA;
+	}
+
 	public Boolean ES_VARIABLE() {
 		return tipo == Tipo_simbolo.VARIABLE;
 	}
 
-	public Boolean ES_PARAMETRO() {
-		return tipo == Tipo_simbolo.PARAMETRO;
-	}
-
 	public Boolean ES_ACCION() {
 		return tipo == Tipo_simbolo.ACCION;
+	}
+
+	public Boolean ES_PARAMETRO() {
+		return tipo == Tipo_simbolo.PARAMETRO;
 	}
 
 	public Boolean ES_VALOR() {
@@ -168,10 +172,14 @@ public class Simbolo {
 		return (tipo == Tipo_simbolo.PARAMETRO) && (parametro == Clase_parametro.REF);
 	}
 
+	public Boolean es_asignable() {
+		return this.ES_VARIABLE() || this.ES_REFERENCIA();
+	}
+
 
 	// Función toString()
 
-	private String getVariableString() {
+	public String getVariableString() {
 		String res = "";
 		switch (variable) {
 		case DESCONOCIDO:
@@ -193,7 +201,7 @@ public class Simbolo {
 		return res;
 	}
 
-	private String getParametroString() {
+	public String getParametroString() {
 		String res = "";
 		switch (parametro) {
 		case VAL:
