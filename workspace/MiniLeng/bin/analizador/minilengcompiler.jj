@@ -392,6 +392,19 @@ TOKEN : /* AGRUPACIONES */
   }
 }
 
+TOKEN : /* VECTORES */
+{
+  < tCORCHETE_IZQ : "[" >
+  {
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Vectores.tCORCHETE_IZQ);
+  }
+  
+| < tCORCHETE_DER : "]" >
+  {
+    tabla_ocurrencias.incrementar(TablaOcurrencias.Vectores.tCORCHETE_DER);
+  }
+}
+
 
 TOKEN : /* OPERADORES */
 {
@@ -1039,33 +1052,75 @@ void lista_asignables(Token t) :
  * escribir	::=	<tESCRIBIR> parentesis_izq lista_escribibles parentesis_der fin_sentencia
  */
 void escribir() :
-{}
 {
-  // Se pueden escribir variables simples.
-  // Como salida se muestra el valor entero
-  // o las cadenas "Verdadero" y "Falso"
+  ArrayList<RegistroExpr> listaExpr;
+}
+{
   try {
-  	<tESCRIBIR> parentesis_izq() lista_escribibles() parentesis_der()  fin_sentencia()
+  	<tESCRIBIR> parentesis_izq() listaExpr = lista_escribibles() parentesis_der()  fin_sentencia()
+  	{
+  	   // Se pueden escribir variables simples.
+  	   // Como salida se muestra el valor entero
+       // o las cadenas "Verdadero" y "Falso"
+       
+  	}
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba la sentencia escribir");
   }
 }
 /*
- * lista_escribibles	::=	lista_expresiones
+ * lista_escribibles	::=	escribible (sep_variable escribible)*
  */
-void lista_escribibles() :
+ArrayList<RegistroExpr> lista_escribibles() :
 {
-  ArrayList<RegistroExpr> listaExpr = null; 
+  RegistroExpr reg;
+  ArrayList<RegistroExpr> listaExpr = new ArrayList<RegistroExpr>();
+  
 }
 {
   try {
-    // En teoría se puede escribir cualquier expresion
-    // Lo que no se puede es una variable sin inicializar o un parámetro por referencia no inicializado
-  	listaExpr = lista_expresiones()
+    // Expresiones y cadenas de caracteres
+    reg = escribible()
+    {
+      listaExpr.add(reg);
+    }
+    (      sep_variable()
+      reg = escribible()
+      {
+        listaExpr.add(reg);
+      }
+    )*
+    {
+      return listaExpr;
+    }
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una lista de escribibles");
+  }
+}
+
+RegistroExpr escribible() :
+{
+  RegistroExpr reg;
+  Token t;
+}
+{
+  try {
+    reg = expresion()
+    {
+      return reg;
+    }
+  | t = < tCONSTCAD>
+    {
+      reg = new RegistroExpr();
+      reg.setTipoCad();
+      reg.setValorCad(t.image);
+      return reg;
+    }
+  }
+  catch (ParseException e) {
+    ErrorSintactico.deteccion(e, "Se esperaba un escribible");
   }
 }
 
@@ -1597,12 +1652,6 @@ RegistroExpr factor() :
       reg = new RegistroExpr();
       reg.setTipoChar();
       reg.setValorChar(t.image.charAt(0));
-    }
-  | t = <tCONSTCAD>
-    {
-      reg = new RegistroExpr();
-      reg.setTipoCad();
-      reg.setValorCad(t.image);
     }
   | <tTRUE>
     {

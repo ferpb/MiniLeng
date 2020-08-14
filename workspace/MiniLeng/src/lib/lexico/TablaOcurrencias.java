@@ -69,6 +69,16 @@ public class TablaOcurrencias {
 	};
 	private final int nAgrupaciones = 4;
 
+	public enum Vectores {
+		tCORCHETE_IZQ,
+		tCORCHETE_DER
+	}
+	private static final String[] VectoresNombres = {
+		"CORCHETE_IZQ",
+		"CORCHETE_DER"
+	};
+	private final int nVectores = 2;
+
 	public enum Operadores {
         tOPAS,
         tFIN_SENTENCIA,
@@ -156,13 +166,14 @@ public class TablaOcurrencias {
 	// Definición de los contadores, uno por cada tipo de token.
 	int cReservadas[];
 	int cAgrupaciones[];
+	int cVectores[];
 	int cOperadores[];
 	int cOpAritmeticos[];
 	int cOpLogicos[];
 	int cTipos[];
 	int cValores[];
-	
-	
+
+
 	// Mostrar o no los tokens reconocidos
 	private Boolean show_tokens;
 
@@ -173,7 +184,7 @@ public class TablaOcurrencias {
 	 */
 	public TablaOcurrencias(Boolean show_tokens) {
 		// Se puede utilizar también Arrays.fills(arr, 0)
-		
+
 		this.show_tokens = show_tokens;
 
 		cReservadas = new int[nReservadas];
@@ -202,6 +213,13 @@ public class TablaOcurrencias {
 			System.out.println(token.name());
 		}
 		cAgrupaciones[token.ordinal()]++;
+	}
+
+	public void incrementar(Vectores token) {
+		if (show_tokens) {
+			System.out.println(token.name());
+		}
+		cVectores[token.ordinal()]++;
 	}
 
 	public void incrementar(Operadores token) {

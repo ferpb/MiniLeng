@@ -59,57 +59,61 @@ public interface minilengcompilerConstants {
   /** RegularExpression Id. */
   int tPARENTESIS_DER = 34;
   /** RegularExpression Id. */
-  int tOPAS = 35;
+  int tCORCHETE_IZQ = 35;
   /** RegularExpression Id. */
-  int tFIN_SENTENCIA = 36;
+  int tCORCHETE_DER = 36;
   /** RegularExpression Id. */
-  int tSEP_VARIABLE = 37;
+  int tOPAS = 37;
   /** RegularExpression Id. */
-  int tMAS = 38;
+  int tFIN_SENTENCIA = 38;
   /** RegularExpression Id. */
-  int tMENOS = 39;
+  int tSEP_VARIABLE = 39;
   /** RegularExpression Id. */
-  int tPRODUCTO = 40;
+  int tMAS = 40;
   /** RegularExpression Id. */
-  int tDIVISION = 41;
+  int tMENOS = 41;
   /** RegularExpression Id. */
-  int tMOD = 42;
+  int tPRODUCTO = 42;
   /** RegularExpression Id. */
-  int tDIV = 43;
+  int tDIVISION = 43;
   /** RegularExpression Id. */
-  int tAND = 44;
+  int tMOD = 44;
   /** RegularExpression Id. */
-  int tOR = 45;
+  int tDIV = 45;
   /** RegularExpression Id. */
-  int tNOT = 46;
+  int tAND = 46;
   /** RegularExpression Id. */
-  int tMAYOR = 47;
+  int tOR = 47;
   /** RegularExpression Id. */
-  int tMENOR = 48;
+  int tNOT = 48;
   /** RegularExpression Id. */
-  int tIGUAL = 49;
+  int tMAYOR = 49;
   /** RegularExpression Id. */
-  int tMAI = 50;
+  int tMENOR = 50;
   /** RegularExpression Id. */
-  int tMEI = 51;
+  int tIGUAL = 51;
   /** RegularExpression Id. */
-  int tNI = 52;
+  int tMAI = 52;
   /** RegularExpression Id. */
-  int DIGITO = 53;
+  int tMEI = 53;
   /** RegularExpression Id. */
-  int LETRA = 54;
+  int tNI = 54;
   /** RegularExpression Id. */
-  int tTRUE = 55;
+  int DIGITO = 55;
   /** RegularExpression Id. */
-  int tFALSE = 56;
+  int LETRA = 56;
   /** RegularExpression Id. */
-  int tIDENTIFICADOR = 57;
+  int tTRUE = 57;
   /** RegularExpression Id. */
-  int tCONSTENTERA = 58;
+  int tFALSE = 58;
   /** RegularExpression Id. */
-  int tCONSTCHAR = 59;
+  int tIDENTIFICADOR = 59;
   /** RegularExpression Id. */
-  int tCONSTCAD = 60;
+  int tCONSTENTERA = 60;
+  /** RegularExpression Id. */
+  int tCONSTCHAR = 61;
+  /** RegularExpression Id. */
+  int tCONSTCAD = 62;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -155,6 +159,8 @@ public interface minilengcompilerConstants {
     "\"}\"",
     "\"(\"",
     "\")\"",
+    "\"[\"",
+    "\"]\"",
     "\":=\"",
     "\";\"",
     "\",\"",

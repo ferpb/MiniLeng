@@ -7,7 +7,7 @@ entero ent1;
 caracter ent2;
 
 %-------------------------------------------------------------------
-accion miaccion (val entero a; ref entero b; ref entero c);
+accion miaccion (val caracter a; ref entero b; ref entero c);
 %-------------------------------------------------------------------
 caracter d;
 
