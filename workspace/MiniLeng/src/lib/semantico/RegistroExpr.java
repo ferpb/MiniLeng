@@ -13,13 +13,13 @@ package lib.semantico;
 
 import lib.semantico.Simbolo.*;
 import lib.aviso.Aviso;
+import lib.generacioncodigo.ListaInstr;
 import lib.semantico.RegistroOp;
 import lib.semantico.RegistroOp.Operador;
 
 import java.math.BigInteger;
 
 public class RegistroExpr {
-
 
 	private Integer valorEnt;
 	private Boolean valorBool;
@@ -31,6 +31,14 @@ public class RegistroExpr {
 	private Clase_parametro parametro;
 
 	private Boolean asignable = false;
+
+	private Boolean vector = false;
+	private Integer longitud;
+
+	// Generacion codigo
+	// Contiene la lista de instrucciones necesaria para calcular la
+	// expresión que representa el registro
+	private ListaInstr instrucciones = new ListaInstr();
 
 
 	public boolean esDesc() {
@@ -65,6 +73,9 @@ public class RegistroExpr {
 		return asignable;
 	}
 
+	public boolean esVector() {
+		return vector;
+	}
 
 	// Getters y setters
 
@@ -111,15 +122,19 @@ public class RegistroExpr {
 	public void setTipoDesc() {
 		this.tipo = Tipo_variable.DESCONOCIDO;
 	}
+
 	public void setTipoEnt() {
 		this.tipo = Tipo_variable.ENTERO;
 	}
+
 	public void setTipoBool() {
 		this.tipo = Tipo_variable.BOOLEANO;
 	}
+
 	public void setTipoChar() {
 		this.tipo = Tipo_variable.CHAR;
 	}
+
 	public void setTipoCad() {
 		this.tipo = Tipo_variable.CADENA;
 	}
@@ -136,23 +151,44 @@ public class RegistroExpr {
 		this.parametro = Clase_parametro.REF;
 	}
 
+	public void setVector(boolean vector) {
+		this.vector = true;
+	}
 
+	public void setLongitud(Integer longitud) {
+		this.longitud = longitud;
+	}
 
+	public Integer getLongitud() {
+		return longitud;
+	}
+
+	public ListaInstr getInstr() {
+		return instrucciones;
+	}
 
 	// Operar con registros
 
 	public static RegistroExpr operar(RegistroOp op, RegistroExpr reg1, RegistroExpr reg2) {
 		// Para operar los registros, ambos deben ser del mismo tipo
 
+		// No se puede operar con vectores
+		if (reg1.esVector() || reg2.esVector()) {
+			ErrorSemantico.deteccion("No se pueden realizar operaciones con vectores", op.getToken());
+			RegistroExpr res = new RegistroExpr();
+			res.setTipoDesc();
+			return res;
+		}
+
 		// Si uno de los dos operandos es desconocido, no se realiza la operación y
-	    // se propaga desconocido
+		// se propaga desconocido
 		if (reg1.esDesc() || reg2.esDesc()) {
 			RegistroExpr res = new RegistroExpr();
 			res.setTipoDesc();
 			return res;
 		}
 
-		switch(op.getOp()) {
+		switch (op.getOp()) {
 		// Operadores enteros
 		case MAS:
 		case MENOS:
@@ -190,14 +226,12 @@ public class RegistroExpr {
 
 		if (!reg1.esEnt()) {
 			ErrorSemantico.deteccion("El operando 1 debe ser entero", op.getToken());
-		}
-		else if (!reg2.esEnt()) {
+		} else if (!reg2.esEnt()) {
 			ErrorSemantico.deteccion("El operador 2 debe ser entero", op.getToken());
-		}
-		else if (reg1.getValorEnt() != null && reg2.getValorEnt() != null) {
+		} else if (reg1.getValorEnt() != null && reg2.getValorEnt() != null) {
 			if (!hayDivisionPorCero(op, reg1.getValorEnt(), reg2.getValorEnt())
 					&& !hayUnderflowOverflow(op, reg1.getValorEnt(), reg2.getValorEnt())) {
-				switch(op.getOp()) {
+				switch (op.getOp()) {
 				// Operadores enteros
 				case MAS:
 					res.setValorEnt(reg1.getValorEnt() + reg2.getValorEnt());
@@ -212,16 +246,14 @@ public class RegistroExpr {
 				case DIVISION:
 					if (reg2.getValorEnt() == 0) {
 						Aviso.deteccion(new DivisionPorCeroException(), op.getToken());
-					}
-					else {
+					} else {
 						res.setValorEnt(reg1.getValorEnt() / reg2.getValorEnt());
 					}
 					break;
 				case MOD:
 					if (reg2.getValorEnt() == 0) {
 						Aviso.deteccion(new DivisionPorCeroException(), op.getToken());
-					}
-					else {
+					} else {
 						res.setValorEnt(reg1.getValorEnt() % reg2.getValorEnt());
 					}
 					break;
@@ -233,19 +265,16 @@ public class RegistroExpr {
 		return res;
 	}
 
-
 	private static RegistroExpr operarBooleano(RegistroOp op, RegistroExpr reg1, RegistroExpr reg2) {
 		RegistroExpr res = new RegistroExpr();
 		res.setTipoBool();
 
 		if (!reg1.esBool()) {
 			ErrorSemantico.deteccion("El operando 1 debe ser booleano", op.getToken());
-		}
-		else if (!reg2.esBool()) {
+		} else if (!reg2.esBool()) {
 			ErrorSemantico.deteccion("El operando 2 debe ser booleano", op.getToken());
-		}
-		else if (reg1.getValorBool() != null && reg2.getValorBool() != null) {
-			switch(op.getOp()) {
+		} else if (reg1.getValorBool() != null && reg2.getValorBool() != null) {
+			switch (op.getOp()) {
 			// Operadores booleanos
 			case OR:
 				res.setValorBool(reg1.getValorBool() || reg2.getValorBool());
@@ -260,34 +289,28 @@ public class RegistroExpr {
 		return res;
 	}
 
-
 	private static RegistroExpr operarComparacion(RegistroOp op, RegistroExpr reg1, RegistroExpr reg2) {
 		RegistroExpr res = new RegistroExpr();
 		res.setTipoBool();
 
 		if (reg1.getTipo() != reg2.getTipo()) {
 			ErrorSemantico.deteccion("Los operandos deben ser del mismo tipo", op.getToken());
-		}
-		else {
+		} else {
 			if (reg1.esEnt() && (reg1.getValorEnt() != null && reg2.getValorEnt() != null)) {
 				res.setValorBool(compararEnt(op, reg1.getValorEnt(), reg2.getValorEnt()));
-			}
-			else if (reg1.esBool() && (reg1.getValorBool() != null && reg2.getValorBool() != null)) {
+			} else if (reg1.esBool() && (reg1.getValorBool() != null && reg2.getValorBool() != null)) {
 				res.setValorBool(compararBool(op, reg1.getValorBool(), reg2.getValorBool()));
-			}
-			else if (reg1.esChar() && (reg1.getValorChar() != null && reg2.getValorChar() != null)) {
+			} else if (reg1.esChar() && (reg1.getValorChar() != null && reg2.getValorChar() != null)) {
 				res.setValorBool(compararChar(op, reg1.getValorChar(), reg2.getValorChar()));
-			}
-			else if (reg1.esCad() && (reg1.getValorCad() != null && reg2.getValorCad() != null)) {
+			} else if (reg1.esCad() && (reg1.getValorCad() != null && reg2.getValorCad() != null)) {
 				res.setValorBool(compararCad(op, reg1.getValorCad(), reg2.getValorCad()));
 			}
 		}
 		return res;
 	}
 
-
 	private static boolean compararEnt(RegistroOp op, Integer ent1, Integer ent2) {
-		switch(op.getOp()) {
+		switch (op.getOp()) {
 		case IGUAL:
 			return ent1 == ent2;
 		case MAI:
@@ -306,20 +329,20 @@ public class RegistroExpr {
 	}
 
 	private static boolean compararBool(RegistroOp op, Boolean bool1, Boolean bool2) {
-		switch(op.getOp()) {
+		switch (op.getOp()) {
 		case IGUAL:
 			return bool1 == bool2;
 		case MAI:
-			ErrorSemantico.deteccion("El operador '>=' no esta definido para operadores booleanos", op.getToken());
+			ErrorSemantico.deteccion("El operador '>=' no esta definido para booleanos", op.getToken());
 			return false;
 		case MAYOR:
-			ErrorSemantico.deteccion("El operador '>' no esta definido para operadores booleanos", op.getToken());
+			ErrorSemantico.deteccion("El operador '>' no esta definido para booleanos", op.getToken());
 			return false;
 		case MEI:
-			ErrorSemantico.deteccion("El operador '<=' no esta definido para operadores booleanos", op.getToken());
+			ErrorSemantico.deteccion("El operador '<=' no esta definido para booleanos", op.getToken());
 			return false;
 		case MENOR:
-			ErrorSemantico.deteccion("El operador '<' no esta definido para operadores booleanos", op.getToken());
+			ErrorSemantico.deteccion("El operador '<' no esta definido para booleanos", op.getToken());
 			return false;
 		case NI:
 			return bool1 != bool2;
@@ -329,7 +352,7 @@ public class RegistroExpr {
 	}
 
 	private static boolean compararChar(RegistroOp op, Character char1, Character char2) {
-		switch(op.getOp()) {
+		switch (op.getOp()) {
 		case IGUAL:
 			return char1 == char2;
 		case MAI:
@@ -348,20 +371,20 @@ public class RegistroExpr {
 	}
 
 	private static boolean compararCad(RegistroOp op, String cad1, String cad2) {
-		switch(op.getOp()) {
+		switch (op.getOp()) {
 		case IGUAL:
 			return cad1.equals(cad2);
 		case MAI:
-			ErrorSemantico.deteccion("El operador '>=' no esta definido para operadores cadenas", op.getToken());
+			ErrorSemantico.deteccion("El operador '>=' no esta definido para cadenas", op.getToken());
 			return false;
 		case MAYOR:
-			ErrorSemantico.deteccion("El operador '>=' no esta definido para operadores cadenas", op.getToken());
+			ErrorSemantico.deteccion("El operador '>=' no esta definido para cadenas", op.getToken());
 			return false;
 		case MEI:
-			ErrorSemantico.deteccion("El operador '>=' no esta definido para operadores cadenas", op.getToken());
+			ErrorSemantico.deteccion("El operador '>=' no esta definido para cadenas", op.getToken());
 			return false;
 		case MENOR:
-			ErrorSemantico.deteccion("El operador '>=' no esta definido para operadores cadenas", op.getToken());
+			ErrorSemantico.deteccion("El operador '>=' no esta definido para cadenas", op.getToken());
 			return false;
 		case NI:
 			return !cad1.equals(cad2);
@@ -375,8 +398,7 @@ public class RegistroExpr {
 				&& ent2 == 0) {
 			Aviso.deteccion(new DivisionPorCeroException(), op.getToken());
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 	}
@@ -391,7 +413,7 @@ public class RegistroExpr {
 		BigInteger res;
 		boolean detectado = false;
 
-		switch(op.getOp()) {
+		switch (op.getOp()) {
 		case MAS:
 			res = bi1.add(bi2);
 			break;

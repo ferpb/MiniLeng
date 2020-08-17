@@ -29,14 +29,13 @@ public class Simbolo {
 		VAL, REF
 	};
 
-
 	/////////////////////////////
-	//  Atributos del símbolo  //
+	// Atributos del símbolo //
 	/////////////////////////////
 
 	String nombre;
-	int nivel; // Nivel en el que se ha declarado el símbolo (primer nivel = 0)
-	int dir; // Dirección del símbolo
+	Integer nivel; // Nivel en el que se ha declarado el símbolo (primer nivel = 0)
+	Integer dir; // Dirección del símbolo
 
 	Tipo_simbolo tipo;
 	Tipo_variable variable;
@@ -44,7 +43,8 @@ public class Simbolo {
 
 	ArrayList<Simbolo> lista_parametros; // Lista de símbolos que representan los parámetros de una acción
 
-
+	Boolean vector = false; // Vale true si el símbolo es una variable o parametro vector
+	Integer longitud; // Longitud para los vectores
 
 	// Getters y setters
 
@@ -104,10 +104,21 @@ public class Simbolo {
 		return dir;
 	}
 
-	public void setDir(int dir) {
+	public void setDir(Integer dir) {
 		this.dir = dir;
 	}
 
+	public void setVector(Boolean vector) {
+		this.vector = vector;
+	}
+
+	public void setLongitud(Integer longitud) {
+		this.longitud = longitud;
+	}
+
+	public Integer getLongitud() {
+		return longitud;
+	}
 
 	// Métodos para construir los tipos de símbolos
 
@@ -131,6 +142,7 @@ public class Simbolo {
 	public void introducir_accion(String nombre, int nivel, int dir) {
 		this.nombre = nombre;
 		this.tipo = Tipo_simbolo.ACCION;
+		this.lista_parametros = new ArrayList<Simbolo>();
 		this.nivel = nivel;
 		this.dir = dir;
 	}
@@ -142,6 +154,29 @@ public class Simbolo {
 		this.tipo = Tipo_simbolo.PARAMETRO;
 		this.variable = tipo_var;
 		this.parametro = clase_param;
+		this.nivel = nivel;
+		this.dir = dir;
+	}
+
+	// Configura los campos del símbolo correspondiente a un vector
+	public void introducir_variable_vector(String nombre, Tipo_variable tipo_var, int longitud, int nivel, int dir) {
+		this.nombre = nombre;
+		this.tipo = Tipo_simbolo.VARIABLE;
+		this.variable = tipo_var;
+		this.vector = true;
+		this.longitud = longitud;
+		this.nivel = nivel;
+		this.dir = dir;
+	}
+
+	public void introducir_parametro_vector(String nombre, Tipo_variable tipo_var, Clase_parametro clase_param,
+			int longitud, int nivel, int dir) {
+		this.nombre = nombre;
+		this.tipo = Tipo_simbolo.PARAMETRO;
+		this.variable = tipo_var;
+		this.parametro = clase_param;
+		this.vector = true;
+		this.longitud = longitud;
 		this.nivel = nivel;
 		this.dir = dir;
 	}
@@ -172,10 +207,13 @@ public class Simbolo {
 		return (tipo == Tipo_simbolo.PARAMETRO) && (parametro == Clase_parametro.REF);
 	}
 
+	public Boolean ES_VECTOR() {
+		return vector;
+	}
+
 	public Boolean es_asignable() {
 		return this.ES_VARIABLE() || this.ES_REFERENCIA();
 	}
-
 
 	// Función toString()
 
@@ -218,14 +256,18 @@ public class Simbolo {
 	public String toString() {
 		String res;
 
+		String nombre = this.nombre;
+		if (vector) {
+			nombre += "[" + longitud + "]";
+		}
+
 		switch (tipo) {
 		case PROGRAMA:
 			res = String.format("%-25s %s [%d, %d]", "PROGRAMA:", nombre, nivel, dir);
 			break;
 
 		case VARIABLE:
-			res = String.format("%-25s %s [%d, %d]",
-					"VARIABLE " + getVariableString() + ":", nombre, nivel, dir);
+			res = String.format("%-25s %s [%d, %d]", "VARIABLE " + getVariableString() + ":", nombre, nivel, dir);
 			break;
 
 		case ACCION:
@@ -234,8 +276,7 @@ public class Simbolo {
 			for (Simbolo par : lista_parametros) {
 				if (primero) {
 					primero = false;
-				}
-				else {
+				} else {
 					signatura += ", ";
 				}
 				signatura += par.nombre;

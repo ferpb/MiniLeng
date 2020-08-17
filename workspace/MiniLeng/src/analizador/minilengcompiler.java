@@ -24,6 +24,8 @@ import lib.semantico.InvocacionAccionException;
 import lib.semantico.ErrorSemantico;
 import lib.semantico.RegistroExpr;
 import lib.semantico.RegistroOp;
+import lib.semantico.UnderflowException;
+import lib.semantico.OverflowException;
 import lib.aviso.Aviso;
 
 
@@ -71,73 +73,77 @@ public class minilengcompiler implements minilengcompilerConstants {
         System.exit(0);
     }
 
+    private static void opcionInvalida(String opcion) {
+        System.err.println("MiniLeng: Opci\u00f3n inv\u00e1lida: '" + opcion + "'\u005cn");
+        help();
+    }
+
+    private static String procesarArgumentos(String args[]) {
+        String fichero_entrada = null;
+                ArrayList<String> opciones = new ArrayList<String>();
+
+        // Obtener opciones
+                for (String arg : args) {
+                    if (arg.charAt(0) == '-') {
+                      // opciones
+                      if (arg.length() == 1) {
+                          opcionInvalida(arg);
+                      }
+                      else if (arg.charAt(1) == '-') {
+                          opciones.add(arg);
+                      }
+                      else {
+                          for (String opt : arg.substring(1).split("")) {
+                              opciones.add("-" + opt);
+                          }
+                      }
+                    }
+                    else {
+                      // fichero de entrada
+                      fichero_entrada = arg;
+                      break;
+                    }
+                }
+
+                // Activar opciones
+                for (String opt : opciones) {
+                    switch(opt) {
+                                case "-h":
+                                case "--help":
+                                help();
+                                break;
+                            case "--version":
+                                version();
+                                break;
+                                case "-v":
+                                case "--verbose":
+                                        verbose_mode = true;
+                                        break;
+                                case "-p":
+                                case "--panic":
+                                        panic_mode = true;
+                                        break;
+                                case "-t":
+                                case "--tokens":
+                                show_tokens = true;
+                                break;
+                                default:
+                                    opcionInvalida(opt);
+                    }
+                }
+                return fichero_entrada;
+        }
+
+
         public static void main(String args []) throws ParseException {
                 System.out.println("Compilador de MiniLeng -- v" + version + " (" + fecha_version + ")");
         System.out.println("Autor: Fernando Pe\u00f1a Bes (NIA: 756012)\u005cn");
 
                 // Entrada al programa
         InputStream stream = System.in;
-        String fichero_entrada = null;
-
-
-        if (args.length == 0) {
-                // Compilador llamado sin argumentos
-        }
-        else if (args[0].equals("-h") || args[0].equals("--help")) {
-                // Mostrar ayuda y salir
-                help();
-                }
-                else if (args[0].equals("--version")) {
-                // Mostrar version y salir
-                version();
-                }
-                else {
-                        // Leer los argumentos.
-                        // Va leyendo hasta que encuentra uno que no empieza por '-',
-                        // ese argumento se considera como fichero de entrada
-                        for (int i = 0; i < args.length; i++) {
-                            switch(args[i]) {
-                                case "-h":
-                                case "--help":
-                                case "--version":
-                                    // Ignorar si aparece ayuda o versión de nuevo
-                                        break;
-
-                                case "-v":
-                                case "--verbose":
-                                        // Activar modo verboso
-                                        verbose_mode = true;
-                                        break;
-
-                                case "-p":
-                                case "--panic":
-                                        // Activar modo pánico
-                                        panic_mode = true;
-                                        break;
-
-                                case "-t":
-                                case "--tokens":
-                                        // Mostrar tokens conforme se reconocen
-                                        show_tokens = true;
-                                        break;
-
-                                        default:
-                                                if (args[i].charAt(0) == '-') {
-                                                        System.err.println("MiniLeng: Opci\u00f3n inv\u00e1lida <" + args[i] + ">\u005cn");
-                                                        help();
-                                                }
-                                                else {
-                                                        fichero_entrada = args[i];
-                                                }
-                                                break;
-                            }
-                        }
-                }
-
+        String fichero_entrada = procesarArgumentos(args);
 
                 if (fichero_entrada != null) {
-                        // Lectura del fichero del usuario.
-
                         // Si el fichero no terminal en .ml, error
                         if (!fichero_entrada.endsWith(".ml")) {
                         System.err.println("MiniLeng: El fichero a compilar tiene que tener extensi\u00f3n .ml");
@@ -146,9 +152,8 @@ public class minilengcompiler implements minilengcompilerConstants {
                         }
 
                         // Ejecutar el compilador con los fichero introducidos
-                        System.out.println("MiniLeng: Leyendo el fichero " + fichero_entrada + " ...");
+                        System.out.println("MiniLeng: Leyendo el fichero '" + fichero_entrada + "'...");
                 try {
-                        // parser = new minilengcompiler(new FileInputStream(args[0]));
                         stream = new FileInputStream(fichero_entrada);
                 }
                 catch (FileNotFoundException e) {
@@ -168,12 +173,19 @@ public class minilengcompiler implements minilengcompilerConstants {
                 minilengcompiler.programa();
         }
         catch (Exception e) {
+                // TODO: ELIMINAR ESTO
+                System.err.println(e.getMessage());
+
             System.err.println("Error en el compilador");
             System.err.println("Cabeza de lectura: (l\u00ednea " + token.beginLine + ", columna " + token.beginColumn + ") " + token);
                 throw e;
         }
         catch (Error e) {
                         // Detectado error léxico
+
+                        // TODO: ELIMINAR ESTO
+                        System.err.println(e.getMessage());
+
                         SimpleCharStream entrada = minilengcompilerTokenManager.input_stream;
                         String error;
 
@@ -188,11 +200,14 @@ public class minilengcompiler implements minilengcompilerConstants {
                 }
 
                 // Imprimir resultados de la compilación
-                resultadosCompilacion();
+                resultadosCompilacion(fichero_entrada);
     }
 
-        static void resultadosCompilacion() {
-                System.out.println("");
+        static void resultadosCompilacion(String fichero_entrada) {
+                System.out.println();
+
+                // Cambiar extensión .ml por .code
+                String fichero_salida = fichero_entrada.substring(0, fichero_entrada.length() - 2) + "code";
 
                 // Mostrar contadores de errores
                 if (ErrorLexico.getContadorErrores() > 0) {
@@ -216,18 +231,18 @@ public class minilengcompiler implements minilengcompilerConstants {
 
             if (PanicMode.getContadorErrores() > 0) {
                         entrado_en_panic = true;
-                        System.out.println("Veces activado panic mode: " + PanicMode.getContadorErrores());
+                        System.out.println("N\u00famero de activaciones del panic mode: " + PanicMode.getContadorErrores());
                 }
 
                 // Resultados compilacion
                 if (!compilado_sin_errores) {
-                        System.out.println("No se ha podido compilar el programa.");
+                        System.out.println("\u005cnNo se ha podido compilar el programa.");
                 }
                 else if (entrado_en_panic) {
-                        System.out.println("Se ha activado el panic mode durante la compilaci\u00f3n. Corrige los errores y vuelve a compilar.");
+                        System.out.println("\u005cnSe ha activado el panic mode durante la compilaci\u00f3n. Es necesario corregir los errores y volver a compilar.");
                 }
                 else {
-                        System.out.println("Compilado sin errores!");
+                        System.out.println("\u005cnCompilaci\u00f3n finalizada. Se ha generado el fichero '" + fichero_salida + "'");
                 }
         }
 
@@ -269,6 +284,8 @@ public class minilengcompiler implements minilengcompilerConstants {
     if (verbose_mode) {
       token_source.tabla_ocurrencias.imprimirTabla();
     }
+
+        // Fin del compilador
     {if (true) return 0;}
     throw new Error("Missing return statement in function");
   }
@@ -312,6 +329,35 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+  static final public void corchete_izq() throws ParseException {
+    try {
+      jj_consume_token(tCORCHETE_IZQ);
+    } catch (ParseException e) {
+    ErrorSintactico.deteccion(e, "Se esperaba '['");
+    }
+  }
+
+  static final public void corchete_der() throws ParseException {
+    try {
+      jj_consume_token(tCORCHETE_DER);
+    } catch (ParseException e) {
+    ErrorSintactico.deteccion(e, "Se esperaba ']'");
+    }
+  }
+
+  static final public Integer longitud_const() throws ParseException {
+  Token t;
+  Integer len = null;
+    try {
+      t = jj_consume_token(tCONSTENTERA);
+      len = Integer.parseInt(t.image);
+    } catch (ParseException e) {
+    ErrorSintactico.deteccion(e, "Se esperaba una constante entera");
+    }
+    {if (true) return len;}
+    throw new Error("Missing return statement in function");
+  }
+
   static final public void principio() throws ParseException {
     try {
       jj_consume_token(tPRINCIPIO);
@@ -328,17 +374,18 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
-// Sintaxis del lenguaje
   static final public Token identificador() throws ParseException {
-  Token t;
+  Token t = null;
     try {
       t = jj_consume_token(tIDENTIFICADOR);
-        {if (true) return t;}
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un identificador");
     }
+    {if (true) return t;}
     throw new Error("Missing return statement in function");
   }
+
+// Declaracion de variables
 
 /*
  * declaracion_variables ::= ( declaracion fin_sentencia )*
@@ -374,18 +421,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   ArrayList<Token> listaIdentificadores;
     try {
       tipo = tipo_variables();
-      listaIdentificadores = identificadores();
-          System.out.println("Entrado en declaracion");
-          for (Token id : listaIdentificadores) {
-            try {
-              System.out.println("Se va a introducir una variable: " + id.image);
-              tabla_simbolos.introducir_variable(id.image, tipo, nivel, dir);
-              dir++;
-            }
-            catch (SimboloYaDeclaradoException e) {
-              ErrorSemantico.deteccion(e, id);
-            }
-          }
+      identificadores(tipo);
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una declaraci\u00f3n de variables");
     }
@@ -395,19 +431,20 @@ public class minilengcompiler implements minilengcompilerConstants {
  * tipo_variables	::=	( <tENTERO> | <tCARACTER> | <tBOOLEANO> )
  */
   static final public Tipo_variable tipo_variables() throws ParseException {
+  Tipo_variable variable = null;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tENTERO:
         jj_consume_token(tENTERO);
-                    {if (true) return Tipo_variable.ENTERO;}
+                    variable = Tipo_variable.ENTERO;
         break;
       case tCARACTER:
         jj_consume_token(tCARACTER);
-                  {if (true) return Tipo_variable.CHAR;}
+                  variable = Tipo_variable.CHAR;
         break;
       case tBOOLEANO:
         jj_consume_token(tBOOLEANO);
-                  {if (true) return Tipo_variable.BOOLEANO;}
+                  variable = Tipo_variable.BOOLEANO;
         break;
       default:
         jj_la1[1] = jj_gen;
@@ -417,19 +454,16 @@ public class minilengcompiler implements minilengcompilerConstants {
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un tipo de dato");
     }
+    {if (true) return variable;}
     throw new Error("Missing return statement in function");
   }
 
 /*
- * identificadores	::=	identificador ( sep_variable identificador )*
+ * identificadores	::=	(identificador | vector) ( sep_variable (identificador | vector) )*
  */
-  static final public ArrayList<Token> identificadores() throws ParseException {
-        ArrayList<Token> tokens = new ArrayList<Token>();
-        Token t;
+  static final public void identificadores(Tipo_variable tipo) throws ParseException {
     try {
-      t = identificador();
-          System.out.println("Leido el identificador: " + t.image);
-          tokens.add(t);
+      identificador_declaracion(tipo);
       label_2:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -441,16 +475,53 @@ public class minilengcompiler implements minilengcompilerConstants {
           break label_2;
         }
         sep_variable();
-        t = identificador();
-            System.out.println("Leido el identificador: " + t.image);
-            tokens.add(t);
+        identificador_declaracion(tipo);
       }
-          {if (true) return tokens;}
     } catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba uno o varios identificadores");
+    ErrorSintactico.deteccion(e, "Se esperaba uno o varios identificadores o vectores");
     }
-    throw new Error("Missing return statement in function");
   }
+
+  static final public void identificador_declaracion(Tipo_variable tipo) throws ParseException {
+  Token id = null;
+  Integer len = null;
+    try {
+      id = identificador();
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tCORCHETE_IZQ:
+        corchete_izq();
+        len = longitud_const();
+        corchete_der();
+        break;
+      default:
+        jj_la1[3] = jj_gen;
+        ;
+      }
+      try {
+        if (id != null && tipo != null) {
+          System.err.println("Identificador declaracion " + id.image + " " + len);
+          if (len == null) {
+            // variable
+            System.out.println("Se va a introducir una variable: " + id.image);
+            tabla_simbolos.introducir_variable(id.image, tipo, nivel, dir);
+          }
+          else {
+            // vector
+            System.out.println("Se va a introducir una variable vector: " + id.image + " " + len);
+            tabla_simbolos.introducir_variable_vector(id.image, tipo, len, nivel, dir);
+          }
+          dir++;
+            }
+          }
+          catch (SimboloYaDeclaradoException e) {
+            ErrorSemantico.deteccion(e, id);
+          }
+    } catch (ParseException e) {
+    ErrorSintactico.deteccion(e, "Se esperaba la declaraci\u00f3n de una variable o vector");
+    }
+  }
+
+// Declaración de acciones
 
 /*
  * declaracion_acciones	::=	( declaracion_accion )*
@@ -464,7 +535,7 @@ public class minilengcompiler implements minilengcompilerConstants {
           ;
           break;
         default:
-          jj_la1[3] = jj_gen;
+          jj_la1[4] = jj_gen;
           break label_3;
         }
         declaracion_accion();
@@ -501,156 +572,187 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * cabecera_accion	::=	<tACCION> identificador parametros_formales
+ * cabecera_accion	::=	<tACCION> identificador ( parametros_formales )?
  */
   static final public void cabecera_accion() throws ParseException {
-  Token t;
-  Simbolo s = new Simbolo();
-  boolean ok = false;
-  ArrayList<Simbolo> parametros = new ArrayList<Simbolo>();
+  Token id;
+  Simbolo s = null;
     try {
       jj_consume_token(tACCION);
-      t = identificador();
+      id = identificador();
           // Procesar símbolo del identificador
-          try {
-            System.out.println("Se va a introducir una accion " + t.image);
-            s = tabla_simbolos.introducir_accion(t.image, nivel, dir);
-            ok = true;
+          if (id != null) {
+            try {
+              System.out.println("Se va a introducir una accion " + id.image);
+              s = tabla_simbolos.introducir_accion(id.image, nivel, dir);
+            }
+            catch (SimboloYaDeclaradoException e) {
+              ErrorSemantico.deteccion(e, id);
+            }
+            nivel++;
           }
-          catch (SimboloYaDeclaradoException e) {
-            ErrorSemantico.deteccion(e, t);
-          }
-          nivel++;
-      parametros = parametros_formales(t.image);
-          if (ok) {
-            s.setListaParametros(parametros);
-          }
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tPARENTESIS_IZQ:
+        parametros_formales(s);
+        break;
+      default:
+        jj_la1[5] = jj_gen;
+        ;
+      }
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Falta la cabecera de la acci\u00f3n");
     }
   }
 
 /*
- * parametros_formales	::=	( parentesis_izq ( lista_parametros )? parentesis_der )?
+ * parametros_formales	::=	parentesis_izq ( parametros ( fin_sentencia parametros )* )? parentesis_der
  */
-  static final public ArrayList<Simbolo> parametros_formales(String nombreAccion) throws ParseException {
-  ArrayList<Simbolo> parametros = new ArrayList<Simbolo>();
+  static final public void parametros_formales(Simbolo s) throws ParseException {
     try {
+      parentesis_izq();
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case tPARENTESIS_IZQ:
-        parentesis_izq();
-        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case tVAL:
-        case tREF:
-          parametros = lista_parametros();
-          break;
-        default:
-          jj_la1[4] = jj_gen;
-          ;
+      case tVAL:
+      case tREF:
+        parametros(s);
+        label_4:
+        while (true) {
+          switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+          case tFIN_SENTENCIA:
+            ;
+            break;
+          default:
+            jj_la1[6] = jj_gen;
+            break label_4;
+          }
+          fin_sentencia();
+          parametros(s);
         }
-        parentesis_der();
         break;
       default:
-        jj_la1[5] = jj_gen;
+        jj_la1[7] = jj_gen;
         ;
       }
-          {if (true) return parametros;}
+      parentesis_der();
     } catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "");
+    ErrorSintactico.deteccion(e, "Se esperaban los parametros formales de la accion");
     }
-    throw new Error("Missing return statement in function");
-  }
-
-/*
- * lista_parametros	::=	parametros ( fin_sentencia parametros )*
- */
-  static final public ArrayList<Simbolo> lista_parametros() throws ParseException {
-  ArrayList<Simbolo> parametros;
-  ArrayList<Simbolo> parametrosAux;
-    try {
-      parametros = parametros();
-      label_4:
-      while (true) {
-        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case tFIN_SENTENCIA:
-          ;
-          break;
-        default:
-          jj_la1[6] = jj_gen;
-          break label_4;
-        }
-        fin_sentencia();
-        parametrosAux = parametros();
-            parametros.addAll(parametrosAux);
-      }
-          {if (true) return parametros;}
-    } catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaban uno o varios par\u00e1metros");
-    }
-    throw new Error("Missing return statement in function");
   }
 
 /*
  * parametros	::=	clase_parametros tipo_variables identificadores
  */
-  static final public ArrayList<Simbolo> parametros() throws ParseException {
+  static final public void parametros(Simbolo s) throws ParseException {
   Clase_parametro clase;
   Tipo_variable tipo;
-  ArrayList<Token> listaIdentificadores = new ArrayList<Token>();
-
-  Simbolo s;
-  ArrayList<Simbolo> parametros = new ArrayList<Simbolo>();
     try {
       clase = clase_parametros();
       tipo = tipo_variables();
-      listaIdentificadores = identificadores();
-          for (Token id : listaIdentificadores) {
-            try {
-              System.out.println("Se va a introducir un parametro: " + id.image + " " + tipo + " " + clase);
-              s = tabla_simbolos.introducir_parametro(id.image, tipo, clase, nivel, dir);
-              parametros.add(s);
-            }
-            catch (SimboloYaDeclaradoException e) {
-              // Si el símbolo está ya declarado, se introduce como un parámetro anónimo
-              // en la lista de parametros para poder hacer la comprobación de signatura
-              // al llamar a la función, pero no se mete en la tabla de simbolos. 
-              ErrorSemantico.deteccion(e, id);
-              s = new Simbolo();
-              s.introducir_parametro("__anonymus", tipo, clase, nivel, dir);
-              parametros.add(s);
-            }
-          }
-          {if (true) return parametros;}
+      lista_parametros(clase, tipo, s);
     } catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba un par\u00e1metro");
+    ErrorSintactico.deteccion(e, "Se esperaban par\u00e1metros");
     }
-    throw new Error("Missing return statement in function");
+  }
+
+/*
+ * lista_parametros	::=	parametros ( sep_variable parametros )*
+ */
+  static final public void lista_parametros(Clase_parametro clase, Tipo_variable tipo, Simbolo s) throws ParseException {
+    try {
+      identificador_parametro(clase, tipo, s);
+      label_5:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case tSEP_VARIABLE:
+          ;
+          break;
+        default:
+          jj_la1[8] = jj_gen;
+          break label_5;
+        }
+        sep_variable();
+        identificador_parametro(clase, tipo, s);
+      }
+    } catch (ParseException e) {
+        ErrorSintactico.deteccion(e, "Se esperaba una lista de par\u00e1metros");
+    }
   }
 
 /*
  * clase_parametros	::=	( <tVAL> | <tREF> )
  */
   static final public Clase_parametro clase_parametros() throws ParseException {
+  Clase_parametro clase = null;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tVAL:
         jj_consume_token(tVAL);
-                 {if (true) return Clase_parametro.VAL;}
+                   clase = Clase_parametro.VAL;
         break;
       case tREF:
         jj_consume_token(tREF);
-               {if (true) return Clase_parametro.REF;}
+               clase = Clase_parametro.REF;
         break;
       default:
-        jj_la1[7] = jj_gen;
+        jj_la1[9] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un tipo de parametro");
     }
+    {if (true) return clase;}
     throw new Error("Missing return statement in function");
   }
+
+  static final public void identificador_parametro(Clase_parametro clase, Tipo_variable tipo, Simbolo s) throws ParseException {
+  Token id;
+  Integer len = null;
+  Simbolo par = null;
+    try {
+      id = identificador();
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tCORCHETE_IZQ:
+        corchete_izq();
+        len = longitud_const();
+        corchete_der();
+        break;
+      default:
+        jj_la1[10] = jj_gen;
+        ;
+      }
+      if (id != null && clase != null && tipo != null) {
+        try {
+          if (len == null) {
+            // parametro
+                System.out.println("Se va a introducir un parametro: " + id.image + " " + tipo + " " + clase);
+                par = tabla_simbolos.introducir_parametro(id.image, tipo, clase, nivel, dir);
+          }
+          else {
+            // parametro vector
+            System.out.println("Se va a introducir un parametro vector: " + id.image + " " + tipo + " " + clase);
+                par = tabla_simbolos.introducir_parametro_vector(id.image, tipo, clase, len, nivel, dir);
+          }
+
+          if (s != null) {
+            // añadir el parametro a la acción
+            s.addParametro(par);
+          }
+        }
+        catch (SimboloYaDeclaradoException e) {
+          // Si el símbolo está ya declarado, se introduce como un parámetro anónimo
+              // en la lista de parametros para poder hacer la comprobación de signatura
+              // al llamar a la función, pero no se mete en la tabla de simbolos. 
+              ErrorSemantico.deteccion(e, id);
+              s = new Simbolo();
+              s.introducir_parametro("__anonymus", tipo, clase, nivel, dir);
+        }
+      }
+    } catch (ParseException e) {
+        ErrorSintactico.deteccion(e, "Se esperaba un par\u00e1metro");
+    }
+  }
+
+// Sentencias
 
 /*
  * bloque_sentencias	::=	principio lista_sentencias fin
@@ -671,7 +773,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   static final public void lista_sentencias() throws ParseException {
     try {
       sentencia();
-      label_5:
+      label_6:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case tSI:
@@ -682,8 +784,8 @@ public class minilengcompiler implements minilengcompilerConstants {
           ;
           break;
         default:
-          jj_la1[8] = jj_gen;
-          break label_5;
+          jj_la1[11] = jj_gen;
+          break label_6;
         }
         sentencia();
       }
@@ -714,7 +816,7 @@ public class minilengcompiler implements minilengcompilerConstants {
         mientras_que();
         break;
       default:
-        jj_la1[9] = jj_gen;
+        jj_la1[12] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -743,17 +845,21 @@ public class minilengcompiler implements minilengcompilerConstants {
  * lista_asignables	::=	identificadores
  */
   static final public void lista_asignables(Token t) throws ParseException {
-  ArrayList<RegistroExpr> listaExpr = null;
+  ArrayList<RegistroExpr> listaExpr;
     try {
       listaExpr = lista_expresiones();
           System.out.println(listaExpr.get(0));
           for (int i = 0; i < listaExpr.size(); i++) {
             if (!listaExpr.get(i).esDesc()) {
-              if (listaExpr.get(i).esParVal()) {
+              if (listaExpr.get(i).esVector()) {
+            ErrorSemantico.deteccion(new InvocacionAccionException(),
+                  "La expresi\u00f3n " + (i + 1) + " es un vector, no es asignable en una instrucci\u00f3n leer", t);
+              }
+              else if (listaExpr.get(i).esParVal()) {
             ErrorSemantico.deteccion(new InvocacionAccionException(),
               "La expresi\u00f3n " + (i + 1) + " es un par\u00e1metro por valor, no es asignable", t);
           }
-              if (!listaExpr.get(i).esAsignable()) {
+              else if (!listaExpr.get(i).esAsignable()) {
                 ErrorSemantico.deteccion(new InvocacionAccionException(),
               "La expresi\u00f3n " + (i + 1) + " no es asignable", t);
               }
@@ -790,30 +896,34 @@ public class minilengcompiler implements minilengcompilerConstants {
     try {
       // Expresiones y cadenas de caracteres
           reg = escribible();
-      listaExpr.add(reg);
-      label_6:
+      if (reg != null) {
+        listaExpr.add(reg);
+      }
+      label_7:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case tSEP_VARIABLE:
           ;
           break;
         default:
-          jj_la1[10] = jj_gen;
-          break label_6;
+          jj_la1[13] = jj_gen;
+          break label_7;
         }
         sep_variable();
         reg = escribible();
-        listaExpr.add(reg);
+        if (reg != null) {
+          listaExpr.add(reg);
+        }
       }
-      {if (true) return listaExpr;}
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una lista de escribibles");
     }
+    {if (true) return listaExpr;}
     throw new Error("Missing return statement in function");
   }
 
   static final public RegistroExpr escribible() throws ParseException {
-  RegistroExpr reg;
+  RegistroExpr reg = null;
   Token t;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -829,115 +939,23 @@ public class minilengcompiler implements minilengcompilerConstants {
       case tCONSTENTERA:
       case tCONSTCHAR:
         reg = expresion();
-      {if (true) return reg;}
         break;
       case tCONSTCAD:
         t = jj_consume_token(tCONSTCAD);
       reg = new RegistroExpr();
       reg.setTipoCad();
       reg.setValorCad(t.image);
-      {if (true) return reg;}
         break;
       default:
-        jj_la1[11] = jj_gen;
+        jj_la1[14] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un escribible");
     }
+    {if (true) return reg;}
     throw new Error("Missing return statement in function");
-  }
-
-/*
- * asignacion	::=	<tOPAS> expresion fin_sentencia
- */
-  static final public void asignacion(Tipo_variable tpID) throws ParseException {
-  RegistroExpr reg;
-  Token t;
-    try {
-      t = jj_consume_token(tOPAS);
-      reg = expresion();
-      fin_sentencia();
-      if (tpID != Tipo_variable.DESCONOCIDO && !reg.esDesc() && tpID != reg.getTipo()) {
-        ErrorSemantico.deteccion("Tipos incompatibles en la asignaci\u00f3n", t);
-      }
-    } catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba una asignaci\u00f3n");
-    }
-  }
-
-/*
- * identificacion	::=	identificador ( ( argumentos )? fin_sentencia | asignacion )
- */
-  static final public void identificacion() throws ParseException {
-  Token t;
-  Simbolo s = new Simbolo();
-  Tipo_variable tpID = Tipo_variable.DESCONOCIDO;
-
-  boolean ok = false;
-  boolean hayArgumentos = false;
-    try {
-      t = identificador();
-          try {
-            s = tabla_simbolos.buscar_simbolo(t.image);
-            ok = true;
-          }
-          catch (SimboloNoEncontradoException e) {
-            ErrorSemantico.deteccion(e, t);
-            tpID = Tipo_variable.DESCONOCIDO;
-          }
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case tPARENTESIS_IZQ:
-      case tFIN_SENTENCIA:
-            if (ok && !s.ES_ACCION()) {
-              ErrorSemantico.deteccion(new InvocacionAccionException(), "El s\u00edmbolo no es una acci\u00f3n", t);
-            }
-        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case tPARENTESIS_IZQ:
-          hayArgumentos = argumentos(s, ok);
-          break;
-        default:
-          jj_la1[12] = jj_gen;
-          ;
-        }
-        // TODO borrar
-          // System.err.println("Accion " + s.getNombre() + " tiene argumentos " + hayArgumentos + " tipo " + tpID);
-
-             if (ok && s.ES_ACCION() && !hayArgumentos && !s.getListaParametros().isEmpty()) {
-               ErrorSemantico.deteccion(new InvocacionAccionException(),
-                 "La acci\u00f3n requiere " + s.getListaParametros().size() + " par\u00e1metros", t);
-             }
-        fin_sentencia();
-        break;
-      case tOPAS:
-              if (s.ES_ACCION()) {
-                ErrorSemantico.deteccion("No se puede realizar una asignaci\u00f3n a una acci\u00f3n", t);
-                tpID = Tipo_variable.DESCONOCIDO;
-              }
-              else if (s.ES_PROGRAMA()) {
-                ErrorSemantico.deteccion("No se puede realizar una asignaci\u00f3n a un programa", t);
-                tpID = Tipo_variable.DESCONOCIDO;
-              }
-              else if (s.ES_VARIABLE() || s.ES_PARAMETRO()) {
-                if (s.ES_PARAMETRO() && s.ES_VALOR()) {
-                  ErrorSemantico.deteccion("No se puede realizar una asignaci\u00f3n a un par\u00e1metro por valor", t);
-                }
-                    tpID = s.getVariable();
-                  }
-                  else {
-                    tpID = Tipo_variable.DESCONOCIDO;
-                  }
-        asignacion(tpID);
-        break;
-      default:
-        jj_la1[13] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
-      }
-    } catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba una asignaci\u00f3n o una acci\u00f3n");
-    }
   }
 
 /*
@@ -987,15 +1005,15 @@ public class minilengcompiler implements minilengcompilerConstants {
     ErrorSintactico.deteccion(e, "Se esperaba el token 'ENT'");
     }
     lista_sentencias();
-    label_7:
+    label_8:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tSI_NO:
         ;
         break;
       default:
-        jj_la1[14] = jj_gen;
-        break label_7;
+        jj_la1[15] = jj_gen;
+        break label_8;
       }
       jj_consume_token(tSI_NO);
       lista_sentencias();
@@ -1008,12 +1026,121 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
+ * identificacion	::=	identificador ( ( argumentos )? fin_sentencia | asignacion )
+ */
+  static final public void identificacion() throws ParseException {
+  Token t;
+  RegistroExpr indice = null;
+
+  Simbolo s = null;
+  Tipo_variable tpID = Tipo_variable.DESCONOCIDO;
+
+  boolean hayArgumentos = false;
+    try {
+      t = identificador();
+          try {
+            s = tabla_simbolos.buscar_simbolo(t.image);
+          }
+          catch (SimboloNoEncontradoException e) {
+            ErrorSemantico.deteccion(e, t);
+          }
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tCORCHETE_IZQ:
+      case tOPAS:
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case tCORCHETE_IZQ:
+          corchete_izq();
+          indice = expresion();
+          corchete_der();
+          break;
+        default:
+          jj_la1[16] = jj_gen;
+          ;
+        }
+        asignacion(s, indice, t);
+        fin_sentencia();
+        break;
+      case tPARENTESIS_IZQ:
+      case tFIN_SENTENCIA:
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case tPARENTESIS_IZQ:
+          hayArgumentos = argumentos(s, t);
+          break;
+        default:
+          jj_la1[17] = jj_gen;
+          ;
+        }
+        fin_sentencia();
+        if (s != null) {
+          if (!s.ES_ACCION()) {
+            ErrorSemantico.deteccion(new InvocacionAccionException(),
+              "El simbolo no es una accion", t);
+          }
+          else if (!s.getListaParametros().isEmpty() && !hayArgumentos) {
+            ErrorSemantico.deteccion(new InvocacionAccionException(),
+                  "La acci\u00f3n requiere " + s.getListaParametros().size() + " argumentos", t);
+          }
+        }
+        break;
+      default:
+        jj_la1[18] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+    } catch (ParseException e) {
+    ErrorSintactico.deteccion(e, "Se esperaba una asignaci\u00f3n o una acci\u00f3n");
+    }
+  }
+
+/*
+ * asignacion	::=	<tOPAS> expresion fin_sentencia
+ */
+  static final public void asignacion(Simbolo s, RegistroExpr indice, Token izq) throws ParseException {
+  RegistroExpr reg;
+  Token t;
+    try {
+      t = jj_consume_token(tOPAS);
+      reg = expresion();
+      if (s != null && !reg.esDesc()) {
+        if (!s.ES_VECTOR() && indice != null) {
+          ErrorSemantico.deteccion("El s\u00edmbolo no es un vector", izq);
+        }
+        else if (s.ES_ACCION()) {
+              ErrorSemantico.deteccion("No se puede realizar una asignaci\u00f3n a una acci\u00f3n", izq);
+            }
+            else if (s.ES_PROGRAMA()) {
+              ErrorSemantico.deteccion("No se puede realizar una asignaci\u00f3n a un programa", izq);
+            }
+            else if (s.ES_PARAMETRO() && s.ES_VALOR()) {
+              ErrorSemantico.deteccion("No se puede realizar una asignaci\u00f3n a un par\u00e1metro por valor", izq);
+                }
+                else if (s.ES_VARIABLE() || (s.ES_PARAMETRO() && s.ES_REFERENCIA())) {
+                  if (s.getVariable() != reg.getTipo() || (s.ES_VECTOR() ^ (indice != null)) != reg.esVector()) {
+                    System.err.print(s.getVariable() + " " + reg.getTipo() + " " + s.ES_VECTOR() + " " + (indice == null) + " " + reg.esVector() + "\u005cn");
+            ErrorSemantico.deteccion("Tipos incompatibles en la asignaci\u00f3n", t);
+                  }
+                  else if (s.ES_VECTOR() && reg.esVector() && s.getLongitud() != reg.getLongitud()) {
+                    ErrorSemantico.deteccion("No se puede realizar la asignaci\u00f3n de vectores de diferente longitud", t);
+                  }
+                  else {
+                    // La asignación es correcta
+                    System.err.println("La asignaci\u00f3n es correcta");
+                  }
+                }
+          }
+    } catch (ParseException e) {
+    ErrorSintactico.deteccion(e, "Se esperaba una asignaci\u00f3n");
+    }
+  }
+
+/*
  * argumentos	::=	parentesis_izq ( lista_expresiones )? parentesis_der
  */
-  static final public boolean argumentos(Simbolo s, boolean ok) throws ParseException {
+  static final public boolean argumentos(Simbolo s, Token t) throws ParseException {
   ArrayList<RegistroExpr> listaExpr = null;
-  ArrayList<Simbolo> listaParams = s.getListaParametros();
-  Token t = token;
+  ArrayList<Simbolo> listaParams;
+
+  boolean hayArgumentos = false;
     try {
       parentesis_izq();
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1031,47 +1158,64 @@ public class minilengcompiler implements minilengcompilerConstants {
         listaExpr = lista_expresiones();
         break;
       default:
-        jj_la1[15] = jj_gen;
+        jj_la1[19] = jj_gen;
         ;
       }
       parentesis_der();
-          if (!ok || listaExpr == null || listaExpr.size() <  1) {
-            {if (true) return false;}
-          }
+          if (s != null && listaExpr != null && s.ES_ACCION()) {
+            hayArgumentos = true;
 
-          if (listaExpr.size() != listaParams.size()) {
-            ErrorSemantico.deteccion(new InvocacionAccionException(),
-              "El n\u00famero de argumentos es incorrecto, se esperaban " + listaParams.size(), t);
-          }
-          // Comparar uno a uno, respentando el orden, los argumentos con los parámetros de la acción
-          else {
-        for (int i = 0; i < listaExpr.size(); i++) {
-          if (!listaExpr.get(i).esDesc()) {
-            if (listaExpr.get(i).getTipo() != listaParams.get(i).getVariable()) {
+            listaParams = s.getListaParametros();
+
+                if (listaExpr.size() != listaParams.size()) {
               ErrorSemantico.deteccion(new InvocacionAccionException(),
-              "El tipo del argumento " + (i + 1) + " no coincide con el del par\u00e1metro, se esperaba " + listaParams.get(i).getVariableString(), t);
+              "El n\u00famero de argumentos es incorrecto, se esperaban " + listaParams.size(), t);
             }
-            else if (listaParams.get(i).ES_REFERENCIA()) {
-              // Los argumentos que se pasan por referencia sólo pueden ser variables asignables,
-              // no se puede pasar por referencia un parámetro por valor ni una expresión.
-              if (listaExpr.get(i).esParVal()) {
+            else {
+          for (int i = 0; i < listaExpr.size(); i++) {
+            RegistroExpr arg = listaExpr.get(i);
+            Simbolo param = listaParams.get(i);
+
+            if (!arg.esDesc()) {
+
+              // Comprobar tipo
+              if ((arg.getTipo() != param.getVariable() || arg.esVector() != param.ES_VECTOR())
+                   || (arg.esVector() && param.ES_VECTOR() && arg.getLongitud() != param.getLongitud())) {
+
+                String tipoEsperado = param.getVariableString();
+                if (param.ES_VECTOR()) {
+                  tipoEsperado += "[" + param.getLongitud() + "]";
+                }
+
                 ErrorSemantico.deteccion(new InvocacionAccionException(),
-                "El argumento " + (i + 1) + " es un par\u00e1metro por valor, no es asignable y no se puede pasar por referencia", t);
+                  "El tipo del argumento " + (i + 1) + " no coincide con el del par\u00e1metro, se esperaba " + tipoEsperado, t);
               }
-              else if (!listaExpr.get(i).esAsignable()) {
+
+              // Comprobar que se pase como referencia un argumento asignable
+              else if (param.ES_REFERENCIA() && arg.esParVal()) {
                 ErrorSemantico.deteccion(new InvocacionAccionException(),
-                "La expresi\u00f3n del argumento " + (i + 1) + " no es asignable, as\u00ed que no se puede pasar por referencia", t);
+                  "El argumento " + (i + 1) + " es un par\u00e1metro por valor, no es asignable y no se puede pasar por referencia", t);
+                          }
+              else if (param.ES_REFERENCIA() && !arg.esAsignable()) {
+                ErrorSemantico.deteccion(new InvocacionAccionException(),
+                    "La expresi\u00f3n del argumento " + (i + 1) + " no es asignable, as\u00ed que no se puede pasar por referencia", t);
+              }
+              else {
+                // El argumento es válido
+                System.err.println("El argumento es v\u00e1lido");
               }
             }
           }
         }
-          }
+      }
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una lista de argumentos");
     }
-    {if (true) return true;}
+    {if (true) return hayArgumentos;}
     throw new Error("Missing return statement in function");
   }
+
+// Expresiones
 
 /*
  * lista_expresiones	::=	expresion ( sep_variable expresion )*
@@ -1083,24 +1227,24 @@ public class minilengcompiler implements minilengcompilerConstants {
       // Construir una lista con el tipo y clase de los argumentos
           reg = expresion();
       listaExpr.add(reg);
-      label_8:
+      label_9:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case tSEP_VARIABLE:
           ;
           break;
         default:
-          jj_la1[16] = jj_gen;
-          break label_8;
+          jj_la1[20] = jj_gen;
+          break label_9;
         }
         sep_variable();
         reg = expresion();
         listaExpr.add(reg);
       }
-      {if (true) return listaExpr;}
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una lista de expresiones");
     }
+    {if (true) return listaExpr;}
     throw new Error("Missing return statement in function");
   }
 
@@ -1122,16 +1266,18 @@ public class minilengcompiler implements minilengcompilerConstants {
       case tNI:
         op = operador_relacional();
         reg2 = expresion_simple();
-                reg1 = RegistroExpr.operar(op, reg1, reg2);
+            if (op != null) {
+                  reg1 = RegistroExpr.operar(op, reg1, reg2);
+                }
         break;
       default:
-        jj_la1[17] = jj_gen;
+        jj_la1[21] = jj_gen;
         ;
       }
-          {if (true) return reg1;}
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una expresi\u00f3n");
     }
+    {if (true) return reg1;}
     throw new Error("Missing return statement in function");
   }
 
@@ -1140,41 +1286,42 @@ public class minilengcompiler implements minilengcompilerConstants {
  */
   static final public RegistroOp operador_relacional() throws ParseException {
   Token t;
-  RegistroOp op;
+  RegistroOp op = null;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tIGUAL:
         t = jj_consume_token(tIGUAL);
-                       {if (true) return new RegistroOp(t, RegistroOp.Operador.IGUAL);}
+                       op = new RegistroOp(t, RegistroOp.Operador.IGUAL);
         break;
       case tMENOR:
         t = jj_consume_token(tMENOR);
-                   {if (true) return new RegistroOp(t, RegistroOp.Operador.MENOR);}
+                   op = new RegistroOp(t, RegistroOp.Operador.MENOR);
         break;
       case tMAYOR:
         t = jj_consume_token(tMAYOR);
-                   {if (true) return new RegistroOp(t, RegistroOp.Operador.MAYOR);}
+                   op = new RegistroOp(t, RegistroOp.Operador.MAYOR);
         break;
       case tMAI:
         t = jj_consume_token(tMAI);
-                   {if (true) return new RegistroOp(t, RegistroOp.Operador.MAI);}
+                   op = new RegistroOp(t, RegistroOp.Operador.MAI);
         break;
       case tMEI:
         t = jj_consume_token(tMEI);
-                   {if (true) return new RegistroOp(t, RegistroOp.Operador.MEI);}
+                   op = new RegistroOp(t, RegistroOp.Operador.MEI);
         break;
       case tNI:
         t = jj_consume_token(tNI);
-                   {if (true) return new RegistroOp(t, RegistroOp.Operador.NI);}
+                   op = new RegistroOp(t, RegistroOp.Operador.NI);
         break;
       default:
-        jj_la1[18] = jj_gen;
+        jj_la1[22] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
     } catch (ParseException e) {
-   ErrorSintactico.deteccion(e, "Se esperaba un operador relacional: '=', ' >', '<', '<=', '>=', o '!='");
+    ErrorSintactico.deteccion(e, "Se esperaba un operador relacional: '=', ' >', '<', '<=', '>=', o '!='");
     }
+    {if (true) return op;}
     throw new Error("Missing return statement in function");
   }
 
@@ -1187,7 +1334,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   RegistroOp op;
     try {
       reg1 = termino();
-      label_9:
+      label_10:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case tMAS:
@@ -1196,17 +1343,19 @@ public class minilengcompiler implements minilengcompilerConstants {
           ;
           break;
         default:
-          jj_la1[19] = jj_gen;
-          break label_9;
+          jj_la1[23] = jj_gen;
+          break label_10;
         }
         op = operador_aditivo();
         reg2 = termino();
-        reg1 = RegistroExpr.operar(op, reg1, reg2);
+        if (op != null) {
+          reg1 = RegistroExpr.operar(op, reg1, reg2);
+        }
       }
-      {if (true) return reg1;}
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una expresi\u00f3n simple");
     }
+    {if (true) return reg1;}
     throw new Error("Missing return statement in function");
   }
 
@@ -1215,29 +1364,30 @@ public class minilengcompiler implements minilengcompilerConstants {
  */
   static final public RegistroOp operador_aditivo() throws ParseException {
   Token t;
-  RegistroOp op;
+  RegistroOp op = null;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tMAS:
         t = jj_consume_token(tMAS);
-                   {if (true) return new RegistroOp(t, RegistroOp.Operador.MAS);}
+                   op = new RegistroOp(t, RegistroOp.Operador.MAS);
         break;
       case tMENOS:
         t = jj_consume_token(tMENOS);
-                   {if (true) return new RegistroOp(t, RegistroOp.Operador.MENOS);}
+                   op = new RegistroOp(t, RegistroOp.Operador.MENOS);
         break;
       case tOR:
         t = jj_consume_token(tOR);
-                   {if (true) return new RegistroOp(t, RegistroOp.Operador.OR);}
+                   op = new RegistroOp(t, RegistroOp.Operador.OR);
         break;
       default:
-        jj_la1[20] = jj_gen;
+        jj_la1[24] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un operador aditivo: '+', '-', o 'OR'");
     }
+    {if (true) return op;}
     throw new Error("Missing return statement in function");
   }
 
@@ -1245,12 +1395,12 @@ public class minilengcompiler implements minilengcompilerConstants {
  * termino	::=	factor ( operador_multiplicativo factor )*
  */
   static final public RegistroExpr termino() throws ParseException {
-  RegistroExpr reg1 = new RegistroExpr();
-  RegistroExpr reg2 = new RegistroExpr();
+  RegistroExpr reg1 = null;
+  RegistroExpr reg2;
   RegistroOp op;
     try {
       reg1 = factor();
-      label_10:
+      label_11:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case tPRODUCTO:
@@ -1261,17 +1411,19 @@ public class minilengcompiler implements minilengcompilerConstants {
           ;
           break;
         default:
-          jj_la1[21] = jj_gen;
-          break label_10;
+          jj_la1[25] = jj_gen;
+          break label_11;
         }
         op = operador_multiplicativo();
         reg2 = factor();
-        reg1 = RegistroExpr.operar(op, reg1, reg2);
+        if (op != null) {
+          reg1 = RegistroExpr.operar(op, reg1, reg2);
+        }
       }
-      {if (true) return reg1;}
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un t\u00e9rmino");
     }
+    {if (true) return reg1;}
     throw new Error("Missing return statement in function");
   }
 
@@ -1280,37 +1432,38 @@ public class minilengcompiler implements minilengcompilerConstants {
  */
   static final public RegistroOp operador_multiplicativo() throws ParseException {
   Token t;
-  RegistroOp op;
+  RegistroOp op = null;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tPRODUCTO:
         t = jj_consume_token(tPRODUCTO);
-                      {if (true) return new RegistroOp(t, RegistroOp.Operador.PRODUCTO);}
+                      op = new RegistroOp(t, RegistroOp.Operador.PRODUCTO);
         break;
       case tDIVISION:
         t = jj_consume_token(tDIVISION);
-                      {if (true) return new RegistroOp(t, RegistroOp.Operador.DIVISION);}
+                      op = new RegistroOp(t, RegistroOp.Operador.DIVISION);
         break;
       case tMOD:
         t = jj_consume_token(tMOD);
-                      {if (true) return new RegistroOp(t, RegistroOp.Operador.MOD);}
+                      op = new RegistroOp(t, RegistroOp.Operador.MOD);
         break;
       case tDIV:
         t = jj_consume_token(tDIV);
-                      {if (true) return new RegistroOp(t, RegistroOp.Operador.DIV);}
+                      op = new RegistroOp(t, RegistroOp.Operador.DIV);
         break;
       case tAND:
         t = jj_consume_token(tAND);
-                      {if (true) return new RegistroOp(t, RegistroOp.Operador.AND);}
+                      op = new RegistroOp(t, RegistroOp.Operador.AND);
         break;
       default:
-        jj_la1[22] = jj_gen;
+        jj_la1[26] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un operador multiplicativo: '*', '/', 'MOD', 'AND'");
     }
+    {if (true) return op;}
     throw new Error("Missing return statement in function");
   }
 
@@ -1326,14 +1479,22 @@ public class minilengcompiler implements minilengcompilerConstants {
  */
   static final public RegistroExpr factor() throws ParseException {
   Token t = null;
-  RegistroExpr reg = new RegistroExpr();
   Simbolo s;
+  RegistroExpr indice = null;
+
+  RegistroExpr reg = new RegistroExpr();
+  reg.setTipoDesc();
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tMENOS:
         t = jj_consume_token(tMENOS);
         reg = factor();
-      if (!reg.esEnt() && !reg.esDesc()) {
+      if (reg.esVector()) {
+        ErrorSemantico.deteccion("No se pueden realizar operaciones con vectores", t);
+        reg.setVector(false);
+        reg.setTipoEnt();
+      }
+      else if (!reg.esEnt() && !reg.esDesc()) {
         ErrorSemantico.deteccion("Tipo incompatible. Se esperaba entero", t);
         reg.setTipoEnt();
       }
@@ -1341,11 +1502,19 @@ public class minilengcompiler implements minilengcompilerConstants {
         reg.setValorEnt(-reg.getValorEnt());
       }
       reg.setAsignable(false);
+
+      // Generacion código
+      reg.getInstr().addMenosUnario();
         break;
       case tMAS:
         t = jj_consume_token(tMAS);
         reg = factor();
-      if (!reg.esEnt() && !reg.esDesc()) {
+      if (reg.esVector()) {
+        ErrorSemantico.deteccion("No se pueden realizar operaciones con vectores", t);
+        reg.setVector(false);
+        reg.setTipoEnt();
+      }
+      else if (!reg.esEnt() && !reg.esDesc()) {
         ErrorSemantico.deteccion("Tipo incompatible. Se esperaba entero", t);
         reg.setTipoEnt();
       }
@@ -1354,7 +1523,11 @@ public class minilengcompiler implements minilengcompilerConstants {
       case tNOT:
         t = jj_consume_token(tNOT);
         reg = factor();
-      if (!reg.esBool() && !reg.esDesc()) {
+      if (reg.esVector()) {
+        ErrorSemantico.deteccion("No se pueden realizar operaciones con vectores", t);
+        reg.setVector(false);
+      }
+      else if (!reg.esBool() && !reg.esDesc()) {
         ErrorSemantico.deteccion("Tipo incompatible. Se esperaba booleano", t);
         reg.setTipoBool();
       }
@@ -1362,6 +1535,9 @@ public class minilengcompiler implements minilengcompilerConstants {
         reg.setValorBool(!reg.getValorBool());
       }
           reg.setAsignable(false);
+
+          // Generacion código
+          reg.getInstr().addNegacionUnaria();
         break;
       case tPARENTESIS_IZQ:
         parentesis_izq();
@@ -1374,8 +1550,9 @@ public class minilengcompiler implements minilengcompilerConstants {
         parentesis_izq();
         reg = expresion();
         parentesis_der();
-          if (!reg.esEnt() && !reg.esDesc()) {
+          if (reg.esVector() || !reg.esEnt() && !reg.esDesc()) {
             ErrorSemantico.deteccion("La expresi\u00f3n no se puede convertir en un car\u00e1cter v\u00e1lido", t);
+            reg.setVector(false);
           }
           else if (reg.esEnt() && reg.getValorEnt() != null) {
             Integer carNum = reg.getValorEnt();
@@ -1394,8 +1571,9 @@ public class minilengcompiler implements minilengcompilerConstants {
         parentesis_izq();
         reg = expresion();
         parentesis_der();
-      if (!reg.esChar() && !reg.esDesc()) {
+      if (reg.esVector() || !reg.esChar() && !reg.esDesc()) {
         ErrorSemantico.deteccion("La expresi\u00f3n no se puede convertir en un entero v\u00e1lido", t);
+        reg.setVector(false);
       }
       else if (reg.esChar() && reg.getValorChar() != null) {
         Character car = reg.getValorChar();
@@ -1412,38 +1590,87 @@ public class minilengcompiler implements minilengcompilerConstants {
         break;
       case tIDENTIFICADOR:
         t = identificador();
-      try {
-        reg = new RegistroExpr();
-        s = tabla_simbolos.buscar_simbolo(t.image);
-        if (s.ES_VARIABLE()) {
-          reg.setTipo(s.getVariable());
-          reg.setAsignable(true);
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case tCORCHETE_IZQ:
+          corchete_izq();
+          indice = expresion();
+          corchete_der();
+          break;
+        default:
+          jj_la1[27] = jj_gen;
+          ;
         }
-        else if (s.ES_PARAMETRO()) {
-          reg.setTipo(s.getVariable());
-          if (s.ES_VALOR()) {
-            reg.setParVal();
-          }
-          else if (s.ES_REFERENCIA()) {
-            reg.setParRef();
+      if (t != null) {
+        try {
+          // puede ser una variable simple o un vector
+
+          s = tabla_simbolos.buscar_simbolo(t.image);
+
+          if (s.ES_VARIABLE()) {
+            reg.setTipo(s.getVariable());
             reg.setAsignable(true);
           }
+          else if (s.ES_PARAMETRO()) {
+            reg.setTipo(s.getVariable());
+            if (s.ES_VALOR()) {
+              reg.setParVal();
+            }
+            else if (s.ES_REFERENCIA()) {
+              reg.setParRef();
+              reg.setAsignable(true);
+            }
+          }
+          else if (s.ES_ACCION()) {
+            ErrorSemantico.deteccion("No se puede utilizar una acci\u00f3n dentro de una expresi\u00f3n", t);
+            reg.setTipoDesc();
+          }
+          else if (s.ES_PROGRAMA()) {
+            ErrorSemantico.deteccion("No se puede utilizar un programa dentro de una expresi\u00f3n", t);
+            reg.setTipoDesc();
+          }
+          else {
+            reg.setTipoDesc();
+          }
+
+
+          // Vectores
+          if (s.ES_VECTOR()) {
+            if (indice == null) {
+              System.err.println("Vector completo: " + s.getNombre() + " " + s.getLongitud());
+
+              // Vector completo
+              reg.setVector(true);
+              reg.setLongitud(s.getLongitud());
+
+              System.err.println("Registro: " + reg.getTipo() + " " + reg.esVector() + " " + reg.getLongitud());
+            }
+            else {
+              // Acceso a una componente del vector
+              System.err.println("Acceso a componente de vector: " + s.getNombre() + " " + s.getLongitud() + " " + indice.getValorEnt());
+
+              // Comprobar tipo
+              if (!indice.esDesc() && !indice.esEnt()) {
+                ErrorSemantico.deteccion("La expresi\u00f3n para acceder a una componente del vector debe ser entera", t);
+              }
+              else if (indice.esEnt()) {
+                // Comprobar overflow/underflow
+                if (indice.getValorEnt() < 0) {
+                  Aviso.deteccion(new UnderflowException(), t);
+                }
+                else if (indice.getValorEnt() >= s.getLongitud() - 1) {
+                  Aviso.deteccion(new OverflowException(), t);
+                }
+              }
+            }
+          }
+          else if (indice != null) {
+            ErrorSemantico.deteccion("El s\u00edmbolo no es un vector", t);
+          }
         }
-        else if (s.ES_ACCION()) {
-          ErrorSemantico.deteccion("No se puede utilizar una acci\u00f3n dentro de una expresi\u00f3n", t);
+        catch (SimboloNoEncontradoException e) {
+          ErrorSemantico.deteccion(e, t);
           reg.setTipoDesc();
         }
-        else if (s.ES_PROGRAMA()) {
-          ErrorSemantico.deteccion("No se puede utilizar un programa dentro de una expresi\u00f3n", t);
-          reg.setTipoDesc();
-        }
-        else {
-          reg.setTipoDesc();
-        }
-      }
-      catch (SimboloNoEncontradoException e) {
-        ErrorSemantico.deteccion(e, t);
-        reg.setTipoDesc();
       }
         break;
       case tCONSTENTERA:
@@ -1471,14 +1698,14 @@ public class minilengcompiler implements minilengcompilerConstants {
       reg.setValorBool(false);
         break;
       default:
-        jj_la1[23] = jj_gen;
+        jj_la1[28] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un factor");
     }
-    {if (true) return reg;}
+     {if (true) return reg;}
     throw new Error("Missing return statement in function");
   }
 
@@ -1492,7 +1719,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   static public Token jj_nt;
   static private int jj_ntk;
   static private int jj_gen;
-  static final private int[] jj_la1 = new int[24];
+  static final private int[] jj_la1 = new int[29];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -1500,10 +1727,10 @@ public class minilengcompiler implements minilengcompilerConstants {
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x70000000,0x70000000,0x0,0x2000000,0xc000000,0x0,0x0,0xc000000,0x688000,0x688000,0x0,0x1800000,0x0,0x0,0x20000,0x1800000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1800000,};
+      jj_la1_0 = new int[] {0x70000000,0x70000000,0x0,0x0,0x2000000,0x0,0x0,0xc000000,0x0,0xc000000,0x0,0x688000,0x688000,0x0,0x1800000,0x20000,0x0,0x0,0x0,0x1800000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x1800000,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x0,0x0,0x80,0x0,0x0,0x2,0x40,0x0,0x8000000,0x8000000,0x80,0x7e010302,0x2,0x62,0x0,0x3e010302,0x80,0x7e0000,0x7e0000,0x8300,0x8300,0x7c00,0x7c00,0x3e010302,};
+      jj_la1_1 = new int[] {0x0,0x0,0x80,0x8,0x0,0x2,0x40,0x0,0x80,0x0,0x8,0x8000000,0x8000000,0x80,0x7e010302,0x0,0x8,0x2,0x6a,0x3e010302,0x80,0x7e0000,0x7e0000,0x8300,0x8300,0x7c00,0x7c00,0x8,0x3e010302,};
    }
 
   /** Constructor with InputStream. */
@@ -1524,7 +1751,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 29; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1538,7 +1765,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 29; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -1555,7 +1782,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 29; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1565,7 +1792,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 29; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -1581,7 +1808,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 29; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1590,7 +1817,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 29; i++) jj_la1[i] = -1;
   }
 
   static private Token jj_consume_token(int kind) throws ParseException {
@@ -1646,7 +1873,7 @@ public class minilengcompiler implements minilengcompilerConstants {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 24; i++) {
+    for (int i = 0; i < 29; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -1680,4 +1907,4 @@ public class minilengcompiler implements minilengcompilerConstants {
   static final public void disable_tracing() {
   }
 
-         }
+}

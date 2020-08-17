@@ -40,6 +40,8 @@ import lib.semantico.InvocacionAccionException;
 import lib.semantico.ErrorSemantico;
 import lib.semantico.RegistroExpr;
 import lib.semantico.RegistroOp;
+import lib.semantico.UnderflowException;
+import lib.semantico.OverflowException;
 import lib.aviso.Aviso;
 
 
@@ -87,73 +89,77 @@ public class minilengcompiler {
       	System.exit(0);
     }
 
+    private static void opcionInvalida(String opcion) {
+        System.err.println("MiniLeng: Opción inválida: '" + opcion + "'\n");
+        help();
+    }
+
+    private static String procesarArgumentos(String args[]) {
+      	String fichero_entrada = null;
+		ArrayList<String> opciones = new ArrayList<String>();
+		
+      	// Obtener opciones
+		for (String arg : args) {
+		    if (arg.charAt(0) == '-') {
+		      // opciones
+		      if (arg.length() == 1) {
+		          opcionInvalida(arg);
+		      }
+		      else if (arg.charAt(1) == '-') {
+		          opciones.add(arg);
+		      }
+		      else {
+		      	  for (String opt : arg.substring(1).split("")) {
+		      	      opciones.add("-" + opt);
+		      	  }
+		      }
+		    }
+		    else {
+		      // fichero de entrada
+		      fichero_entrada = arg;
+		      break;
+		    }
+		}
+
+		// Activar opciones
+		for (String opt : opciones) {
+		    switch(opt) {
+				case "-h":
+				case "--help":
+			    	help();
+			    	break;
+			    case "--version":
+			        version();
+			    	break;
+			  	case "-v":
+				case "--verbose":				
+					verbose_mode = true;
+					break;
+				case "-p":
+				case "--panic":
+					panic_mode = true;
+					break;
+				case "-t":
+				case "--tokens":
+		        	show_tokens = true;
+		        	break;
+				default:
+				    opcionInvalida(opt);
+		    }
+		}
+		return fichero_entrada;
+	}	
+
+
 	public static void main(String args []) throws ParseException {
 		System.out.println("Compilador de MiniLeng -- v" + version + " (" + fecha_version + ")");
     	System.out.println("Autor: Fernando Peña Bes (NIA: 756012)\n");
 
 		// Entrada al programa
     	InputStream stream = System.in;
-    	String fichero_entrada = null;
-
-
-    	if (args.length == 0) {
-    	  	// Compilador llamado sin argumentos
-    	}
-    	else if (args[0].equals("-h") || args[0].equals("--help")) {
-    	  	// Mostrar ayuda y salir
-    	  	help();
-  		}
-  		else if (args[0].equals("--version")) {
-    	  	// Mostrar version y salir
-    	  	version();
-  		}
-  		else {
-  			// Leer los argumentos.
-  			// Va leyendo hasta que encuentra uno que no empieza por '-',
-  			// ese argumento se considera como fichero de entrada
-  			for (int i = 0; i < args.length; i++) {
-  			    switch(args[i]) {
-  			        case "-h":
-  			        case "--help":
-  			        case "--version":
-  			            // Ignorar si aparece ayuda o versión de nuevo
-  			        	break;
-
-  			      	case "-v":
-  			      	case "--verbose":
-  			      		// Activar modo verboso
-  			      		verbose_mode = true;
-  			      		break;
-
-  			      	case "-p":
-  			      	case "--panic":
-  			      		// Activar modo pánico
-  			      		panic_mode = true;
-  			      		break;
-
-  			        case "-t":
-  			        case "--tokens":
-  			        	// Mostrar tokens conforme se reconocen
-  			        	show_tokens = true;
-  			        	break;
-
-					default:
-						if (args[i].charAt(0) == '-') {
-							System.err.println("MiniLeng: Opción inválida <" + args[i] + ">\n");
-							help();
-						}
-						else {
-						  	fichero_entrada = args[i];
-						}
-						break;
-  			    }
-  			}
- 		}
-
+    	String fichero_entrada = procesarArgumentos(args);
 
 		if (fichero_entrada != null) {
-		  	// Lectura del fichero del usuario.
-
 			// Si el fichero no terminal en .ml, error
 			if (!fichero_entrada.endsWith(".ml")) {
         		System.err.println("MiniLeng: El fichero a compilar tiene que tener extensión .ml");
@@ -162,9 +168,8 @@ public class minilengcompiler {
 			}
 
 			// Ejecutar el compilador con los fichero introducidos
-			System.out.println("MiniLeng: Leyendo el fichero " + fichero_entrada + " ...");
+			System.out.println("MiniLeng: Leyendo el fichero '" + fichero_entrada + "'...");
       		try {
-        		// parser = new minilengcompiler(new FileInputStream(args[0]));
         		stream = new FileInputStream(fichero_entrada);
       		}
       		catch (FileNotFoundException e) {
@@ -184,12 +189,19 @@ public class minilengcompiler {
     		minilengcompiler.programa();
         }
         catch (Exception e) {
+      		// TODO: ELIMINAR ESTO
+      		System.err.println(e.getMessage());
+      		
             System.err.println("Error en el compilador");
             System.err.println("Cabeza de lectura: (línea " + token.beginLine + ", columna " + token.beginColumn + ") " + token);
            	throw e;
         }
         catch (Error e) {
 		  	// Detectado error léxico
+
+		  	// TODO: ELIMINAR ESTO
+		  	System.err.println(e.getMessage());
+		  	
 			SimpleCharStream entrada = minilengcompilerTokenManager.input_stream;
 			String error;
 
@@ -204,12 +216,15 @@ public class minilengcompiler {
 		}
 
 		// Imprimir resultados de la compilación
-		resultadosCompilacion();
+		resultadosCompilacion(fichero_entrada);
     }
 
-	static void resultadosCompilacion() {
-	  	System.out.println("");
+	static void resultadosCompilacion(String fichero_entrada) {
+	  	System.out.println();
 
+		// Cambiar extensión .ml por .code
+	  	String fichero_salida = fichero_entrada.substring(0, fichero_entrada.length() - 2) + "code";
+	  	
 	  	// Mostrar contadores de errores
 		if (ErrorLexico.getContadorErrores() > 0) {
 		  	compilado_sin_errores = false;
@@ -232,20 +247,23 @@ public class minilengcompiler {
 
 	    if (PanicMode.getContadorErrores() > 0) {
 		  	entrado_en_panic = true;
-		  	System.out.println("Veces activado panic mode: " + PanicMode.getContadorErrores());
+		  	System.out.println("Número de activaciones del panic mode: " + PanicMode.getContadorErrores());
 		}
 
 		// Resultados compilacion
 		if (!compilado_sin_errores) {
-		  	System.out.println("No se ha podido compilar el programa.");
+		  	System.out.println("\nNo se ha podido compilar el programa.");
 		}
 		else if (entrado_en_panic) {
-		  	System.out.println("Se ha activado el panic mode durante la compilación. Corrige los errores y vuelve a compilar.");
+		  	System.out.println("\nSe ha activado el panic mode durante la compilación. Es necesario corregir los errores y volver a compilar.");
 		}
 		else {
-		  	System.out.println("Compilado sin errores!");
+		  	System.out.println("\nCompilación finalizada. Se ha generado el fichero '" + fichero_salida + "'");
 		}
-	}}PARSER_END(minilengcompiler)
+	}
+}
+
+PARSER_END(minilengcompiler)
 
 
 
@@ -391,6 +409,7 @@ TOKEN : /* AGRUPACIONES */
     tabla_ocurrencias.incrementar(TablaOcurrencias.Agrupaciones.tPARENTESIS_DER);
   }
 }
+
 
 TOKEN : /* VECTORES */
 {
@@ -580,10 +599,14 @@ int programa() :
     if (verbose_mode) {
       token_source.tabla_ocurrencias.imprimirTabla();
     }
+
+	// Fin del compilador
     return 0;
   }
 
 }
+
+
 
 
 // Declaraciones de separadores y limitadores de bloque
@@ -636,6 +659,47 @@ void parentesis_der() :
   }
 }
 
+void corchete_izq() :
+{}
+{
+  try {
+    < tCORCHETE_IZQ >
+  }
+  catch (ParseException e) {
+    ErrorSintactico.deteccion(e, "Se esperaba '['");
+  }
+}
+void corchete_der() :
+{}
+{
+  try {
+    < tCORCHETE_DER >
+  }
+  catch (ParseException e) {
+    ErrorSintactico.deteccion(e, "Se esperaba ']'");
+  }
+}
+
+Integer longitud_const() :
+{
+  Token t;
+  Integer len = null;
+}
+{
+  try { 
+    t = < tCONSTENTERA >
+    { 
+      len = Integer.parseInt(t.image);
+    }
+  }
+  catch (ParseException e) {
+    ErrorSintactico.deteccion(e, "Se esperaba una constante entera");
+  }
+  {
+    return len;
+  }
+}
+
 void principio() :
 {}
 {
@@ -657,25 +721,26 @@ void fin() :
   }
 }
 
-
-// Sintaxis del lenguaje
-
 Token identificador() :
 {
-  Token t;
+  Token t = null;
 }
 {
-  try {
-    t = < tIDENTIFICADOR >
-    {
-        return t;
-  	}
+  try { 
+  	t = < tIDENTIFICADOR >
   }
-  catch (ParseException e) {
+  catch(ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un identificador");
   }
+  {
+    return t;
+  } 
 }
 
+
+
+
+// Declaracion de variables
 
 /*
  * declaracion_variables ::= ( declaracion fin_sentencia )*
@@ -704,22 +769,7 @@ void declaracion() :
 {
   try {
   	tipo = tipo_variables()
-  	listaIdentificadores = identificadores()
-  	{
-  	  System.out.println("Entrado en declaracion");
-  	}
-  	{
-  	  for (Token id : listaIdentificadores) {
-  	    try {
-  	      System.out.println("Se va a introducir una variable: " + id.image);
-  	      tabla_simbolos.introducir_variable(id.image, tipo, nivel, dir);
-  	      dir++;
-  	    }
-  	    catch (SimboloYaDeclaradoException e) {
-  	      ErrorSemantico.deteccion(e, id);
-  	    }
-  	  }
-  	}
+  	identificadores(tipo)
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una declaración de variables");
@@ -729,49 +779,75 @@ void declaracion() :
  * tipo_variables	::=	( <tENTERO> | <tCARACTER> | <tBOOLEANO> )
  */
 Tipo_variable tipo_variables() :
-{}
+{
+  Tipo_variable variable = null;
+}
 {
   try {
-  	<tENTERO> { return Tipo_variable.ENTERO; }
-  | <tCARACTER> { return Tipo_variable.CHAR; }
-  | <tBOOLEANO> { return Tipo_variable.BOOLEANO; }
+  	<tENTERO> { variable = Tipo_variable.ENTERO; }
+  | <tCARACTER> { variable = Tipo_variable.CHAR; }
+  | <tBOOLEANO> { variable = Tipo_variable.BOOLEANO; }
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un tipo de dato");
   }
+  {
+    return variable;
+  }
 }
 /*
- * identificadores	::=	identificador ( sep_variable identificador )*
+ * identificadores	::=	(identificador | vector) ( sep_variable (identificador | vector) )*
  */
-ArrayList<Token> identificadores() :
+void identificadores(Tipo_variable tipo) :
 {
-	ArrayList<Token> tokens = new ArrayList<Token>();
-	Token t; 
 }
 {
   try {
-  	t = identificador()
-  	{
-  	  System.out.println("Leido el identificador: " + t.image);
-  	  tokens.add(t);
-  	}
-  	
-  	(
-  	  sep_variable()
-  	  t = identificador()
-  	  {
-  	    System.out.println("Leido el identificador: " + t.image);
-  	    tokens.add(t);
+  	identificador_declaracion(tipo) (sep_variable() identificador_declaracion(tipo))*
+  }
+  catch (ParseException e) {
+    ErrorSintactico.deteccion(e, "Se esperaba uno o varios identificadores o vectores");
+  }
+}
+
+void identificador_declaracion(Tipo_variable tipo) :
+{
+  Token id = null;
+  Integer len = null;
+}
+{
+  try {
+    id = identificador() ( corchete_izq() len = longitud_const() corchete_der() )?
+    { 
+      try {
+        if (id != null && tipo != null) { 
+          System.err.println("Identificador declaracion " + id.image + " " + len);
+          if (len == null) {
+            // variable
+            System.out.println("Se va a introducir una variable: " + id.image);
+            tabla_simbolos.introducir_variable(id.image, tipo, nivel, dir);
+          }
+          else {
+            // vector
+            System.out.println("Se va a introducir una variable vector: " + id.image + " " + len);
+            tabla_simbolos.introducir_variable_vector(id.image, tipo, len, nivel, dir);
+          }
+          dir++;
+  	    }
   	  }
-  	)*
-  	{
-  	  return tokens;
+  	  catch (SimboloYaDeclaradoException e) {
+  	    ErrorSemantico.deteccion(e, id);
+  	  }
   	}
   }
   catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba uno o varios identificadores");
+    ErrorSintactico.deteccion(e, "Se esperaba la declaración de una variable o vector");
   }
 }
+
+
+
+// Declaración de acciones
 
 /*
  * declaracion_acciones	::=	( declaracion_accion )*
@@ -819,39 +895,33 @@ void declaracion_accion() :
   }
 }
 /*
- * cabecera_accion	::=	<tACCION> identificador parametros_formales
+ * cabecera_accion	::=	<tACCION> identificador ( parametros_formales )?
  */
 void cabecera_accion() :
 {
-  Token t;
-  Simbolo s = new Simbolo();
-  boolean ok = false;
-  ArrayList<Simbolo> parametros = new ArrayList<Simbolo>();
+  Token id;
+  Simbolo s = null;
 }
 {
   try {
   	<tACCION>
   	
-  	t = identificador()
+  	id = identificador()
   	{
   	  // Procesar símbolo del identificador
-  	  try {
-  	    System.out.println("Se va a introducir una accion " + t.image);
-  	    s = tabla_simbolos.introducir_accion(t.image, nivel, dir);
-  	    ok = true;
+  	  if (id != null) { 
+  	    try {
+  	      System.out.println("Se va a introducir una accion " + id.image);
+  	      s = tabla_simbolos.introducir_accion(id.image, nivel, dir);
+  	    }
+  	    catch (SimboloYaDeclaradoException e) {
+  	      ErrorSemantico.deteccion(e, id);
+  	    }
+  	    nivel++;
   	  }
-  	  catch (SimboloYaDeclaradoException e) {
-  	    ErrorSemantico.deteccion(e, t);
-  	  }
-  	  nivel++;
   	}
   	
-  	parametros = parametros_formales(t.image)
-  	{
-  	  if (ok) {
-  	    s.setListaParametros(parametros);
-  	  } 
-  	}
+  	( parametros_formales(s) )?
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Falta la cabecera de la acción");
@@ -859,105 +929,122 @@ void cabecera_accion() :
 }
 
 /*
- * parametros_formales	::=	( parentesis_izq ( lista_parametros )? parentesis_der )?
+ * parametros_formales	::=	parentesis_izq ( parametros ( fin_sentencia parametros )* )? parentesis_der
  */
-ArrayList<Simbolo> parametros_formales(String nombreAccion) :
-{
-  ArrayList<Simbolo> parametros = new ArrayList<Simbolo>();
-}
+void parametros_formales(Simbolo s) :
+{}
 {
   try {
-	( parentesis_izq() ( parametros = lista_parametros() )? parentesis_der() )?
-	{
-	  return parametros;
-	}
+    parentesis_izq()
+    ( parametros(s) ( fin_sentencia() parametros(s) )* )?
+    parentesis_der()
   }
   catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "");
+    ErrorSintactico.deteccion(e, "Se esperaban los parametros formales de la accion");
   }
 }
-/*
- * lista_parametros	::=	parametros ( fin_sentencia parametros )*
- */
-ArrayList<Simbolo> lista_parametros() :
-{
-  ArrayList<Simbolo> parametros;
-  ArrayList<Simbolo> parametrosAux;
-}
-{
-  try {
-  	parametros = parametros()
-  	(
-  	  fin_sentencia()
-  	  parametrosAux = parametros()
-  	  {
-  	    parametros.addAll(parametrosAux);
-  	  }
-  	)*
-  	{
-  	  return parametros;
-  	}
-  }
-  catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaban uno o varios parámetros");
-  }
-}
+
 /*
  * parametros	::=	clase_parametros tipo_variables identificadores
  */
-ArrayList<Simbolo> parametros() :
+void parametros(Simbolo s) :
 {
   Clase_parametro clase;
   Tipo_variable tipo;
-  ArrayList<Token> listaIdentificadores = new ArrayList<Token>();
-
-  Simbolo s;
-  ArrayList<Simbolo> parametros = new ArrayList<Simbolo>();
 }
 {
   try {
-  	clase = clase_parametros()
-  	tipo = tipo_variables()
-  	listaIdentificadores = identificadores()
-  	{
-  	  for (Token id : listaIdentificadores) {
-  	    try {
-  	      System.out.println("Se va a introducir un parametro: " + id.image + " " + tipo + " " + clase);
-  	      s = tabla_simbolos.introducir_parametro(id.image, tipo, clase, nivel, dir);
-  	      parametros.add(s);
-  	    }
-  	    catch (SimboloYaDeclaradoException e) {
-  	      // Si el símbolo está ya declarado, se introduce como un parámetro anónimo
-  	      // en la lista de parametros para poder hacer la comprobación de signatura
-  	      // al llamar a la función, pero no se mete en la tabla de simbolos. 
-  	      ErrorSemantico.deteccion(e, id);
-  	      s = new Simbolo();
-  	      s.introducir_parametro("__anonymus", tipo, clase, nivel, dir);
-  	      parametros.add(s);
-  	    }
-  	  }
-  	  return parametros;
-  	}
+    clase = clase_parametros()
+    tipo = tipo_variables()
+    lista_parametros(clase, tipo, s)
   }
   catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba un parámetro");
+    ErrorSintactico.deteccion(e, "Se esperaban parámetros");
+  }
+}
+/*
+ * lista_parametros	::=	parametros ( sep_variable parametros )*
+ */
+void lista_parametros(Clase_parametro clase, Tipo_variable tipo, Simbolo s) :
+{}
+{
+  try { 
+    identificador_parametro(clase, tipo, s)
+    ( sep_variable() identificador_parametro(clase, tipo, s) )*
+  }
+  catch (ParseException e) {
+	ErrorSintactico.deteccion(e, "Se esperaba una lista de parámetros");
   }
 }
 /*
  * clase_parametros	::=	( <tVAL> | <tREF> )
  */
 Clase_parametro clase_parametros() :
-{}
+{
+  Clase_parametro clase = null;
+}
 {
   try {
-  	<tVAL> { return Clase_parametro.VAL; }
-    | <tREF> { return Clase_parametro.REF; }
+  	  <tVAL> { clase = Clase_parametro.VAL; }
+    | <tREF> { clase = Clase_parametro.REF; }
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un tipo de parametro");
   }
+  {
+    return clase;
+  }
 }
 
+
+void identificador_parametro(Clase_parametro clase, Tipo_variable tipo, Simbolo s) :
+{
+  Token id;
+  Integer len = null;
+  Simbolo par = null;
+}
+{
+  try { 
+    id = identificador() ( corchete_izq() len = longitud_const() corchete_der() )?
+    {
+      if (id != null && clase != null && tipo != null) { 
+        try { 
+          if (len == null) {
+            // parametro
+	        System.out.println("Se va a introducir un parametro: " + id.image + " " + tipo + " " + clase);
+  	        par = tabla_simbolos.introducir_parametro(id.image, tipo, clase, nivel, dir);
+          }
+          else {
+            // parametro vector
+            System.out.println("Se va a introducir un parametro vector: " + id.image + " " + tipo + " " + clase);
+	        par = tabla_simbolos.introducir_parametro_vector(id.image, tipo, clase, len, nivel, dir);
+          }
+
+          if (s != null) {
+            // añadir el parametro a la acción
+            s.addParametro(par);
+          }
+        }
+        catch (SimboloYaDeclaradoException e) {
+          // Si el símbolo está ya declarado, se introduce como un parámetro anónimo
+  	      // en la lista de parametros para poder hacer la comprobación de signatura
+  	      // al llamar a la función, pero no se mete en la tabla de simbolos. 
+  	      ErrorSemantico.deteccion(e, id);
+  	      s = new Simbolo();
+  	      s.introducir_parametro("__anonymus", tipo, clase, nivel, dir);
+        }
+      }
+    }
+  }
+  catch (ParseException e) {
+	ErrorSintactico.deteccion(e, "Se esperaba un parámetro");
+  }
+}
+
+
+
+
+// Sentencias
 
 /*
  * bloque_sentencias	::=	principio lista_sentencias fin
@@ -1023,7 +1110,7 @@ void leer() :
  */
 void lista_asignables(Token t) :
 {
-  ArrayList<RegistroExpr> listaExpr = null;
+  ArrayList<RegistroExpr> listaExpr;
 }
 {
   try {
@@ -1032,11 +1119,15 @@ void lista_asignables(Token t) :
   	  System.out.println(listaExpr.get(0));
   	  for (int i = 0; i < listaExpr.size(); i++) {
   	    if (!listaExpr.get(i).esDesc()) {
-  	      if (listaExpr.get(i).esParVal()) {
+  	      if (listaExpr.get(i).esVector()) {
+            ErrorSemantico.deteccion(new InvocacionAccionException(), 
+  	          "La expresión " + (i + 1) + " es un vector, no es asignable en una instrucción leer", t);
+  	      }
+  	      else if (listaExpr.get(i).esParVal()) {
             ErrorSemantico.deteccion(new InvocacionAccionException(), 
               "La expresión " + (i + 1) + " es un parámetro por valor, no es asignable", t);
           }
-  	      if (!listaExpr.get(i).esAsignable()) {
+  	      else if (!listaExpr.get(i).esAsignable()) {
   	        ErrorSemantico.deteccion(new InvocacionAccionException(), 
               "La expresión " + (i + 1) + " no es asignable", t);
   	      }
@@ -1062,6 +1153,8 @@ void escribir() :
   	   // Se pueden escribir variables simples.
   	   // Como salida se muestra el valor entero
        // o las cadenas "Verdadero" y "Falso"
+
+       // Pensar si se pueden escribir vectores
        
   	}
   }
@@ -1083,144 +1176,50 @@ ArrayList<RegistroExpr> lista_escribibles() :
     // Expresiones y cadenas de caracteres
     reg = escribible()
     {
-      listaExpr.add(reg);
+      if (reg != null) { 
+        listaExpr.add(reg);
+      }
     }
     (      sep_variable()
       reg = escribible()
       {
-        listaExpr.add(reg);
+        if (reg != null) { 
+          listaExpr.add(reg);
+        }
       }
     )*
-    {
-      return listaExpr;
-    }
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una lista de escribibles");
+  }
+  {
+    return listaExpr;
   }
 }
 
 RegistroExpr escribible() :
 {
-  RegistroExpr reg;
+  RegistroExpr reg = null;
   Token t;
 }
 {
   try {
     reg = expresion()
-    {
-      return reg;
-    }
   | t = < tCONSTCAD>
     {
       reg = new RegistroExpr();
       reg.setTipoCad();
       reg.setValorCad(t.image);
-      return reg;
     }
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un escribible");
   }
-}
-
-/*
- * asignacion	::=	<tOPAS> expresion fin_sentencia
- */
-void asignacion(Tipo_variable tpID) :
-{
-  RegistroExpr reg;
-  Token t;
-}
-{
-  try {
-    t = <tOPAS> reg = expresion() fin_sentencia()
-    {
-      if (tpID != Tipo_variable.DESCONOCIDO && !reg.esDesc() && tpID != reg.getTipo()) {
-        ErrorSemantico.deteccion("Tipos incompatibles en la asignación", t);
-      }
-    }
-  }
-  catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba una asignación");
+  {
+    return reg;
   }
 }
 
-/*
- * identificacion	::=	identificador ( ( argumentos )? fin_sentencia | asignacion )
- */
-void identificacion() :
-{
-  Token t;
-  Simbolo s = new Simbolo();
-  Tipo_variable tpID = Tipo_variable.DESCONOCIDO;
-
-  boolean ok = false;
-  boolean hayArgumentos = false;
-}
-{
-  try {
-  	t = identificador()
-  	{
-	  try { 
-  	    s = tabla_simbolos.buscar_simbolo(t.image);
-  	    ok = true;
-  	  }
-  	  catch (SimboloNoEncontradoException e) {
-  	    ErrorSemantico.deteccion(e, t);
-  	    tpID = Tipo_variable.DESCONOCIDO;
-  	  }
-  	}
-  	(
-  	  // Llamada a acción. Comprobación de los argumentos
-  	  {
-  	    if (ok && !s.ES_ACCION()) {
-  	      ErrorSemantico.deteccion(new InvocacionAccionException(), "El símbolo no es una acción", t);
-  	    }
-  	  }
-
-  	  ( hayArgumentos = argumentos(s, ok))?
-  	  
-      {
-        // TODO borrar
-  	  // System.err.println("Accion " + s.getNombre() + " tiene argumentos " + hayArgumentos + " tipo " + tpID);
-        
-	     if (ok && s.ES_ACCION() && !hayArgumentos && !s.getListaParametros().isEmpty()) {
-	       ErrorSemantico.deteccion(new InvocacionAccionException(),
-  	         "La acción requiere " + s.getListaParametros().size() + " parámetros", t);
-	     }
-  	  }
-  	  
-  	  fin_sentencia()
-
-  	  // Asignación
-  	  |
-
-		{
-	      if (s.ES_ACCION()) {
-  	        ErrorSemantico.deteccion("No se puede realizar una asignación a una acción", t);
-  	        tpID = Tipo_variable.DESCONOCIDO;
-  	      }
-  	      else if (s.ES_PROGRAMA()) {
-  	        ErrorSemantico.deteccion("No se puede realizar una asignación a un programa", t);
-  	        tpID = Tipo_variable.DESCONOCIDO;
-  	      }
-  	      else if (s.ES_VARIABLE() || s.ES_PARAMETRO()) {
-  	        if (s.ES_PARAMETRO() && s.ES_VALOR()) {
-  	          ErrorSemantico.deteccion("No se puede realizar una asignación a un parámetro por valor", t);
-  	        }
-  	   	    tpID = s.getVariable();
-  	   	  }
-  	   	  else {
-  	   	    tpID = Tipo_variable.DESCONOCIDO;
-  	   	  }
-  	    }
-  	    asignacion(tpID) )
-  }
-  catch (ParseException e) {
-    ErrorSintactico.deteccion(e, "Se esperaba una asignación o una acción");
-  }
-}
 
 /*
  * mientras_que	::=	<tMQ> expresion lista_sentencias <tFMQ>
@@ -1291,59 +1290,187 @@ void seleccion() :
   }
 }
 
+
+
+
+
+
+/*
+ * identificacion	::=	identificador ( ( argumentos )? fin_sentencia | asignacion )
+ */
+void identificacion() :
+{
+  Token t;
+  RegistroExpr indice = null;
+  
+  Simbolo s = null;
+  Tipo_variable tpID = Tipo_variable.DESCONOCIDO;
+
+  boolean hayArgumentos = false;
+}
+{
+  try {
+  	t = identificador()
+  	{
+	  try { 
+  	    s = tabla_simbolos.buscar_simbolo(t.image);
+  	  }
+  	  catch (SimboloNoEncontradoException e) {
+  	    ErrorSemantico.deteccion(e, t);
+  	  }
+  	}
+
+    (      ( corchete_izq() indice = expresion() corchete_der() )? asignacion(s, indice, t) fin_sentencia()
+      
+    | ( hayArgumentos = argumentos(s, t) )? fin_sentencia()
+      {
+        if (s != null) { 
+          if (!s.ES_ACCION()) {
+            ErrorSemantico.deteccion(new InvocacionAccionException(),
+              "El simbolo no es una accion", t);
+          }
+          else if (!s.getListaParametros().isEmpty() && !hayArgumentos) {
+            ErrorSemantico.deteccion(new InvocacionAccionException(),
+  	          "La acción requiere " + s.getListaParametros().size() + " argumentos", t);
+          }
+        }
+      }
+    )
+  }
+  catch (ParseException e) {
+    ErrorSintactico.deteccion(e, "Se esperaba una asignación o una acción");
+  }
+}
+
+
+
+/*
+ * asignacion	::=	<tOPAS> expresion fin_sentencia
+ */
+void asignacion(Simbolo s, RegistroExpr indice, Token izq) :
+{
+  RegistroExpr reg;
+  Token t;
+}
+{
+  try {
+    t = <tOPAS> reg = expresion()
+    {
+      if (s != null && !reg.esDesc()) {
+        if (!s.ES_VECTOR() && indice != null) {
+          ErrorSemantico.deteccion("El símbolo no es un vector", izq);
+        }
+        else if (s.ES_ACCION()) {
+  	      ErrorSemantico.deteccion("No se puede realizar una asignación a una acción", izq);
+  	    }
+  	    else if (s.ES_PROGRAMA()) {
+  	      ErrorSemantico.deteccion("No se puede realizar una asignación a un programa", izq);
+  	    }
+  	    else if (s.ES_PARAMETRO() && s.ES_VALOR()) {
+  	      ErrorSemantico.deteccion("No se puede realizar una asignación a un parámetro por valor", izq);
+  	   	}
+  	   	else if (s.ES_VARIABLE() || (s.ES_PARAMETRO() && s.ES_REFERENCIA())) {
+  	   	  if (s.getVariable() != reg.getTipo() || (s.ES_VECTOR() ^ (indice != null)) != reg.esVector()) {
+  	   	    System.err.print(s.getVariable() + " " + reg.getTipo() + " " + s.ES_VECTOR() + " " + (indice == null) + " " + reg.esVector() + "\n");
+            ErrorSemantico.deteccion("Tipos incompatibles en la asignación", t);
+  	   	  }
+  	   	  else if (s.ES_VECTOR() && reg.esVector() && s.getLongitud() != reg.getLongitud()) {
+  	   	    ErrorSemantico.deteccion("No se puede realizar la asignación de vectores de diferente longitud", t);
+  	   	  }
+  	   	  else {
+  	   	    // La asignación es correcta
+  	   	    System.err.println("La asignación es correcta");
+  	   	  }
+  	   	}
+  	  }
+    }
+  }
+  catch (ParseException e) {
+    ErrorSintactico.deteccion(e, "Se esperaba una asignación");
+  }
+}
+
+
+
+
 /*
  * argumentos	::=	parentesis_izq ( lista_expresiones )? parentesis_der
  */
-boolean argumentos(Simbolo s, boolean ok) :
+boolean argumentos(Simbolo s, Token t) :
 {
   ArrayList<RegistroExpr> listaExpr = null;
-  ArrayList<Simbolo> listaParams = s.getListaParametros();
-  Token t = token;
+  ArrayList<Simbolo> listaParams;
+
+  boolean hayArgumentos = false;
 }
 {
   try {
   	parentesis_izq() ( listaExpr = lista_expresiones() )? parentesis_der()
-  	{
-  	  if (!ok || listaExpr == null || listaExpr.size() <  1) {
-  	    return false;
-  	  }
-  	    
-  	  if (listaExpr.size() != listaParams.size()) {
-  	    ErrorSemantico.deteccion(new InvocacionAccionException(),
+	{
+	  if (s != null && listaExpr != null && s.ES_ACCION()) {
+	    hayArgumentos = true;
+
+	    listaParams = s.getListaParametros();
+	      	    
+  	  	if (listaExpr.size() != listaParams.size()) {
+  	      ErrorSemantico.deteccion(new InvocacionAccionException(),
   	      "El número de argumentos es incorrecto, se esperaban " + listaParams.size(), t);
-  	  }
-  	  // Comparar uno a uno, respentando el orden, los argumentos con los parámetros de la acción
-  	  else {
-        for (int i = 0; i < listaExpr.size(); i++) {
-          if (!listaExpr.get(i).esDesc()) {
-            if (listaExpr.get(i).getTipo() != listaParams.get(i).getVariable()) {
-              ErrorSemantico.deteccion(new InvocacionAccionException(), 
-              "El tipo del argumento " + (i + 1) + " no coincide con el del parámetro, se esperaba " + listaParams.get(i).getVariableString(), t);
-            }
-            else if (listaParams.get(i).ES_REFERENCIA()) {
-              // Los argumentos que se pasan por referencia sólo pueden ser variables asignables,
-              // no se puede pasar por referencia un parámetro por valor ni una expresión.
-              if (listaExpr.get(i).esParVal()) {
+  	    }
+  	    else {
+          for (int i = 0; i < listaExpr.size(); i++) {
+            RegistroExpr arg = listaExpr.get(i);
+            Simbolo param = listaParams.get(i);
+            
+            if (!arg.esDesc()) {
+
+              // Comprobar tipo
+              if ((arg.getTipo() != param.getVariable() || arg.esVector() != param.ES_VECTOR())
+                   || (arg.esVector() && param.ES_VECTOR() && arg.getLongitud() != param.getLongitud())) {
+                     
+                String tipoEsperado = param.getVariableString();
+                if (param.ES_VECTOR()) {
+                  tipoEsperado += "[" + param.getLongitud() + "]";
+                }
+                
                 ErrorSemantico.deteccion(new InvocacionAccionException(), 
-                "El argumento " + (i + 1) + " es un parámetro por valor, no es asignable y no se puede pasar por referencia", t);
+                  "El tipo del argumento " + (i + 1) + " no coincide con el del parámetro, se esperaba " + tipoEsperado, t);
               }
-              else if (!listaExpr.get(i).esAsignable()) {
+
+              // Comprobar que se pase como referencia un argumento asignable
+              else if (param.ES_REFERENCIA() && arg.esParVal()) {
                 ErrorSemantico.deteccion(new InvocacionAccionException(), 
-                "La expresión del argumento " + (i + 1) + " no es asignable, así que no se puede pasar por referencia", t);
+                  "El argumento " + (i + 1) + " es un parámetro por valor, no es asignable y no se puede pasar por referencia", t);
+			  }  
+              else if (param.ES_REFERENCIA() && !arg.esAsignable()) {
+                ErrorSemantico.deteccion(new InvocacionAccionException(), 
+                    "La expresión del argumento " + (i + 1) + " no es asignable, así que no se puede pasar por referencia", t);
+              }
+              else {
+                // El argumento es válido
+                System.err.println("El argumento es válido");
               }
             }
           }
         }
-  	  }
-  	}
-  }
+      }
+    }
+  }           
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una lista de argumentos");
   }
   {
-    return true;
+    return hayArgumentos;
   }
 }
+
+
+
+
+
+
+
+
+// Expresiones
 
 /*
  * lista_expresiones	::=	expresion ( sep_variable expresion )*
@@ -1367,15 +1494,14 @@ ArrayList<RegistroExpr> lista_expresiones() :
         listaExpr.add(reg);
       }
     )*
-    {
-      return listaExpr;
-    }
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una lista de expresiones");
   }
+  {
+    return listaExpr;
+  }
 }
-
 
 
 /*
@@ -1394,15 +1520,17 @@ RegistroExpr expresion() :
   	  op = operador_relacional()
   	  reg2 = expresion_simple()
   	  {
-  	   	reg1 = RegistroExpr.operar(op, reg1, reg2);
+  	    if (op != null) { 
+  	   	  reg1 = RegistroExpr.operar(op, reg1, reg2);
+  	   	}
   	  }
   	)?
-  	{
-  	  return reg1;
-  	}
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una expresión");
+  }
+  {
+    return reg1;
   }
 }
 /*
@@ -1411,20 +1539,23 @@ RegistroExpr expresion() :
 RegistroOp operador_relacional() :
 {
   Token t;
-  RegistroOp op;
+  RegistroOp op = null;
 }
 {
   try {
-  	t = <tIGUAL> { return new RegistroOp(t, RegistroOp.Operador.IGUAL); }
-  | t = <tMENOR> { return new RegistroOp(t, RegistroOp.Operador.MENOR); }
-  | t = <tMAYOR> { return new RegistroOp(t, RegistroOp.Operador.MAYOR); }
-  | t = <tMAI>   { return new RegistroOp(t, RegistroOp.Operador.MAI); }
-  | t = <tMEI>   { return new RegistroOp(t, RegistroOp.Operador.MEI); }
-  | t = <tNI>    { return new RegistroOp(t, RegistroOp.Operador.NI); }
- }
- catch (ParseException e) {
-   ErrorSintactico.deteccion(e, "Se esperaba un operador relacional: '=', ' >', '<', '<=', '>=', o '!='");
- }
+  	t = <tIGUAL> { op = new RegistroOp(t, RegistroOp.Operador.IGUAL); }
+  | t = <tMENOR> { op = new RegistroOp(t, RegistroOp.Operador.MENOR); }
+  | t = <tMAYOR> { op = new RegistroOp(t, RegistroOp.Operador.MAYOR); }
+  | t = <tMAI>   { op = new RegistroOp(t, RegistroOp.Operador.MAI); }
+  | t = <tMEI>   { op = new RegistroOp(t, RegistroOp.Operador.MEI); }
+  | t = <tNI>    { op = new RegistroOp(t, RegistroOp.Operador.NI); }
+  }
+  catch (ParseException e) {
+    ErrorSintactico.deteccion(e, "Se esperaba un operador relacional: '=', ' >', '<', '<=', '>=', o '!='");
+  }
+  {
+    return op;
+  }
 }
 /*
  * expresion_simple	::=	termino ( operador_aditivo termino )*
@@ -1442,15 +1573,17 @@ RegistroExpr expresion_simple() :
       op = operador_aditivo()
       reg2 = termino()
       {
-        reg1 = RegistroExpr.operar(op, reg1, reg2);
+        if (op != null) { 
+          reg1 = RegistroExpr.operar(op, reg1, reg2);
+        }
       }
     )*
-    {
-      return reg1;
-    }
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una expresión simple");
+  }
+  {
+    return reg1;
   }
 }
 /*
@@ -1459,16 +1592,19 @@ RegistroExpr expresion_simple() :
 RegistroOp operador_aditivo() :
 {
   Token t;
-  RegistroOp op;
+  RegistroOp op = null;
 }
 {
   try {
-    t = <tMAS>   { return new RegistroOp(t, RegistroOp.Operador.MAS); }
-  | t = <tMENOS> { return new RegistroOp(t, RegistroOp.Operador.MENOS); }
-  | t = <tOR>    { return new RegistroOp(t, RegistroOp.Operador.OR); }
+    t = <tMAS>   { op = new RegistroOp(t, RegistroOp.Operador.MAS); }
+  | t = <tMENOS> { op = new RegistroOp(t, RegistroOp.Operador.MENOS); }
+  | t = <tOR>    { op = new RegistroOp(t, RegistroOp.Operador.OR); }
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un operador aditivo: '+', '-', o 'OR'");
+  }
+  {
+    return op;
   }
 }
 /*
@@ -1476,8 +1612,8 @@ RegistroOp operador_aditivo() :
  */
 RegistroExpr termino() :
 {
-  RegistroExpr reg1 = new RegistroExpr();
-  RegistroExpr reg2 = new RegistroExpr();
+  RegistroExpr reg1 = null;
+  RegistroExpr reg2;
   RegistroOp op;
 }
 {
@@ -1487,15 +1623,17 @@ RegistroExpr termino() :
       op = operador_multiplicativo()
       reg2 = factor()
       {
-        reg1 = RegistroExpr.operar(op, reg1, reg2);
+        if (op != null) { 
+          reg1 = RegistroExpr.operar(op, reg1, reg2);
+        }
       }
     )*
-    {
-      return reg1;
-  	}
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un término");
+  }
+  {
+    return reg1;
   }
 }
 /*
@@ -1504,18 +1642,21 @@ RegistroExpr termino() :
 RegistroOp operador_multiplicativo() :
 {
   Token t;
-  RegistroOp op;
+  RegistroOp op = null;
 }
 {
   try {
-    t = <tPRODUCTO> { return new RegistroOp(t, RegistroOp.Operador.PRODUCTO); }
-  | t = <tDIVISION> { return new RegistroOp(t, RegistroOp.Operador.DIVISION); }
-  | t = <tMOD>      { return new RegistroOp(t, RegistroOp.Operador.MOD); }
-  | t = <tDIV>      { return new RegistroOp(t, RegistroOp.Operador.DIV); }
-  | t = <tAND>      { return new RegistroOp(t, RegistroOp.Operador.AND); }
+    t = <tPRODUCTO> { op = new RegistroOp(t, RegistroOp.Operador.PRODUCTO); }
+  | t = <tDIVISION> { op = new RegistroOp(t, RegistroOp.Operador.DIVISION); }
+  | t = <tMOD>      { op = new RegistroOp(t, RegistroOp.Operador.MOD); }
+  | t = <tDIV>      { op = new RegistroOp(t, RegistroOp.Operador.DIV); }
+  | t = <tAND>      { op = new RegistroOp(t, RegistroOp.Operador.AND); }
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un operador multiplicativo: '*', '/', 'MOD', 'AND'");
+  }
+  {
+    return op;
   }
 }
 /*
@@ -1531,14 +1672,22 @@ RegistroOp operador_multiplicativo() :
 RegistroExpr factor() :
 {
   Token t = null;
-  RegistroExpr reg = new RegistroExpr();
   Simbolo s;
+  RegistroExpr indice = null;
+  
+  RegistroExpr reg = new RegistroExpr();
+  reg.setTipoDesc();
 }
 {
   try {
     t = <tMENOS> reg = factor()
     {
-      if (!reg.esEnt() && !reg.esDesc()) {
+      if (reg.esVector()) {
+        ErrorSemantico.deteccion("No se pueden realizar operaciones con vectores", t);
+        reg.setVector(false);
+        reg.setTipoEnt();
+      }
+      else if (!reg.esEnt() && !reg.esDesc()) {
         ErrorSemantico.deteccion("Tipo incompatible. Se esperaba entero", t);
         reg.setTipoEnt();
       }
@@ -1546,10 +1695,18 @@ RegistroExpr factor() :
         reg.setValorEnt(-reg.getValorEnt());
       }
       reg.setAsignable(false);
+        
+      // Generacion código
+      reg.getInstr().addMenosUnario();
     }
  |  t = <tMAS> reg = factor()
     {
-      if (!reg.esEnt() && !reg.esDesc()) {
+      if (reg.esVector()) {
+        ErrorSemantico.deteccion("No se pueden realizar operaciones con vectores", t);
+        reg.setVector(false);
+        reg.setTipoEnt();
+      }
+      else if (!reg.esEnt() && !reg.esDesc()) {
         ErrorSemantico.deteccion("Tipo incompatible. Se esperaba entero", t);
         reg.setTipoEnt();
       }
@@ -1557,7 +1714,11 @@ RegistroExpr factor() :
     }
   | t = <tNOT> reg = factor()
     {
-      if (!reg.esBool() && !reg.esDesc()) {
+      if (reg.esVector()) {
+        ErrorSemantico.deteccion("No se pueden realizar operaciones con vectores", t);
+        reg.setVector(false);
+      }
+      else if (!reg.esBool() && !reg.esDesc()) {
         ErrorSemantico.deteccion("Tipo incompatible. Se esperaba booleano", t);
         reg.setTipoBool();
       }
@@ -1565,6 +1726,9 @@ RegistroExpr factor() :
         reg.setValorBool(!reg.getValorBool());
       }
 	  reg.setAsignable(false);
+	          
+	  // Generacion código
+	  reg.getInstr().addNegacionUnaria();
     }
   | parentesis_izq() reg = expresion() parentesis_der()
     {
@@ -1572,8 +1736,9 @@ RegistroExpr factor() :
     }
   | t = <tENTACAR> parentesis_izq() reg = expresion() parentesis_der()
  	{
- 	  if (!reg.esEnt() && !reg.esDesc()) {
+ 	  if (reg.esVector() || !reg.esEnt() && !reg.esDesc()) {
  	    ErrorSemantico.deteccion("La expresión no se puede convertir en un carácter válido", t);
+ 	    reg.setVector(false);
  	  }
  	  else if (reg.esEnt() && reg.getValorEnt() != null) {
  	    Integer carNum = reg.getValorEnt();
@@ -1589,8 +1754,9 @@ RegistroExpr factor() :
 	}
   | t = <tCARAENT> parentesis_izq() reg = expresion() parentesis_der()
     {
-      if (!reg.esChar() && !reg.esDesc()) {
+      if (reg.esVector() || !reg.esChar() && !reg.esDesc()) {
         ErrorSemantico.deteccion("La expresión no se puede convertir en un entero válido", t);
+        reg.setVector(false);
       }
       else if (reg.esChar() && reg.getValorChar() != null) {
         Character car = reg.getValorChar();
@@ -1605,40 +1771,79 @@ RegistroExpr factor() :
       reg.setTipoEnt();
       reg.setAsignable(false);
     }
-  | t = identificador()
+  | t = identificador() ( corchete_izq() indice = expresion() corchete_der() )?
     {
-      try {
-        reg = new RegistroExpr();
-      	s = tabla_simbolos.buscar_simbolo(t.image);
-      	if (s.ES_VARIABLE()) {
-      	  reg.setTipo(s.getVariable());
-      	  reg.setAsignable(true);
-      	}
-      	else if (s.ES_PARAMETRO()) {
-      	  reg.setTipo(s.getVariable());
-      	  if (s.ES_VALOR()) {
-      	    reg.setParVal();
-      	  }
-      	  else if (s.ES_REFERENCIA()) {
-      	    reg.setParRef();
+      if (t != null) { 
+        try {
+          // puede ser una variable simple o un vector
+          
+          s = tabla_simbolos.buscar_simbolo(t.image);
+      	  
+      	  if (s.ES_VARIABLE()) {
+      	    reg.setTipo(s.getVariable());
       	    reg.setAsignable(true);
       	  }
-      	}
-      	else if (s.ES_ACCION()) {
-      	  ErrorSemantico.deteccion("No se puede utilizar una acción dentro de una expresión", t);
-      	  reg.setTipoDesc();
-      	}
-      	else if (s.ES_PROGRAMA()) {
-      	  ErrorSemantico.deteccion("No se puede utilizar un programa dentro de una expresión", t);
-      	  reg.setTipoDesc();
-      	}
-      	else {
-      	  reg.setTipoDesc();
-      	}
-      }
-      catch (SimboloNoEncontradoException e) {
-        ErrorSemantico.deteccion(e, t);
-        reg.setTipoDesc();
+      	  else if (s.ES_PARAMETRO()) {
+      	    reg.setTipo(s.getVariable());
+      	    if (s.ES_VALOR()) {
+      	      reg.setParVal();
+      	    }
+      	    else if (s.ES_REFERENCIA()) {
+      	      reg.setParRef();
+      	      reg.setAsignable(true);
+      	    }
+          }
+      	  else if (s.ES_ACCION()) {
+      	    ErrorSemantico.deteccion("No se puede utilizar una acción dentro de una expresión", t);
+      	    reg.setTipoDesc();
+      	  }
+      	  else if (s.ES_PROGRAMA()) {
+      	    ErrorSemantico.deteccion("No se puede utilizar un programa dentro de una expresión", t);
+      	    reg.setTipoDesc();
+      	  }
+      	  else {
+      	    reg.setTipoDesc();
+      	  }
+
+      	  
+          // Vectores
+          if (s.ES_VECTOR()) {
+            if (indice == null) {
+              System.err.println("Vector completo: " + s.getNombre() + " " + s.getLongitud());
+              
+              // Vector completo
+              reg.setVector(true);
+              reg.setLongitud(s.getLongitud());
+
+              System.err.println("Registro: " + reg.getTipo() + " " + reg.esVector() + " " + reg.getLongitud());
+            }
+            else {
+              // Acceso a una componente del vector
+              System.err.println("Acceso a componente de vector: " + s.getNombre() + " " + s.getLongitud() + " " + indice.getValorEnt());
+              
+              // Comprobar tipo
+              if (!indice.esDesc() && !indice.esEnt()) {
+                ErrorSemantico.deteccion("La expresión para acceder a una componente del vector debe ser entera", t);
+              }
+              else if (indice.esEnt()) {
+                // Comprobar overflow/underflow
+                if (indice.getValorEnt() < 0) {
+                  Aviso.deteccion(new UnderflowException(), t);
+                }
+                else if (indice.getValorEnt() >= s.getLongitud() - 1) {
+                  Aviso.deteccion(new OverflowException(), t);
+                }
+              }
+            }
+          }
+          else if (indice != null) {
+            ErrorSemantico.deteccion("El símbolo no es un vector", t);
+          }
+        }
+        catch (SimboloNoEncontradoException e) {
+          ErrorSemantico.deteccion(e, t);
+          reg.setTipoDesc();
+        }
       }
     }
   | t = <tCONSTENTERA>
@@ -1670,6 +1875,6 @@ RegistroExpr factor() :
     ErrorSintactico.deteccion(e, "Se esperaba un factor");
   }
   {
-    return reg;
+     return reg;
   }
 }

@@ -17,9 +17,9 @@ accion a2 (val entero b);
 		a1:=a1+1;
 	    caca(j);
 	    caca(j);
-		fallo:="hola"="hola";
+		fallo:="a"="a";
 		fallo:="a">="c";
-		fallo:="hola">2;
+		fallo:="a">2;
 		fallo:=1>3;
 	Fin
 Principio
@@ -35,7 +35,7 @@ Principio
 		  a3(d);
 		  d:=num;
         d:=0;
-		  d:="hola";
+		  d:="a";
 		  d:=fallo+3;
 		  fallo:=entacar(fallo);
 		  d:=hombre;
@@ -48,7 +48,7 @@ Principio
                         escribir (entacar (13), entacar (10));
                 FSi
         FMq
-		  
+
 Fin
 
 %-----------------------------------------------------------
@@ -57,7 +57,7 @@ accion mcd(Val entero  a,b ; ref  entero  m );
 entero r;
 Principio
         r:=a mod b;
-		  
+
         Mq r<>0
                 a:=b;
                 b:=r;

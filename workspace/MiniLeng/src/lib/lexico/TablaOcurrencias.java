@@ -11,6 +11,8 @@
 
 package lib.lexico;
 
+import java.util.Arrays;
+
 public class TablaOcurrencias {
 
 	// Definiciones de los tokens del lenguaje
@@ -34,26 +36,7 @@ public class TablaOcurrencias {
         tVAL,
         tREF,
 	}
-	private static final String[] ReservadasNombres = {
-		"PROGRAMA",
-        "VAR",
-        "PRINCIPIO",
-        "FIN",
-        "SI",
-        "ENT",
-        "SI_NO",
-        "FSI",
-        "MQ",
-        "FMQ",
-        "ESCRIBIR",
-        "LEER",
-        "ENTACAR",
-        "CARAENT",
-        "ACCION",
-        "VAL",
-        "REF"
-	};
-	private final int nReservadas = 17;
+	private int cReservadas[] = new int[Reservadas.values().length];
 
 	public enum Agrupaciones {
 		tLLAVE_IZQ,
@@ -61,35 +44,20 @@ public class TablaOcurrencias {
 		tPARENTESIS_IZQ,
 		tPARENTESIS_DER
 	}
-	private static final String[] AgrupacionesNombres = {
-		"LLAVE_IZQ",
-		"LLAVE_DER",
-		"PARENTESIS_IZQ",
-		"PARENTESIS_DER"
-	};
-	private final int nAgrupaciones = 4;
+	private int cAgrupaciones[] = new int[Agrupaciones.values().length];
 
 	public enum Vectores {
 		tCORCHETE_IZQ,
 		tCORCHETE_DER
 	}
-	private static final String[] VectoresNombres = {
-		"CORCHETE_IZQ",
-		"CORCHETE_DER"
-	};
-	private final int nVectores = 2;
+	private int cVectores[] = new int[Vectores.values().length];
 
 	public enum Operadores {
         tOPAS,
         tFIN_SENTENCIA,
         tSEP_VARIABLE
 	}
-	private static final String[] OperadoresNombres = {
-        "OPAS",
-        "FIN_SENTENCIA",
-        "SEP_VARIABLE"
-	};
-	private final int nOperadores = 3;
+	private int cOperadores[] = new int[Operadores.values().length];
 
 	public enum OpAritmeticos {
         tMAS,
@@ -99,15 +67,7 @@ public class TablaOcurrencias {
         tMOD,
         tDIV
 	}
-	private static final String[] OpAritmeticosNombres = {
-        "MAS",
-        "MENOS",
-        "PRODUCTO",
-        "DIVISION",
-        "MOD",
-        "DIV"
-	};
-	private final int nOpAritmeticos = 6;
+	private int cOpAritmeticos[] = new int[OpAritmeticos.values().length];
 
 	public enum OpLogicos {
         tAND,
@@ -120,30 +80,14 @@ public class TablaOcurrencias {
         tMEI,
         tNI
 	}
-	private static final String[] OpLogicosNombres = {
-        "AND",
-        "OR",
-        "NOT",
-        "MAYOR",
-        "MENOR",
-        "IGUAL",
-        "MAI",
-        "MEI",
-        "NI"
-	};
-	private final int nOpLogicos = 9;
+	private int cOpLogicos[] = new int[OpLogicos.values().length];
 
     public enum Tipos {
         tENTERO,
         tBOOLEANO,
         tCARACTER
     }
-    private static final String[] TiposNombres = {
-        "ENTERO",
-        "BOOLEANO",
-        "CARACTER"
-    };
-    private final int nTipos = 3;
+    private int cTipos[] = new int[Tipos.values().length];
 
 	public enum Valores {
         tTRUE,
@@ -153,47 +97,17 @@ public class TablaOcurrencias {
         tCONSTCHAR,
         tCONSTCAD
 	}
-    private static final String[] ValoresNombres = {
-        "TRUE",
-        "FALSE",
-        "IDENTIFICADOR",
-        "CONSTENTERA",
-        "CONSTCHAR",
-        "CONSTCAD"
-	};
-	private final int nValores = 6;
-
-	// Definición de los contadores, uno por cada tipo de token.
-	int cReservadas[];
-	int cAgrupaciones[];
-	int cVectores[];
-	int cOperadores[];
-	int cOpAritmeticos[];
-	int cOpLogicos[];
-	int cTipos[];
-	int cValores[];
+	private int cValores[] = new int[Valores.values().length];
 
 
 	// Mostrar o no los tokens reconocidos
 	private Boolean show_tokens;
 
 
-	/*
-	 * Constructor de la clase que inicializa todos
-	 * los contadores a 0
-	 */
+
+
 	public TablaOcurrencias(Boolean show_tokens) {
-		// Se puede utilizar también Arrays.fills(arr, 0)
-
 		this.show_tokens = show_tokens;
-
-		cReservadas = new int[nReservadas];
-		cAgrupaciones = new int[nAgrupaciones];
-		cOperadores = new int[nOperadores];
-		cOpAritmeticos = new int[nOpAritmeticos];
-		cOpLogicos = new int[nOpLogicos];
-		cTipos = new int[nTipos];
-		cValores = new int[nValores];
 	}
 
 
@@ -258,6 +172,7 @@ public class TablaOcurrencias {
 	}
 
 
+
 	/*
 	 *  Devuelve true si contador tiene algún elemento mayor que 0.
 	 */
@@ -285,6 +200,15 @@ public class TablaOcurrencias {
 	}
 
 	/*
+	 * Devuelve una lista de Strings con los nombres de las entradas
+	 * del enum que se pasa como argumento.
+	 * Se respeta el orden con el que están declaradas las entradas.
+	 */
+	public static String[] getNombres(Class<? extends Enum<?>> e) {
+	    return Arrays.stream(e.getEnumConstants()).map(Enum::name).toArray(String[]::new);
+	}
+
+	/*
 	 * Imprime una tabla con el contenido de todos los contadores
 	 */
 	public void imprimirTabla() {
@@ -294,13 +218,14 @@ public class TablaOcurrencias {
 		System.out.println("| Token                         num.  |");
 		System.out.println("+" + new String(new char[37]).replace("\0", "-") + "+");
 
-		imprimirContador(cReservadas, "Palabras reservadas", ReservadasNombres);
-		imprimirContador(cAgrupaciones, "Caracteres de agrupación", AgrupacionesNombres);
-		imprimirContador(cOperadores, "Operadores", OperadoresNombres);
-		imprimirContador(cOpAritmeticos, "Operadores aritméticos", OpAritmeticosNombres);
-		imprimirContador(cOpLogicos, "Operadores lógicos", OpLogicosNombres);
-		imprimirContador(cTipos, "Tipos de dato", TiposNombres);
-		imprimirContador(cValores, "Valores", ValoresNombres);
+		imprimirContador(cReservadas, "Palabras reservadas", getNombres(Reservadas.class));
+		imprimirContador(cAgrupaciones, "Caracteres de agrupación", getNombres(Agrupaciones.class));
+		imprimirContador(cVectores, "Vectores", getNombres(Vectores.class));
+		imprimirContador(cOperadores, "Operadores", getNombres(Operadores.class));
+		imprimirContador(cOpAritmeticos, "Operadores aritméticos", getNombres(OpAritmeticos.class));
+		imprimirContador(cOpLogicos, "Operadores lógicos", getNombres(OpLogicos.class));
+		imprimirContador(cTipos, "Tipos de dato", getNombres(Tipos.class));
+		imprimirContador(cValores, "Valores", getNombres(Valores.class));
 
 		System.out.println("+" + new String(new char[37]).replace("\0", "-") + "+");
 	}

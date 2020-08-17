@@ -18,11 +18,11 @@ public class RegistroOp {
 	public enum Operador {
 		// Operadores relacionales (expresion())
 		IGUAL,
-		MENOR,
+		NI,
 		MAYOR,
 		MAI,
+		MENOR,
 		MEI,
-		NI,
 
 		// Operadores aditivos (expresion_simple())
 		MAS,

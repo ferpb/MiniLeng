@@ -21,6 +21,8 @@ import lib.semantico.InvocacionAccionException;
 import lib.semantico.ErrorSemantico;
 import lib.semantico.RegistroExpr;
 import lib.semantico.RegistroOp;
+import lib.semantico.UnderflowException;
+import lib.semantico.OverflowException;
 import lib.aviso.Aviso;
 
 /** Token Manager. */

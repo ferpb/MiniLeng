@@ -91,13 +91,13 @@ public class TablaSimbolos {
 	private int h(String cadena) {
 		int h = 0;
 
-		System.out.println("Se va a generar clave de: " + cadena);
+		// System.out.println("Se va a generar clave de: " + cadena);
 
 		for (int i = 0; i < cadena.length(); i++) {
 			h = T[h ^ cadena.charAt(i)];
 		}
 
-		System.out.println("Generada clave: " + h);
+		// System.out.println("Generada clave: " + h);
 
 		return h;
 	}
@@ -145,11 +145,11 @@ public class TablaSimbolos {
 	 */
 	private Simbolo introducir_simbolo(Simbolo simbolo) throws SimboloYaDeclaradoException {
 
-		System.out.println("Introducir simbolo");
+		// System.out.println("Introducir simbolo");
 
 		int clave = h(simbolo.getNombre());
 
-		System.out.println("Clave: " + clave);
+		// System.out.println("Clave: " + clave);
 
 		for (Simbolo s : tabla_hash[clave]) {
 			// Si el símbolo ya está declarado en ese mismo nivel, lanzar una excepción
@@ -218,6 +218,32 @@ public class TablaSimbolos {
 			int dir) throws SimboloYaDeclaradoException {
 		Simbolo simbolo = new Simbolo();
 		simbolo.introducir_parametro(nombre, variable, parametro, nivel, dir);
+
+		return introducir_simbolo(simbolo);
+	}
+
+	/*
+	 * Si existe un símbolo en la tabla del mismo nivel y con el mismo nombre, lanza
+	 * una excepción. De lo contrario, introduce un símbolo VARIABLE vector con los datos
+	 * de los argumentos.
+	 */
+	public Simbolo introducir_variable_vector(String nombre, Tipo_variable variable, int longitud, int nivel,
+			int dir) throws SimboloYaDeclaradoException {
+		Simbolo simbolo = new Simbolo();
+		simbolo.introducir_variable_vector(nombre, variable, longitud, nivel, dir);
+
+		return introducir_simbolo(simbolo);
+	}
+
+	/*
+	 * Si existe un símbolo en la tabla del mismo nivel y con el mismo nombre, lanza
+	 * una excepción. De lo contrario, introduce un símbolo PARAMETRO vector con los datos
+	 * de los argumentos.
+	 */
+	public Simbolo introducir_parametro_vector(String nombre, Tipo_variable variable, Clase_parametro clase, int longitud, int nivel,
+			int dir) throws SimboloYaDeclaradoException {
+		Simbolo simbolo = new Simbolo();
+		simbolo.introducir_parametro_vector(nombre, variable, clase, longitud, nivel, dir);
 
 		return introducir_simbolo(simbolo);
 	}
