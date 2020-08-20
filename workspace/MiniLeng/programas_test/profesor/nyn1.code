@@ -1,0 +1,242 @@
+; Programa: noventa_y_nueve
+	ENP L6
+; Acción: miaccion
+L0:
+; Comienzo de acción: miaccion
+; Escribir cadena: hola
+	STC 104
+	WRT 0
+	STC 111
+	WRT 0
+	STC 108
+	WRT 0
+	STC 97
+	WRT 0
+	CSF
+; Comienzo de programa: noventa_y_nueve
+L6:
+; Asignación a n
+; Obtener dirección de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+; Sustituida expresion constante
+	STC 0
+	ASG
+; Mientras que
+	JMP L2
+L3:
+; Escribir cadena: n: 
+	STC 110
+	WRT 0
+	STC 58
+	WRT 0
+	STC 32
+	WRT 0
+; Leer como entero
+; Obtener valor de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+; Instrucción eliminada
+	RD 1
+L2:
+; Condicion mientras que
+; Obtener valor de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+	DRF
+	STC 0
+	LTE
+; Obtener valor de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+	DRF
+	STC 100
+	GTE
+	OR
+; Obtener valor de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+	DRF
+	STC 10
+	DIV
+; Obtener valor de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+	DRF
+	STC 10
+	MOD
+	EQ
+	OR
+	JMT L3
+; Escribir entero
+; Obtener valor de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+	DRF
+	WRT 1
+; Escribir cadena:  se convierte en 
+	STC 32
+	WRT 0
+	STC 115
+	WRT 0
+	STC 101
+	WRT 0
+	STC 32
+	WRT 0
+	STC 99
+	WRT 0
+	STC 111
+	WRT 0
+	STC 110
+	WRT 0
+	STC 118
+	WRT 0
+	STC 105
+	WRT 0
+	STC 101
+	WRT 0
+	STC 114
+	WRT 0
+	STC 116
+	WRT 0
+	STC 101
+	WRT 0
+	STC 32
+	WRT 0
+	STC 101
+	WRT 0
+	STC 110
+	WRT 0
+	STC 32
+	WRT 0
+; Invocar a ACCION:                   miaccion() [0, 0]
+	OSF 7 0 L0
+; Asignación a x
+; Obtener dirección de VARIABLE ENTERO:          x [0, 3]
+	SRF 0 3
+; Sustituida expresion constante
+	STC 0
+	ASG
+; Asignación a x
+; Obtener dirección de VARIABLE ENTERO:          x [0, 3]
+	SRF 0 3
+; Sustituida expresion constante
+	STC -999999998
+	ASG
+; Asignación a x
+; Obtener dirección de VARIABLE ENTERO:          x [0, 3]
+	SRF 0 3
+; Obtener valor de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+	DRF
+	STC 10
+	DIV
+	ASG
+; Asignación a y
+; Obtener dirección de VARIABLE ENTERO:          y [0, 4]
+	SRF 0 4
+; Obtener valor de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+	DRF
+	STC 10
+	MOD
+	ASG
+; Asignación a m
+; Obtener dirección de VARIABLE ENTERO:          m [0, 6]
+	SRF 0 6
+	STC 10
+; Obtener valor de VARIABLE ENTERO:          y [0, 4]
+	SRF 0 4
+	DRF
+	TMS
+; Obtener valor de VARIABLE ENTERO:          x [0, 3]
+	SRF 0 3
+	DRF
+	PLUS
+	ASG
+; Seleccion
+; Obtener valor de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+	DRF
+; Obtener valor de VARIABLE ENTERO:          m [0, 6]
+	SRF 0 6
+	DRF
+	GT
+	JMF L4
+; Si
+; Asignación a n
+; Obtener dirección de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+; Obtener valor de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+	DRF
+; Obtener valor de VARIABLE ENTERO:          m [0, 6]
+	SRF 0 6
+	DRF
+	SBT
+	ASG
+	JMF L5
+L4:
+; Si no
+; Asignación a n
+; Obtener dirección de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+; Obtener valor de VARIABLE ENTERO:          m [0, 6]
+	SRF 0 6
+	DRF
+; Obtener valor de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+	DRF
+	SBT
+	ASG
+L5:
+; Asignación a x
+; Obtener dirección de VARIABLE ENTERO:          x [0, 3]
+	SRF 0 3
+; Obtener valor de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+	DRF
+	STC 10
+	DIV
+	ASG
+; Asignación a y
+; Obtener dirección de VARIABLE ENTERO:          y [0, 4]
+	SRF 0 4
+; Obtener valor de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+	DRF
+	STC 10
+	MOD
+	ASG
+; Asignación a m
+; Obtener dirección de VARIABLE ENTERO:          m [0, 6]
+	SRF 0 6
+	STC 10
+; Obtener valor de VARIABLE ENTERO:          y [0, 4]
+	SRF 0 4
+	DRF
+	TMS
+; Obtener valor de VARIABLE ENTERO:          x [0, 3]
+	SRF 0 3
+	DRF
+	PLUS
+	ASG
+; Asignación a n
+; Obtener dirección de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+; Obtener valor de VARIABLE ENTERO:          m [0, 6]
+	SRF 0 6
+	DRF
+; Obtener valor de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+	DRF
+	PLUS
+	ASG
+; Escribir entero
+; Obtener valor de VARIABLE ENTERO:          n [0, 5]
+	SRF 0 5
+	DRF
+	WRT 1
+; Escribir char
+; Sustituida expresion constante
+	STC 13
+	WRT 0
+; Escribir char
+; Sustituida expresion constante
+	STC 10
+	WRT 0
+; Fin de noventa_y_nueve
+	LVP

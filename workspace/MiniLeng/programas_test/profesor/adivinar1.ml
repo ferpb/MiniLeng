@@ -27,7 +27,7 @@ accion pedirletra;
 
  caracter c,ln;
 
-  principio
+ principio
   c := " ";
   mq (c < "A") or (c > "Z")
     escribir("letra:");
@@ -39,7 +39,7 @@ accion pedirletra;
 %-------------------------------------------------------------------
 principio
 %-------------------------------------------------------------------
- escribir("Piensa en una letra e intentare adivinarla.", 
+ escribir("Piensa en una letra e intentare adivinarla.",
           entacar(13),entacar(10));
  escribir("Listo?");
  siono;

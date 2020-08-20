@@ -1,0 +1,257 @@
+; Programa: maximo_comun_divisor
+	ENP L9
+; Acción: dato
+L0:
+; Comienzo de acción: dato
+; Asignación a d
+; Obtener dirección de VARIABLE ENTERO:          d [0, 4]
+	SRF 1 4
+; Sustituida expresion constante
+	STC 0
+	ASG
+; Mientras que
+	JMP L2
+L3:
+; Escribir cadena: Escribe un numero: 
+	STC 69
+	WRT 0
+	STC 115
+	WRT 0
+	STC 99
+	WRT 0
+	STC 114
+	WRT 0
+	STC 105
+	WRT 0
+	STC 98
+	WRT 0
+	STC 101
+	WRT 0
+	STC 32
+	WRT 0
+	STC 117
+	WRT 0
+	STC 110
+	WRT 0
+	STC 32
+	WRT 0
+	STC 110
+	WRT 0
+	STC 117
+	WRT 0
+	STC 109
+	WRT 0
+	STC 101
+	WRT 0
+	STC 114
+	WRT 0
+	STC 111
+	WRT 0
+	STC 58
+	WRT 0
+	STC 32
+	WRT 0
+; Leer como entero
+; Obtener valor de VARIABLE ENTERO:          d [0, 4]
+	SRF 1 4
+; Instrucción eliminada
+	RD 1
+; Seleccion simple
+; Obtener valor de VARIABLE ENTERO:          d [0, 4]
+	SRF 1 4
+	DRF
+	STC 0
+	LTE
+	JMF L1
+; Si
+; Escribir cadena: El numero debe ser postivo.
+	STC 69
+	WRT 0
+	STC 108
+	WRT 0
+	STC 32
+	WRT 0
+	STC 110
+	WRT 0
+	STC 117
+	WRT 0
+	STC 109
+	WRT 0
+	STC 101
+	WRT 0
+	STC 114
+	WRT 0
+	STC 111
+	WRT 0
+	STC 32
+	WRT 0
+	STC 100
+	WRT 0
+	STC 101
+	WRT 0
+	STC 98
+	WRT 0
+	STC 101
+	WRT 0
+	STC 32
+	WRT 0
+	STC 115
+	WRT 0
+	STC 101
+	WRT 0
+	STC 114
+	WRT 0
+	STC 32
+	WRT 0
+	STC 112
+	WRT 0
+	STC 111
+	WRT 0
+	STC 115
+	WRT 0
+	STC 116
+	WRT 0
+	STC 105
+	WRT 0
+	STC 118
+	WRT 0
+	STC 111
+	WRT 0
+	STC 46
+	WRT 0
+; Escribir char
+; Sustituida expresion constante
+	STC 13
+	WRT 0
+; Escribir char
+; Sustituida expresion constante
+	STC 10
+	WRT 0
+L1:
+L2:
+; Condicion mientras que
+; Obtener valor de VARIABLE ENTERO:          d [0, 4]
+	SRF 1 4
+	DRF
+	STC 0
+	LTE
+	JMT L3
+	CSF
+; Acción: mcd
+L5:
+; Comienzo de acción: mcd
+; Asignación a r
+; Obtener dirección de VARIABLE ENTERO:          r [1, 3]
+	SRF 0 3
+; Obtener valor de VARIABLE ENTERO:          a [0, 5]
+	SRF 1 5
+	DRF
+; Obtener valor de VARIABLE ENTERO:          b [0, 6]
+	SRF 1 6
+	DRF
+	MOD
+	ASG
+; Mientras que
+	JMP L6
+L7:
+; Asignación a a
+; Obtener dirección de VARIABLE ENTERO:          a [0, 5]
+	SRF 1 5
+; Obtener valor de VARIABLE ENTERO:          b [0, 6]
+	SRF 1 6
+	DRF
+	ASG
+; Asignación a b
+; Obtener dirección de VARIABLE ENTERO:          b [0, 6]
+	SRF 1 6
+; Obtener valor de VARIABLE ENTERO:          r [1, 3]
+	SRF 0 3
+	DRF
+	ASG
+; Asignación a r
+; Obtener dirección de VARIABLE ENTERO:          r [1, 3]
+	SRF 0 3
+; Obtener valor de VARIABLE ENTERO:          a [0, 5]
+	SRF 1 5
+	DRF
+; Obtener valor de VARIABLE ENTERO:          b [0, 6]
+	SRF 1 6
+	DRF
+	MOD
+	ASG
+L6:
+; Condicion mientras que
+; Obtener valor de VARIABLE ENTERO:          r [1, 3]
+	SRF 0 3
+	DRF
+	STC 0
+	NEQ
+	JMT L7
+; Asignación a m
+; Obtener dirección de VARIABLE ENTERO:          m [0, 3]
+	SRF 1 3
+; Obtener valor de VARIABLE ENTERO:          b [0, 6]
+	SRF 1 6
+	DRF
+	ASG
+	CSF
+; Comienzo de programa: maximo_comun_divisor
+L9:
+; Invocar a ACCION:                   dato() [0, 0]
+	OSF 6 0 L0
+; Asignación a a
+; Obtener dirección de VARIABLE ENTERO:          a [0, 5]
+	SRF 0 5
+; Obtener valor de VARIABLE ENTERO:          d [0, 4]
+	SRF 0 4
+	DRF
+	ASG
+; Invocar a ACCION:                   dato() [0, 0]
+	OSF 6 0 L0
+; Asignación a b
+; Obtener dirección de VARIABLE ENTERO:          b [0, 6]
+	SRF 0 6
+; Obtener valor de VARIABLE ENTERO:          d [0, 4]
+	SRF 0 4
+	DRF
+	ASG
+; Invocar a ACCION:                   mcd() [0, 5]
+	OSF 6 0 L5
+; Escribir cadena: El MCD es: 
+	STC 69
+	WRT 0
+	STC 108
+	WRT 0
+	STC 32
+	WRT 0
+	STC 77
+	WRT 0
+	STC 67
+	WRT 0
+	STC 68
+	WRT 0
+	STC 32
+	WRT 0
+	STC 101
+	WRT 0
+	STC 115
+	WRT 0
+	STC 58
+	WRT 0
+	STC 32
+	WRT 0
+; Escribir entero
+; Obtener valor de VARIABLE ENTERO:          m [0, 3]
+	SRF 0 3
+	DRF
+	WRT 1
+; Escribir char
+; Sustituida expresion constante
+	STC 13
+	WRT 0
+; Escribir char
+; Sustituida expresion constante
+	STC 10
+	WRT 0
+; Fin de maximo_comun_divisor
+	LVP

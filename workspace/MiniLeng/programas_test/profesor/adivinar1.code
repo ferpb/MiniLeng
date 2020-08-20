@@ -1,0 +1,536 @@
+; Programa: adivinar
+	ENP L15
+; Acción: siono
+L0:
+; Comienzo de acción: siono
+; Asignación a c
+; Obtener dirección de VARIABLE CHAR:            c [1, 3]
+	SRF 0 3
+; Sustituida expresion constante
+	STC 32
+	ASG
+; Mientras que
+	JMP L1
+L2:
+; Escribir cadena: (S/N)?
+	STC 40
+	WRT 0
+	STC 83
+	WRT 0
+	STC 47
+	WRT 0
+	STC 78
+	WRT 0
+	STC 41
+	WRT 0
+	STC 63
+	WRT 0
+; Leer como char
+; Obtener valor de VARIABLE CHAR:            c [1, 3]
+	SRF 0 3
+; Instrucción eliminada
+	RD 0
+; Leer como char
+; Obtener valor de VARIABLE CHAR:            ln [1, 4]
+	SRF 0 4
+; Instrucción eliminada
+	RD 0
+L1:
+; Condicion mientras que
+; Obtener valor de VARIABLE CHAR:            c [1, 3]
+	SRF 0 3
+	DRF
+	STC 83
+	NEQ
+; Obtener valor de VARIABLE CHAR:            c [1, 3]
+	SRF 0 3
+	DRF
+	STC 78
+	NEQ
+	AND
+	JMT L2
+; Asignación a respuesta
+; Obtener dirección de VARIABLE CHAR:            respuesta [0, 3]
+	SRF 1 3
+; Obtener valor de VARIABLE CHAR:            c [1, 3]
+	SRF 0 3
+	DRF
+	ASG
+	CSF
+; Acción: pedirletra
+L4:
+; Comienzo de acción: pedirletra
+; Asignación a c
+; Obtener dirección de VARIABLE CHAR:            c [1, 3]
+	SRF 0 3
+; Sustituida expresion constante
+	STC 32
+	ASG
+; Mientras que
+	JMP L5
+L6:
+; Escribir cadena: letra:
+	STC 108
+	WRT 0
+	STC 101
+	WRT 0
+	STC 116
+	WRT 0
+	STC 114
+	WRT 0
+	STC 97
+	WRT 0
+	STC 58
+	WRT 0
+; Leer como char
+; Obtener valor de VARIABLE CHAR:            c [1, 3]
+	SRF 0 3
+; Instrucción eliminada
+	RD 0
+; Leer como char
+; Obtener valor de VARIABLE CHAR:            ln [1, 4]
+	SRF 0 4
+; Instrucción eliminada
+	RD 0
+L5:
+; Condicion mientras que
+; Obtener valor de VARIABLE CHAR:            c [1, 3]
+	SRF 0 3
+	DRF
+	STC 65
+	LT
+; Obtener valor de VARIABLE CHAR:            c [1, 3]
+	SRF 0 3
+	DRF
+	STC 90
+	GT
+	OR
+	JMT L6
+; Asignación a respuesta
+; Obtener dirección de VARIABLE CHAR:            respuesta [0, 3]
+	SRF 1 3
+; Obtener valor de VARIABLE CHAR:            c [1, 3]
+	SRF 0 3
+	DRF
+	ASG
+	CSF
+; Comienzo de programa: adivinar
+L15:
+; Escribir cadena: Piensa en una letra e intentare adivinarla.
+	STC 80
+	WRT 0
+	STC 105
+	WRT 0
+	STC 101
+	WRT 0
+	STC 110
+	WRT 0
+	STC 115
+	WRT 0
+	STC 97
+	WRT 0
+	STC 32
+	WRT 0
+	STC 101
+	WRT 0
+	STC 110
+	WRT 0
+	STC 32
+	WRT 0
+	STC 117
+	WRT 0
+	STC 110
+	WRT 0
+	STC 97
+	WRT 0
+	STC 32
+	WRT 0
+	STC 108
+	WRT 0
+	STC 101
+	WRT 0
+	STC 116
+	WRT 0
+	STC 114
+	WRT 0
+	STC 97
+	WRT 0
+	STC 32
+	WRT 0
+	STC 101
+	WRT 0
+	STC 32
+	WRT 0
+	STC 105
+	WRT 0
+	STC 110
+	WRT 0
+	STC 116
+	WRT 0
+	STC 101
+	WRT 0
+	STC 110
+	WRT 0
+	STC 116
+	WRT 0
+	STC 97
+	WRT 0
+	STC 114
+	WRT 0
+	STC 101
+	WRT 0
+	STC 32
+	WRT 0
+	STC 97
+	WRT 0
+	STC 100
+	WRT 0
+	STC 105
+	WRT 0
+	STC 118
+	WRT 0
+	STC 105
+	WRT 0
+	STC 110
+	WRT 0
+	STC 97
+	WRT 0
+	STC 114
+	WRT 0
+	STC 108
+	WRT 0
+	STC 97
+	WRT 0
+	STC 46
+	WRT 0
+; Escribir char
+; Sustituida expresion constante
+	STC 13
+	WRT 0
+; Escribir char
+; Sustituida expresion constante
+	STC 10
+	WRT 0
+; Escribir cadena: Listo?
+	STC 76
+	WRT 0
+	STC 105
+	WRT 0
+	STC 115
+	WRT 0
+	STC 116
+	WRT 0
+	STC 111
+	WRT 0
+	STC 63
+	WRT 0
+; Invocar a ACCION:                   siono() [0, 0]
+	OSF 10 0 L0
+; Asignación a min
+; Obtener dirección de VARIABLE CHAR:            min [0, 5]
+	SRF 0 5
+; Sustituida expresion constante
+	STC 65
+	ASG
+; Asignación a max
+; Obtener dirección de VARIABLE CHAR:            max [0, 6]
+	SRF 0 6
+; Sustituida expresion constante
+	STC 90
+	ASG
+; Asignación a headivinado
+; Obtener dirección de VARIABLE BOOLEANO:        headivinado [0, 7]
+	SRF 0 7
+; Sustituida expresion constante
+	STC 0
+	ASG
+; Mientras que
+	JMP L12
+L13:
+; Asignación a letra
+; Obtener dirección de VARIABLE CHAR:            letra [0, 4]
+	SRF 0 4
+; Obtener valor de VARIABLE CHAR:            min [0, 5]
+	SRF 0 5
+	DRF
+; Obtener valor de VARIABLE CHAR:            max [0, 6]
+	SRF 0 6
+	DRF
+	PLUS
+	STC 2
+	DIV
+	ASG
+; Escribir char
+; Sustituida expresion constante
+	STC 40
+	WRT 0
+; Escribir char
+; Obtener valor de VARIABLE CHAR:            min [0, 5]
+	SRF 0 5
+	DRF
+	WRT 0
+; Escribir char
+; Sustituida expresion constante
+	STC 44
+	WRT 0
+; Escribir char
+; Obtener valor de VARIABLE CHAR:            max [0, 6]
+	SRF 0 6
+	DRF
+	WRT 0
+; Escribir char
+; Sustituida expresion constante
+	STC 41
+	WRT 0
+; Escribir cadena: : has pensado en la letra 
+	STC 58
+	WRT 0
+	STC 32
+	WRT 0
+	STC 104
+	WRT 0
+	STC 97
+	WRT 0
+	STC 115
+	WRT 0
+	STC 32
+	WRT 0
+	STC 112
+	WRT 0
+	STC 101
+	WRT 0
+	STC 110
+	WRT 0
+	STC 115
+	WRT 0
+	STC 97
+	WRT 0
+	STC 100
+	WRT 0
+	STC 111
+	WRT 0
+	STC 32
+	WRT 0
+	STC 101
+	WRT 0
+	STC 110
+	WRT 0
+	STC 32
+	WRT 0
+	STC 108
+	WRT 0
+	STC 97
+	WRT 0
+	STC 32
+	WRT 0
+	STC 108
+	WRT 0
+	STC 101
+	WRT 0
+	STC 116
+	WRT 0
+	STC 114
+	WRT 0
+	STC 97
+	WRT 0
+	STC 32
+	WRT 0
+; Escribir char
+; Obtener valor de VARIABLE CHAR:            letra [0, 4]
+	SRF 0 4
+	DRF
+	WRT 0
+; Escribir char
+; Sustituida expresion constante
+	STC 63
+	WRT 0
+; Invocar a ACCION:                   siono() [0, 0]
+	OSF 10 0 L0
+; Seleccion
+; Obtener valor de VARIABLE CHAR:            respuesta [0, 3]
+	SRF 0 3
+	DRF
+	STC 78
+	EQ
+	JMF L10
+; Si
+; Escribir cadena: La letra que has pensado es mayor?
+	STC 76
+	WRT 0
+	STC 97
+	WRT 0
+	STC 32
+	WRT 0
+	STC 108
+	WRT 0
+	STC 101
+	WRT 0
+	STC 116
+	WRT 0
+	STC 114
+	WRT 0
+	STC 97
+	WRT 0
+	STC 32
+	WRT 0
+	STC 113
+	WRT 0
+	STC 117
+	WRT 0
+	STC 101
+	WRT 0
+	STC 32
+	WRT 0
+	STC 104
+	WRT 0
+	STC 97
+	WRT 0
+	STC 115
+	WRT 0
+	STC 32
+	WRT 0
+	STC 112
+	WRT 0
+	STC 101
+	WRT 0
+	STC 110
+	WRT 0
+	STC 115
+	WRT 0
+	STC 97
+	WRT 0
+	STC 100
+	WRT 0
+	STC 111
+	WRT 0
+	STC 32
+	WRT 0
+	STC 101
+	WRT 0
+	STC 115
+	WRT 0
+	STC 32
+	WRT 0
+	STC 109
+	WRT 0
+	STC 97
+	WRT 0
+	STC 121
+	WRT 0
+	STC 111
+	WRT 0
+	STC 114
+	WRT 0
+	STC 63
+	WRT 0
+; Invocar a ACCION:                   siono() [0, 0]
+	OSF 10 0 L0
+; Seleccion
+; Obtener valor de VARIABLE CHAR:            respuesta [0, 3]
+	SRF 0 3
+	DRF
+	STC 83
+	EQ
+	JMF L8
+; Si
+; Asignación a min
+; Obtener dirección de VARIABLE CHAR:            min [0, 5]
+	SRF 0 5
+; Obtener valor de VARIABLE CHAR:            letra [0, 4]
+	SRF 0 4
+	DRF
+	STC 1
+	PLUS
+	ASG
+	JMP L9
+L8:
+; Si no
+; Asignación a max
+; Obtener dirección de VARIABLE CHAR:            max [0, 6]
+	SRF 0 6
+; Obtener valor de VARIABLE CHAR:            letra [0, 4]
+	SRF 0 4
+	DRF
+	STC 1
+	SBT
+	ASG
+L9:
+	JMP L11
+L10:
+; Si no
+; Asignación a headivinado
+; Obtener dirección de VARIABLE BOOLEANO:        headivinado [0, 7]
+	SRF 0 7
+; Sustituida expresion constante
+	STC 1
+	ASG
+L11:
+L12:
+; Condicion mientras que
+; Obtener valor de VARIABLE CHAR:            min [0, 5]
+	SRF 0 5
+	DRF
+; Obtener valor de VARIABLE CHAR:            max [0, 6]
+	SRF 0 6
+	DRF
+	NEQ
+; Obtener valor de VARIABLE BOOLEANO:        headivinado [0, 7]
+	SRF 0 7
+	DRF
+	NGB
+	AND
+	JMT L13
+; Seleccion simple
+; Obtener valor de VARIABLE BOOLEANO:        headivinado [0, 7]
+	SRF 0 7
+	DRF
+	NGB
+	JMF L14
+; Si
+; Escribir cadena: La letra es la 
+	STC 76
+	WRT 0
+	STC 97
+	WRT 0
+	STC 32
+	WRT 0
+	STC 108
+	WRT 0
+	STC 101
+	WRT 0
+	STC 116
+	WRT 0
+	STC 114
+	WRT 0
+	STC 97
+	WRT 0
+	STC 32
+	WRT 0
+	STC 101
+	WRT 0
+	STC 115
+	WRT 0
+	STC 32
+	WRT 0
+	STC 108
+	WRT 0
+	STC 97
+	WRT 0
+	STC 32
+	WRT 0
+; Escribir char
+; Obtener valor de VARIABLE CHAR:            min [0, 5]
+	SRF 0 5
+	DRF
+	WRT 0
+; Escribir char
+; Sustituida expresion constante
+	STC 13
+	WRT 0
+; Escribir char
+; Sustituida expresion constante
+	STC 10
+	WRT 0
+L14:
+; Fin de adivinar
+	LVP

@@ -21,7 +21,7 @@ booleano correcto;
      escribir ("Escribe un numero: ");
      leer (dato);
   Fin
-    
+
 Principio
   dato := 0;
   correcto := FALSE;

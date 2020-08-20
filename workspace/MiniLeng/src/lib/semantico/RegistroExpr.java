@@ -13,8 +13,8 @@ package lib.semantico;
 
 import lib.semantico.Simbolo.*;
 import lib.aviso.Aviso;
+import lib.generacioncodigo.GeneracionCodigo;
 import lib.generacioncodigo.ListaInstr;
-import lib.semantico.RegistroOp;
 import lib.semantico.RegistroOp.Operador;
 
 import java.math.BigInteger;
@@ -35,11 +35,32 @@ public class RegistroExpr {
 	private Boolean vector = false;
 	private Integer longitud;
 
+	// Se puede almacenar un símbolo cuando la expresión es un
+	// factor identificador
+	private Simbolo s;
+
 	// Generacion codigo
 	// Contiene la lista de instrucciones necesaria para calcular la
 	// expresión que representa el registro
 	private ListaInstr instrucciones = new ListaInstr();
 
+	// Si la expresión es constante, sustituir las instrucciones por la generación
+	// de la constante
+	public void sustituirConstante() {
+		if (esEnt() && getValorEnt() != null) {
+			instrucciones = new ListaInstr();
+			instrucciones.addComentario("Sustituida expresion constante");
+			instrucciones.addConstEnt(getValorEnt());
+		} else if (esChar() && getValorChar() != null) {
+			instrucciones = new ListaInstr();
+			instrucciones.addComentario("Sustituida expresion constante");
+			instrucciones.addConstChar(getValorChar());
+		} else if (esBool() && getValorBool() != null) {
+			instrucciones = new ListaInstr();
+			instrucciones.addComentario("Sustituida expresion constante");
+			instrucciones.addConstBool(getValorBool());
+		}
+	}
 
 	public boolean esDesc() {
 		return tipo == Tipo_variable.DESCONOCIDO;
@@ -163,61 +184,77 @@ public class RegistroExpr {
 		return longitud;
 	}
 
-	public ListaInstr getInstr() {
+	public ListaInstr getListaInstr() {
 		return instrucciones;
+	}
+
+	public void setSimbolo(Simbolo s) {
+		this.s = s;
+	}
+
+	public Simbolo getSimbolo() {
+		return s;
 	}
 
 	// Operar con registros
 
 	public static RegistroExpr operar(RegistroOp op, RegistroExpr reg1, RegistroExpr reg2) {
 		// Para operar los registros, ambos deben ser del mismo tipo
+		System.out.println("Se va a operar");
 
-		// No se puede operar con vectores
+		RegistroExpr res = new RegistroExpr();
+
 		if (reg1.esVector() || reg2.esVector()) {
+			// No se puede operar con vectores
 			ErrorSemantico.deteccion("No se pueden realizar operaciones con vectores", op.getToken());
-			RegistroExpr res = new RegistroExpr();
 			res.setTipoDesc();
-			return res;
+		} else if (reg1.esDesc() || reg2.esDesc()) {
+			// Si uno de los dos operandos es desconocido, no se realiza la operación y
+			// se propaga desconocido
+			res.setTipoDesc();
+		} else {
+			switch (op.getOp()) {
+			// Operadores enteros
+			case MAS:
+			case MENOS:
+			case PRODUCTO:
+			case DIV:
+			case DIVISION:
+			case MOD:
+				res = operarEntero(op, reg1, reg2);
+				break;
+
+			// Operadores booleanos
+			case OR:
+			case AND:
+				res = operarBooleano(op, reg1, reg2);
+				break;
+
+			// Operadores de comparación
+			case IGUAL:
+			case MAI:
+			case MAYOR:
+			case MEI:
+			case MENOR:
+			case NI:
+				res = operarComparacion(op, reg1, reg2);
+				break;
+
+			default:
+				res.setTipoDesc();
+				break;
+			}
 		}
 
-		// Si uno de los dos operandos es desconocido, no se realiza la operación y
-		// se propaga desconocido
-		if (reg1.esDesc() || reg2.esDesc()) {
-			RegistroExpr res = new RegistroExpr();
-			res.setTipoDesc();
-			return res;
-		}
+		System.out.println("Generar operacion");
+		// Generación de código
+		// Se juntan las listas de intrucciones de los dos registros y se añade la
+		// operacion
+		res.getListaInstr().concatenarLista(reg1.getListaInstr());
+		res.getListaInstr().concatenarLista(reg2.getListaInstr());
+		res.getListaInstr().addOpBinaria(op);
 
-		switch (op.getOp()) {
-		// Operadores enteros
-		case MAS:
-		case MENOS:
-		case PRODUCTO:
-		case DIV:
-		case DIVISION:
-		case MOD:
-			return operarEntero(op, reg1, reg2);
-
-		// Operadores booleanos
-		case OR:
-		case AND:
-			return operarBooleano(op, reg1, reg2);
-
-		// Operadores de comparación
-		case IGUAL:
-		case MAI:
-		case MAYOR:
-		case MEI:
-		case MENOR:
-		case NI:
-			return operarComparacion(op, reg1, reg2);
-
-		default:
-			RegistroExpr res = new RegistroExpr();
-			res.setTipoDesc();
-			return res;
-		}
-
+		return res;
 	}
 
 	private static RegistroExpr operarEntero(RegistroOp op, RegistroExpr reg1, RegistroExpr reg2) {
@@ -268,6 +305,9 @@ public class RegistroExpr {
 	private static RegistroExpr operarBooleano(RegistroOp op, RegistroExpr reg1, RegistroExpr reg2) {
 		RegistroExpr res = new RegistroExpr();
 		res.setTipoBool();
+
+		System.out.println(reg1.getTipo());
+		System.out.println(reg2.getTipo());
 
 		if (!reg1.esBool()) {
 			ErrorSemantico.deteccion("El operando 1 debe ser booleano", op.getToken());
@@ -433,12 +473,12 @@ public class RegistroExpr {
 			break;
 		}
 
-		if (res.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) == 1) {
+		if (res.compareTo(BigInteger.valueOf(GeneracionCodigo.INT_MAX)) == 1) {
 			detectado = true;
 			Aviso.deteccion(new OverflowException(), op.getToken());
 		}
 
-		if (res.compareTo(BigInteger.valueOf(Integer.MIN_VALUE)) == -1) {
+		if (res.compareTo(BigInteger.valueOf(GeneracionCodigo.INT_MIN)) == -1) {
 			detectado = true;
 			Aviso.deteccion(new UnderflowException(), op.getToken());
 		}

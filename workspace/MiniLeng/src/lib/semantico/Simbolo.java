@@ -46,6 +46,8 @@ public class Simbolo {
 	Boolean vector = false; // Vale true si el símbolo es una variable o parametro vector
 	Integer longitud; // Longitud para los vectores
 
+	Boolean inicializado = false; // Vale true si el símbolo es una variable o parámetro y ha sido inicializado
+
 	// Getters y setters
 
 	public String getNombre() {
@@ -118,6 +120,14 @@ public class Simbolo {
 
 	public Integer getLongitud() {
 		return longitud;
+	}
+
+	public void setInicializado(Boolean inicializado) {
+		this.inicializado = inicializado;
+	}
+
+	public Boolean INICIALIZADO() {
+		return inicializado;
 	}
 
 	// Métodos para construir los tipos de símbolos
@@ -263,7 +273,7 @@ public class Simbolo {
 
 		switch (tipo) {
 		case PROGRAMA:
-			res = String.format("%-25s %s [%d, %d]", "PROGRAMA:", nombre, nivel, dir);
+			res = String.format("%-25s %s [%d, -]", "PROGRAMA:", nombre, nivel);
 			break;
 
 		case VARIABLE:

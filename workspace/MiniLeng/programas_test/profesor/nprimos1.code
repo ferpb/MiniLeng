@@ -1,0 +1,140 @@
+; Programa: nprimos
+	ENP L7
+; Acción: es_primo
+L0:
+; Comienzo de acción: es_primo
+; Asignación a j
+; Obtener dirección de VARIABLE ENTERO:          j [1, 3]
+	SRF 0 3
+; Sustituida expresion constante
+	STC 2
+	ASG
+; Asignación a divisible
+; Obtener dirección de VARIABLE BOOLEANO:        divisible [1, 4]
+	SRF 0 4
+; Sustituida expresion constante
+	STC 0
+	ASG
+; Mientras que
+	JMP L1
+L2:
+; Asignación a divisible
+; Obtener dirección de VARIABLE BOOLEANO:        divisible [1, 4]
+	SRF 0 4
+; Obtener valor de VARIABLE ENTERO:          i [0, 4]
+	SRF 1 4
+	DRF
+; Obtener valor de VARIABLE ENTERO:          j [1, 3]
+	SRF 0 3
+	DRF
+	MOD
+	STC 0
+	EQ
+	ASG
+; Asignación a j
+; Obtener dirección de VARIABLE ENTERO:          j [1, 3]
+	SRF 0 3
+; Obtener valor de VARIABLE ENTERO:          j [1, 3]
+	SRF 0 3
+	DRF
+	STC 1
+	PLUS
+	ASG
+L1:
+; Condicion mientras que
+; Obtener valor de VARIABLE ENTERO:          j [1, 3]
+	SRF 0 3
+	DRF
+; Obtener valor de VARIABLE ENTERO:          i [0, 4]
+	SRF 1 4
+	DRF
+	STC 2
+	DIV
+	LT
+; Obtener valor de VARIABLE BOOLEANO:        divisible [1, 4]
+	SRF 0 4
+	DRF
+	NGB
+	AND
+	JMT L2
+; Seleccion simple
+; Obtener valor de VARIABLE BOOLEANO:        divisible [1, 4]
+	SRF 0 4
+	DRF
+	NGB
+	JMF L3
+; Si
+; Escribir entero
+; Obtener valor de VARIABLE ENTERO:          i [0, 4]
+	SRF 1 4
+	DRF
+	WRT 1
+; Escribir cadena: es primo.
+	STC 101
+	WRT 0
+	STC 115
+	WRT 0
+	STC 32
+	WRT 0
+	STC 112
+	WRT 0
+	STC 114
+	WRT 0
+	STC 105
+	WRT 0
+	STC 109
+	WRT 0
+	STC 111
+	WRT 0
+	STC 46
+	WRT 0
+; Escribir char
+; Sustituida expresion constante
+	STC 13
+	WRT 0
+; Escribir char
+; Sustituida expresion constante
+	STC 10
+	WRT 0
+L3:
+	CSF
+; Comienzo de programa: nprimos
+L7:
+; Asignación a n
+; Obtener dirección de VARIABLE ENTERO:          n [0, 3]
+	SRF 0 3
+; Sustituida expresion constante
+	STC 100
+	ASG
+; Asignación a i
+; Obtener dirección de VARIABLE ENTERO:          i [0, 4]
+	SRF 0 4
+; Sustituida expresion constante
+	STC 2
+	ASG
+; Mientras que
+	JMP L5
+L6:
+; Invocar a ACCION:                   es_primo() [0, 0]
+	OSF 5 0 L0
+; Asignación a i
+; Obtener dirección de VARIABLE ENTERO:          i [0, 4]
+	SRF 0 4
+; Obtener valor de VARIABLE ENTERO:          i [0, 4]
+	SRF 0 4
+	DRF
+	STC 1
+	PLUS
+	ASG
+L5:
+; Condicion mientras que
+; Obtener valor de VARIABLE ENTERO:          i [0, 4]
+	SRF 0 4
+	DRF
+; Obtener valor de VARIABLE ENTERO:          n [0, 3]
+	SRF 0 3
+	DRF
+	LTE
+	JMT L6
+; Fin de nprimos
+	LVP
