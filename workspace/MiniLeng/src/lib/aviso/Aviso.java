@@ -22,25 +22,25 @@ public class Aviso {
 
 	public static void deteccion(String mensaje, Token t) {
 		contadorAvisos++;
-		System.err.println("MiniLeng: AVISO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+		System.err.println("AVISO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
 				"Símbolo: '" + t.image + "'. " + mensaje);
 	}
 
 	public static void deteccion(UnderflowException e, Token t) {
 		contadorAvisos++;
-		System.err.println("MiniLeng: AVISO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+		System.err.println("AVISO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
 				"Símbolo: '" + t.image + "' La operación produce undeflow");
 	}
 
 	public static void deteccion(OverflowException e, Token t) {
 		contadorAvisos++;
-		System.err.println("MiniLeng: AVISO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+		System.err.println("AVISO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
 				"Símbolo: '" + t.image + "' La operación produce overflow");
 	}
 
 	public static void deteccion(DivisionPorCeroException e, Token t) {
 		contadorAvisos++;
-		System.err.println("MiniLeng: AVISO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+		System.err.println("AVISO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
 				"Símbolo: '" + t.image + "' La operación produce una división por cero");
 	}
 

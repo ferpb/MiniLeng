@@ -41,11 +41,13 @@ L2:
 ; Obtener valor de VARIABLE ENTERO:          n [0, 5]
 	SRF 0 5
 	DRF
+; Sustituida expresion constante
 	STC 0
 	LTE
 ; Obtener valor de VARIABLE ENTERO:          n [0, 5]
 	SRF 0 5
 	DRF
+; Sustituida expresion constante
 	STC 100
 	GTE
 	OR
@@ -103,7 +105,7 @@ L2:
 	STC 32
 	WRT 0
 ; Invocar a ACCION:                   miaccion() [0, 0]
-	OSF 7 0 L0
+	OSF 6 0 L0
 ; Asignación a x
 ; Obtener dirección de VARIABLE ENTERO:          x [0, 3]
 	SRF 0 3
@@ -114,7 +116,10 @@ L2:
 ; Obtener dirección de VARIABLE ENTERO:          x [0, 3]
 	SRF 0 3
 ; Sustituida expresion constante
-	STC -999999998
+	STC 1
+; Sustituida expresion constante
+	STC 999999999
+	SBT
 	ASG
 ; Asignación a x
 ; Obtener dirección de VARIABLE ENTERO:          x [0, 3]
@@ -168,7 +173,7 @@ L2:
 	DRF
 	SBT
 	ASG
-	JMF L5
+	JMP L5
 L4:
 ; Si no
 ; Asignación a n

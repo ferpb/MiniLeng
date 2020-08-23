@@ -1,12 +1,13 @@
 /*********************************************************************************
- * Especificación JavaCC para el lenguaje MiniLeng (Procesadores de Lenguajes)
+ * Especificación JavaCC para el lenguaje MiniLeng
  *
  * Fichero:    minilengcompiler.jj
  * Autor:      Fernando Peña (NIA: 756012)
  * Fecha:      29/03/2020
- * Versión:    v2.2
+ * Versión:    v4.0
  * Asignatura: Procesadores de Lenguajes, curso 2019-2020
  **********************************************************************************/
+
 options {
   static = true;
   ignore_case = true;
@@ -95,7 +96,7 @@ public class minilengcompiler {
     }
 
     private static void opcionInvalida(String opcion) {
-        System.err.println("MiniLeng: Opción inválida: '" + opcion + "'\n");
+        System.err.println("Error: Opción inválida: '" + opcion + "'\n");
         help();
     }
 
@@ -169,7 +170,7 @@ public class minilengcompiler {
 		if (fichero_entrada != null) {
 			// Si el fichero no terminal en .ml, error
 			if (!fichero_entrada.endsWith(".ml")) {
-        		System.err.println("MiniLeng: El fichero a compilar tiene que tener extensión .ml");
+        		System.err.println("Error: El fichero a compilar tiene que tener extensión .ml");
         		System.err.println("          Fichero introducido: '" + fichero_entrada + "'");
         		System.exit(0);
 			}
@@ -180,7 +181,7 @@ public class minilengcompiler {
         		stream = new FileInputStream(fichero_entrada);
       		}
       		catch (FileNotFoundException e) {
-        		System.err.println("MiniLeng: No se ha encontrado el fichero '" + fichero_entrada + "'");
+        		System.err.println("Error: No se ha encontrado el fichero '" + fichero_entrada + "'");
         		System.exit(0);
       		}
 		}
@@ -1507,16 +1508,6 @@ ListaInstr seleccion() :
 {
   t = <tSI>
   reg = expresion()
-  {
-    if (!reg.esDesc() && !reg.esBool()) {
-      ErrorSemantico.deteccion("La condición en la selección debe ser un booleano", t);
-      ok = false;
-    }
-    else if (reg.esBool() && reg.getValorBool() != null && !reg.getValorBool()) {
-      Aviso.deteccion("La expresión del 'si' es siempre 'false', el interior del bloque es código muerto", t);
-      ok = false;
-    }
-  }
   try {
   	<tENT>
   }
@@ -1531,18 +1522,43 @@ ListaInstr seleccion() :
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba el delimitador de fin de estructura SI: 'FSI'");
   }
+
   {
 	// Generación de código
 	// Si va a ser código muerto no se genera código
-	if (ok) {
+    
+    if (!reg.esDesc() && !reg.esBool()) {
+      ErrorSemantico.deteccion("La condición en la selección debe ser un booleano", t);
+    }
+    else if (reg.esBool() && reg.getValorBool() != null) {
+      if (lSino == null) {
+        if (reg.getValorBool()) {
+          l.concatenarLista(lSi);
+        }
+        else {
+          Aviso.deteccion("La expresión del 'si' es siempre 'false', el interior del bloque es código muerto", t);
+        }
+      }
+      else {
+        if (reg.getValorBool()) {
+          Aviso.deteccion("La expresión de la selección es siempre 'true', el interior del bloque 'si_no' es código muerto", t);
+          l.concatenarLista(lSi);
+        }
+        else {
+          Aviso.deteccion("La expresión de la selección es siempre 'false', el interior del bloque 'si' es código muerto", t);
+          l.concatenarLista(lSino);
+        }
+      }
+    }
+    else {
 	  if (lSino != null) {
 	    l.addSeleccion(reg.getListaInstr(), lSi, lSino, generacion_codigo.nuevaEtiqueta(), generacion_codigo.nuevaEtiqueta());
 	  }
 	  else {
 	    l.addSeleccionSimple(reg.getListaInstr(), lSi, generacion_codigo.nuevaEtiqueta());
 	  }
-	}
-
+    }
+    
 	return l;
   }
 }
@@ -1745,16 +1761,7 @@ ListaInstr argumentos(Simbolo s, Token t) :
                 System.err.println("El argumento es válido");
 
                 // Generación de código
-                // Añadir instrucciones para apilar el argumento
-      			// IMPORTANTE! En los parámetro por referencia hay que eliminar la última
-      			// 			   instrucción (que será DRF)
-                ListaInstr apilar = new ListaInstr();
-                apilar.addComentario("Apilar argumento " + i);
-                apilar.concatenarLista(arg.getListaInstr());
-                if (param.ES_REFERENCIA()) {
-                  apilar.eliminarUltimaInstr();
-                }
-                listaInstr.concatenarLista(apilar);
+                listaInstr.addApilarArgumento(param, i, arg.getListaInstr());
               }
             }
           }
@@ -1893,6 +1900,9 @@ RegistroExpr expresion_simple() :
     ErrorSintactico.deteccion(e, "Se esperaba una expresión simple");
   }
   {
+    // Generación de código
+    reg1.sustituirConstante();
+    
     return reg1;
   }
 }
@@ -1943,6 +1953,9 @@ RegistroExpr termino() :
     ErrorSintactico.deteccion(e, "Se esperaba un término");
   }
   {
+    // Generación de código
+    reg1.sustituirConstante();
+    
     return reg1;
   }
 }

@@ -25,7 +25,7 @@ public class ErrorSintactico {
 	  	e.currentToken.beginColumn;
 		e.currentToken.next;
          */
-		System.err.println("MiniLeng: ERROR SINTÁCTICO (línea " + e.currentToken.next.beginLine +
+		System.err.println("ERROR SINTÁCTICO (línea " + e.currentToken.next.beginLine +
 				", columna " + (e.currentToken.next.beginColumn) + "): Token incorrecto: '" +
                 e.currentToken.next + "'. " + mensaje);
 	}

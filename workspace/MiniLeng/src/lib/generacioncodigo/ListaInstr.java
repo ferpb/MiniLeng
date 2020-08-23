@@ -20,12 +20,7 @@ import lib.semantico.Simbolo;
 public class ListaInstr {
 
 	// Las instrucciones se almacenan en forma de Strings
-
 	private ArrayList<String> lista = new ArrayList<String>();
-
-
-
-
 
 
 	// Programa
@@ -63,6 +58,19 @@ public class ListaInstr {
 	}
 
 	// Invocación
+
+	// El símbolo param debe contener un parámetro
+	// La lista de instrucciones arg debe contener las instrucciones para acceder al valor
+	// del argumento que se quiere apilar
+	public void addApilarArgumento(Simbolo param, Integer i, ListaInstr arg) {
+		// IMPORTANTE! En los parámetro por referencia hay que eliminar la última
+	    // 			   instrucción (que será DRF) para apilar su DIRECCIÓN
+        addComentario("Apilar argumento " + (i + 1));
+        concatenarLista(arg);
+        if (param.ES_REFERENCIA()) {
+          eliminarUltimaInstr();
+        }
+	}
 
 	// El símbolo acción debe ser una acción
 	public void addInvocacionAccion(Simbolo accion, Integer size, Integer nivelAct) {
@@ -417,6 +425,4 @@ public class ListaInstr {
 		lista.remove(lista.size() - 1);
 		addComentario("Instrucción eliminada");
 	}
-
-
 }

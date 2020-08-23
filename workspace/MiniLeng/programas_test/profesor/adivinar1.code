@@ -40,11 +40,13 @@ L1:
 ; Obtener valor de VARIABLE CHAR:            c [1, 3]
 	SRF 0 3
 	DRF
+; Sustituida expresion constante
 	STC 83
 	NEQ
 ; Obtener valor de VARIABLE CHAR:            c [1, 3]
 	SRF 0 3
 	DRF
+; Sustituida expresion constante
 	STC 78
 	NEQ
 	AND
@@ -97,11 +99,13 @@ L5:
 ; Obtener valor de VARIABLE CHAR:            c [1, 3]
 	SRF 0 3
 	DRF
+; Sustituida expresion constante
 	STC 65
 	LT
 ; Obtener valor de VARIABLE CHAR:            c [1, 3]
 	SRF 0 3
 	DRF
+; Sustituida expresion constante
 	STC 90
 	GT
 	OR
@@ -225,7 +229,7 @@ L15:
 	STC 63
 	WRT 0
 ; Invocar a ACCION:                   siono() [0, 0]
-	OSF 10 0 L0
+	OSF 9 0 L0
 ; Asignación a min
 ; Obtener dirección de VARIABLE CHAR:            min [0, 5]
 	SRF 0 5
@@ -345,11 +349,12 @@ L13:
 	STC 63
 	WRT 0
 ; Invocar a ACCION:                   siono() [0, 0]
-	OSF 10 0 L0
+	OSF 9 0 L0
 ; Seleccion
 ; Obtener valor de VARIABLE CHAR:            respuesta [0, 3]
 	SRF 0 3
 	DRF
+; Sustituida expresion constante
 	STC 78
 	EQ
 	JMF L10
@@ -424,11 +429,12 @@ L13:
 	STC 63
 	WRT 0
 ; Invocar a ACCION:                   siono() [0, 0]
-	OSF 10 0 L0
+	OSF 9 0 L0
 ; Seleccion
 ; Obtener valor de VARIABLE CHAR:            respuesta [0, 3]
 	SRF 0 3
 	DRF
+; Sustituida expresion constante
 	STC 83
 	EQ
 	JMF L8
@@ -439,6 +445,7 @@ L13:
 ; Obtener valor de VARIABLE CHAR:            letra [0, 4]
 	SRF 0 4
 	DRF
+; Sustituida expresion constante
 	STC 1
 	PLUS
 	ASG
@@ -451,6 +458,7 @@ L8:
 ; Obtener valor de VARIABLE CHAR:            letra [0, 4]
 	SRF 0 4
 	DRF
+; Sustituida expresion constante
 	STC 1
 	SBT
 	ASG

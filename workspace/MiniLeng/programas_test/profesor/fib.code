@@ -1,5 +1,5 @@
 ; Programa: fibbonaci
-	ENP L15
+	ENP L13
 ; Acción: cambiar_de_linea
 L0:
 ; Comienzo de acción: cambiar_de_linea
@@ -94,6 +94,7 @@ L7:
 	SRF 0 3
 	DRF
 	DRF
+; Sustituida expresion constante
 	STC 0
 	GT
 	ASG
@@ -183,29 +184,32 @@ L9:
 ; Obtener valor de PARAMETRO VAL ENTERO:     n [1, 3]
 	SRF 0 3
 	DRF
+; Sustituida expresion constante
 	STC 1
 	GT
 	JMF L10
 ; Si
-; Apilar argumento 0
+; Apilar argumento 1
 ; Obtener valor de PARAMETRO VAL ENTERO:     n [1, 3]
 	SRF 0 3
 	DRF
+; Sustituida expresion constante
 	STC 1
 	SBT
-; Apilar argumento 1
+; Apilar argumento 2
 ; Obtener valor de VARIABLE ENTERO:          r1 [1, 5]
 	SRF 0 5
 ; Instrucción eliminada
 ; Invocar a ACCION:                   fib(n, r) [0, 9]
 	OSF 6 1 L9
-; Apilar argumento 0
+; Apilar argumento 1
 ; Obtener valor de PARAMETRO VAL ENTERO:     n [1, 3]
 	SRF 0 3
 	DRF
+; Sustituida expresion constante
 	STC 2
 	SBT
-; Apilar argumento 1
+; Apilar argumento 2
 ; Obtener valor de VARIABLE ENTERO:          r2 [1, 6]
 	SRF 0 6
 ; Instrucción eliminada
@@ -237,68 +241,23 @@ L10:
 L11:
 	CSF
 ; Comienzo de programa: fibbonaci
-L15:
-; Apilar argumento 0
+L13:
+; Apilar argumento 1
 ; Obtener valor de VARIABLE ENTERO:          n [0, 3]
 	SRF 0 3
 ; Instrucción eliminada
 ; Invocar a ACCION:                   dato(dato) [0, 2]
 	OSF 4 0 L2
-; Apilar argumento 0
+; Apilar argumento 1
 ; Obtener valor de VARIABLE ENTERO:          n [0, 3]
 	SRF 0 3
 	DRF
-; Apilar argumento 1
+; Apilar argumento 2
 ; Obtener valor de VARIABLE ENTERO:          r [0, 4]
 	SRF 0 4
 ; Instrucción eliminada
 ; Invocar a ACCION:                   fib(n, r) [0, 9]
 	OSF 4 0 L9
-; Asignación a b
-; Obtener dirección de VARIABLE BOOLEANO:        b [0, 5]
-	SRF 0 5
-; Sustituida expresion constante
-	STC 0
-	ASG
-; Escribir char
-; Sustituida expresion constante
-	STC 13
-	WRT 0
-; Escribir char
-; Sustituida expresion constante
-	STC 10
-	WRT 0
-; Escribir bool
-; Seleccion
-; Obtener valor de VARIABLE BOOLEANO:        b [0, 5]
-	SRF 0 5
-	DRF
-	JMF L13
-; Si
-; Escribir cadena: True
-	STC 84
-	WRT 0
-	STC 114
-	WRT 0
-	STC 117
-	WRT 0
-	STC 101
-	WRT 0
-	JMP L14
-L13:
-; Si no
-; Escribir cadena: False
-	STC 70
-	WRT 0
-	STC 97
-	WRT 0
-	STC 108
-	WRT 0
-	STC 115
-	WRT 0
-	STC 101
-	WRT 0
-L14:
 ; Escribir cadena: Fibbonaci(
 	STC 70
 	WRT 0

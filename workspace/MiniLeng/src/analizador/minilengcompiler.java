@@ -79,7 +79,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
 
     private static void opcionInvalida(String opcion) {
-        System.err.println("MiniLeng: Opci\u00f3n inv\u00e1lida: '" + opcion + "'\u005cn");
+        System.err.println("Error: Opci\u00f3n inv\u00e1lida: '" + opcion + "'\u005cn");
         help();
     }
 
@@ -153,7 +153,7 @@ public class minilengcompiler implements minilengcompilerConstants {
                 if (fichero_entrada != null) {
                         // Si el fichero no terminal en .ml, error
                         if (!fichero_entrada.endsWith(".ml")) {
-                        System.err.println("MiniLeng: El fichero a compilar tiene que tener extensi\u00f3n .ml");
+                        System.err.println("Error: El fichero a compilar tiene que tener extensi\u00f3n .ml");
                         System.err.println("          Fichero introducido: '" + fichero_entrada + "'");
                         System.exit(0);
                         }
@@ -164,7 +164,7 @@ public class minilengcompiler implements minilengcompilerConstants {
                         stream = new FileInputStream(fichero_entrada);
                 }
                 catch (FileNotFoundException e) {
-                        System.err.println("MiniLeng: No se ha encontrado el fichero '" + fichero_entrada + "'");
+                        System.err.println("Error: No se ha encontrado el fichero '" + fichero_entrada + "'");
                         System.exit(0);
                 }
                 }
@@ -1191,14 +1191,6 @@ public class minilengcompiler implements minilengcompilerConstants {
   ListaInstr lSino = null;
     t = jj_consume_token(tSI);
     reg = expresion();
-    if (!reg.esDesc() && !reg.esBool()) {
-      ErrorSemantico.deteccion("La condici\u00f3n en la selecci\u00f3n debe ser un booleano", t);
-      ok = false;
-    }
-    else if (reg.esBool() && reg.getValorBool() != null && !reg.getValorBool()) {
-      Aviso.deteccion("La expresi\u00f3n del 'si' es siempre 'false', el interior del bloque es c\u00f3digo muerto", t);
-      ok = false;
-    }
     try {
       jj_consume_token(tENT);
     } catch (ParseException e) {
@@ -1225,14 +1217,38 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
         // Generación de código
         // Si va a ser código muerto no se genera código
-        if (ok) {
+
+    if (!reg.esDesc() && !reg.esBool()) {
+      ErrorSemantico.deteccion("La condici\u00f3n en la selecci\u00f3n debe ser un booleano", t);
+    }
+    else if (reg.esBool() && reg.getValorBool() != null) {
+      if (lSino == null) {
+        if (reg.getValorBool()) {
+          l.concatenarLista(lSi);
+        }
+        else {
+          Aviso.deteccion("La expresi\u00f3n del 'si' es siempre 'false', el interior del bloque es c\u00f3digo muerto", t);
+        }
+      }
+      else {
+        if (reg.getValorBool()) {
+          Aviso.deteccion("La expresi\u00f3n de la selecci\u00f3n es siempre 'true', el interior del bloque 'si_no' es c\u00f3digo muerto", t);
+          l.concatenarLista(lSi);
+        }
+        else {
+          Aviso.deteccion("La expresi\u00f3n de la selecci\u00f3n es siempre 'false', el interior del bloque 'si' es c\u00f3digo muerto", t);
+          l.concatenarLista(lSino);
+        }
+      }
+    }
+    else {
           if (lSino != null) {
             l.addSeleccion(reg.getListaInstr(), lSi, lSino, generacion_codigo.nuevaEtiqueta(), generacion_codigo.nuevaEtiqueta());
           }
           else {
             l.addSeleccionSimple(reg.getListaInstr(), lSi, generacion_codigo.nuevaEtiqueta());
           }
-        }
+    }
 
         {if (true) return l;}
     throw new Error("Missing return statement in function");
@@ -1451,16 +1467,7 @@ public class minilengcompiler implements minilengcompilerConstants {
                 System.err.println("El argumento es v\u00e1lido");
 
                 // Generación de código
-                // Añadir instrucciones para apilar el argumento
-                        // IMPORTANTE! En los parámetro por referencia hay que eliminar la última
-                        // 			   instrucción (que será DRF)
-                ListaInstr apilar = new ListaInstr();
-                apilar.addComentario("Apilar argumento " + i);
-                apilar.concatenarLista(arg.getListaInstr());
-                if (param.ES_REFERENCIA()) {
-                  apilar.eliminarUltimaInstr();
-                }
-                listaInstr.concatenarLista(apilar);
+                listaInstr.addApilarArgumento(param, i, arg.getListaInstr());
               }
             }
           }
@@ -1616,6 +1623,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una expresi\u00f3n simple");
     }
+    // Generación de código
+    reg1.sustituirConstante();
+
     {if (true) return reg1;}
     throw new Error("Missing return statement in function");
   }
@@ -1684,6 +1694,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     } catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba un t\u00e9rmino");
     }
+    // Generación de código
+    reg1.sustituirConstante();
+
     {if (true) return reg1;}
     throw new Error("Missing return statement in function");
   }

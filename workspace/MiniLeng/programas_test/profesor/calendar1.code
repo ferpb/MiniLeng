@@ -1,0 +1,742 @@
+; Programa: calendario
+	ENP L32
+; Acción: primer_dia_anho
+L0:
+; Comienzo de acción: primer_dia_anho
+; Asignación a anho
+; Obtener dirección de VARIABLE ENTERO:          anho [0, 4]
+	SRF 1 4
+; Obtener valor de VARIABLE ENTERO:          anho [0, 4]
+	SRF 1 4
+	DRF
+; Sustituida expresion constante
+	STC 1900
+	SBT
+	ASG
+; Asignación a cuatro
+; Obtener dirección de VARIABLE BOOLEANO:        cuatro [1, 6]
+	SRF 0 6
+; Obtener valor de VARIABLE ENTERO:          anho [0, 4]
+	SRF 1 4
+	DRF
+	STC 4
+	MOD
+; Sustituida expresion constante
+	STC 0
+	EQ
+; Obtener valor de VARIABLE ENTERO:          anho [0, 4]
+	SRF 1 4
+	DRF
+	STC 100
+	MOD
+; Sustituida expresion constante
+	STC 0
+	NEQ
+	AND
+	ASG
+; Asignación a cien
+; Obtener dirección de VARIABLE BOOLEANO:        cien [1, 5]
+	SRF 0 5
+; Obtener valor de VARIABLE ENTERO:          anho [0, 4]
+	SRF 1 4
+	DRF
+	STC 400
+	MOD
+; Sustituida expresion constante
+	STC 0
+	EQ
+	ASG
+; Asignación a bisiestos_validos
+; Obtener dirección de VARIABLE BOOLEANO:        bisiestos_validos [1, 4]
+	SRF 0 4
+; Obtener valor de VARIABLE BOOLEANO:        cuatro [1, 6]
+	SRF 0 6
+	DRF
+; Obtener valor de VARIABLE BOOLEANO:        cien [1, 5]
+	SRF 0 5
+	DRF
+	OR
+	ASG
+; Asignación a bisiestos
+; Obtener dirección de VARIABLE ENTERO:          bisiestos [1, 3]
+	SRF 0 3
+; Obtener valor de VARIABLE ENTERO:          anho [0, 4]
+	SRF 1 4
+	DRF
+	STC 4
+	DIV
+	ASG
+; Seleccion
+; Obtener valor de VARIABLE BOOLEANO:        bisiestos_validos [1, 4]
+	SRF 0 4
+	DRF
+	JMF L1
+; Si
+; Asignación a dia1anho
+; Obtener dirección de VARIABLE ENTERO:          dia1anho [0, 5]
+	SRF 1 5
+; Obtener valor de VARIABLE ENTERO:          anho [0, 4]
+	SRF 1 4
+	DRF
+; Sustituida expresion constante
+	STC 1
+	SBT
+; Obtener valor de VARIABLE ENTERO:          bisiestos [1, 3]
+	SRF 0 3
+	DRF
+	PLUS
+	STC 7
+	MOD
+	ASG
+	JMP L2
+L1:
+; Si no
+; Asignación a dia1anho
+; Obtener dirección de VARIABLE ENTERO:          dia1anho [0, 5]
+	SRF 1 5
+; Obtener valor de VARIABLE ENTERO:          anho [0, 4]
+	SRF 1 4
+	DRF
+; Obtener valor de VARIABLE ENTERO:          bisiestos [1, 3]
+	SRF 0 3
+	DRF
+	PLUS
+	STC 7
+	MOD
+	ASG
+L2:
+	CSF
+; Acción: primer_dia_mes
+L4:
+; Comienzo de acción: primer_dia_mes
+; Asignación a anho
+; Obtener dirección de VARIABLE ENTERO:          anho [0, 4]
+	SRF 1 4
+; Obtener valor de VARIABLE ENTERO:          anho [0, 4]
+	SRF 1 4
+	DRF
+; Sustituida expresion constante
+	STC 1900
+	SBT
+	ASG
+; Asignación a cien
+; Obtener dirección de VARIABLE BOOLEANO:        cien [1, 4]
+	SRF 0 4
+; Obtener valor de VARIABLE ENTERO:          anho [0, 4]
+	SRF 1 4
+	DRF
+	STC 4
+	MOD
+; Sustituida expresion constante
+	STC 0
+	EQ
+; Obtener valor de VARIABLE ENTERO:          anho [0, 4]
+	SRF 1 4
+	DRF
+	STC 100
+	MOD
+; Sustituida expresion constante
+	STC 0
+	NEQ
+	AND
+	ASG
+; Asignación a cuatro
+; Obtener dirección de VARIABLE BOOLEANO:        cuatro [1, 5]
+	SRF 0 5
+; Obtener valor de VARIABLE ENTERO:          anho [0, 4]
+	SRF 1 4
+	DRF
+	STC 400
+	MOD
+; Sustituida expresion constante
+	STC 0
+	EQ
+	ASG
+; Asignación a bisiestos_validos
+; Obtener dirección de VARIABLE BOOLEANO:        bisiestos_validos [1, 3]
+	SRF 0 3
+; Obtener valor de VARIABLE BOOLEANO:        cien [1, 4]
+	SRF 0 4
+	DRF
+; Obtener valor de VARIABLE BOOLEANO:        cuatro [1, 5]
+	SRF 0 5
+	DRF
+	OR
+	ASG
+; Seleccion
+; Obtener valor de VARIABLE BOOLEANO:        bisiestos_validos [1, 3]
+	SRF 0 3
+	DRF
+	JMF L5
+; Si
+; Asignación a anhade
+; Obtener dirección de VARIABLE ENTERO:          anhade [0, 7]
+	SRF 1 7
+; Sustituida expresion constante
+	STC 1
+	ASG
+	JMP L6
+L5:
+; Si no
+; Asignación a anhade
+; Obtener dirección de VARIABLE ENTERO:          anhade [0, 7]
+	SRF 1 7
+; Sustituida expresion constante
+	STC 0
+	ASG
+L6:
+; Seleccion
+; Obtener valor de VARIABLE ENTERO:          mes [0, 3]
+	SRF 1 3
+	DRF
+; Sustituida expresion constante
+	STC 1
+	EQ
+	JMF L29
+; Si
+; Asignación a dia1mes
+; Obtener dirección de VARIABLE ENTERO:          dia1mes [0, 6]
+	SRF 1 6
+; Obtener valor de VARIABLE ENTERO:          dia1anho [0, 5]
+	SRF 1 5
+	DRF
+	ASG
+	JMP L30
+L29:
+; Si no
+; Seleccion
+; Obtener valor de VARIABLE ENTERO:          mes [0, 3]
+	SRF 1 3
+	DRF
+; Sustituida expresion constante
+	STC 2
+	EQ
+	JMF L27
+; Si
+; Asignación a dia1mes
+; Obtener dirección de VARIABLE ENTERO:          dia1mes [0, 6]
+	SRF 1 6
+; Obtener valor de VARIABLE ENTERO:          dia1anho [0, 5]
+	SRF 1 5
+	DRF
+; Sustituida expresion constante
+	STC 31
+	PLUS
+	STC 7
+	MOD
+	ASG
+	JMP L28
+L27:
+; Si no
+; Seleccion
+; Obtener valor de VARIABLE ENTERO:          mes [0, 3]
+	SRF 1 3
+	DRF
+; Sustituida expresion constante
+	STC 3
+	EQ
+	JMF L25
+; Si
+; Asignación a dia1mes
+; Obtener dirección de VARIABLE ENTERO:          dia1mes [0, 6]
+	SRF 1 6
+; Obtener valor de VARIABLE ENTERO:          dia1anho [0, 5]
+	SRF 1 5
+	DRF
+; Sustituida expresion constante
+	STC 59
+	PLUS
+; Obtener valor de VARIABLE ENTERO:          anhade [0, 7]
+	SRF 1 7
+	DRF
+	PLUS
+	STC 7
+	MOD
+	ASG
+	JMP L26
+L25:
+; Si no
+; Seleccion
+; Obtener valor de VARIABLE ENTERO:          mes [0, 3]
+	SRF 1 3
+	DRF
+; Sustituida expresion constante
+	STC 4
+	EQ
+	JMF L23
+; Si
+; Asignación a dia1mes
+; Obtener dirección de VARIABLE ENTERO:          dia1mes [0, 6]
+	SRF 1 6
+; Obtener valor de VARIABLE ENTERO:          dia1anho [0, 5]
+	SRF 1 5
+	DRF
+; Sustituida expresion constante
+	STC 90
+	PLUS
+; Obtener valor de VARIABLE ENTERO:          anhade [0, 7]
+	SRF 1 7
+	DRF
+	PLUS
+	STC 7
+	MOD
+	ASG
+	JMP L24
+L23:
+; Si no
+; Seleccion
+; Obtener valor de VARIABLE ENTERO:          mes [0, 3]
+	SRF 1 3
+	DRF
+; Sustituida expresion constante
+	STC 5
+	EQ
+	JMF L21
+; Si
+; Asignación a dia1mes
+; Obtener dirección de VARIABLE ENTERO:          dia1mes [0, 6]
+	SRF 1 6
+; Obtener valor de VARIABLE ENTERO:          dia1anho [0, 5]
+	SRF 1 5
+	DRF
+; Sustituida expresion constante
+	STC 120
+	PLUS
+; Obtener valor de VARIABLE ENTERO:          anhade [0, 7]
+	SRF 1 7
+	DRF
+	PLUS
+	STC 7
+	MOD
+	ASG
+	JMP L22
+L21:
+; Si no
+; Seleccion
+; Obtener valor de VARIABLE ENTERO:          mes [0, 3]
+	SRF 1 3
+	DRF
+; Sustituida expresion constante
+	STC 6
+	EQ
+	JMF L19
+; Si
+; Asignación a dia1mes
+; Obtener dirección de VARIABLE ENTERO:          dia1mes [0, 6]
+	SRF 1 6
+; Obtener valor de VARIABLE ENTERO:          dia1anho [0, 5]
+	SRF 1 5
+	DRF
+; Sustituida expresion constante
+	STC 151
+	PLUS
+; Obtener valor de VARIABLE ENTERO:          anhade [0, 7]
+	SRF 1 7
+	DRF
+	PLUS
+	STC 7
+	MOD
+	ASG
+	JMP L20
+L19:
+; Si no
+; Seleccion
+; Obtener valor de VARIABLE ENTERO:          mes [0, 3]
+	SRF 1 3
+	DRF
+; Sustituida expresion constante
+	STC 7
+	EQ
+	JMF L17
+; Si
+; Asignación a dia1mes
+; Obtener dirección de VARIABLE ENTERO:          dia1mes [0, 6]
+	SRF 1 6
+; Obtener valor de VARIABLE ENTERO:          dia1anho [0, 5]
+	SRF 1 5
+	DRF
+; Sustituida expresion constante
+	STC 181
+	PLUS
+; Obtener valor de VARIABLE ENTERO:          anhade [0, 7]
+	SRF 1 7
+	DRF
+	PLUS
+	STC 7
+	MOD
+	ASG
+	JMP L18
+L17:
+; Si no
+; Seleccion
+; Obtener valor de VARIABLE ENTERO:          mes [0, 3]
+	SRF 1 3
+	DRF
+; Sustituida expresion constante
+	STC 8
+	EQ
+	JMF L15
+; Si
+; Asignación a dia1mes
+; Obtener dirección de VARIABLE ENTERO:          dia1mes [0, 6]
+	SRF 1 6
+; Obtener valor de VARIABLE ENTERO:          dia1anho [0, 5]
+	SRF 1 5
+	DRF
+; Sustituida expresion constante
+	STC 212
+	PLUS
+; Obtener valor de VARIABLE ENTERO:          anhade [0, 7]
+	SRF 1 7
+	DRF
+	PLUS
+	STC 7
+	MOD
+	ASG
+	JMP L16
+L15:
+; Si no
+; Seleccion
+; Obtener valor de VARIABLE ENTERO:          mes [0, 3]
+	SRF 1 3
+	DRF
+; Sustituida expresion constante
+	STC 9
+	EQ
+	JMF L13
+; Si
+; Asignación a dia1mes
+; Obtener dirección de VARIABLE ENTERO:          dia1mes [0, 6]
+	SRF 1 6
+; Obtener valor de VARIABLE ENTERO:          dia1anho [0, 5]
+	SRF 1 5
+	DRF
+; Sustituida expresion constante
+	STC 243
+	PLUS
+; Obtener valor de VARIABLE ENTERO:          anhade [0, 7]
+	SRF 1 7
+	DRF
+	PLUS
+	STC 7
+	MOD
+	ASG
+	JMP L14
+L13:
+; Si no
+; Seleccion
+; Obtener valor de VARIABLE ENTERO:          mes [0, 3]
+	SRF 1 3
+	DRF
+; Sustituida expresion constante
+	STC 10
+	EQ
+	JMF L11
+; Si
+; Asignación a dia1mes
+; Obtener dirección de VARIABLE ENTERO:          dia1mes [0, 6]
+	SRF 1 6
+; Obtener valor de VARIABLE ENTERO:          dia1anho [0, 5]
+	SRF 1 5
+	DRF
+; Sustituida expresion constante
+	STC 273
+	PLUS
+; Obtener valor de VARIABLE ENTERO:          anhade [0, 7]
+	SRF 1 7
+	DRF
+	PLUS
+	STC 7
+	MOD
+	ASG
+	JMP L12
+L11:
+; Si no
+; Seleccion
+; Obtener valor de VARIABLE ENTERO:          mes [0, 3]
+	SRF 1 3
+	DRF
+; Sustituida expresion constante
+	STC 11
+	EQ
+	JMF L9
+; Si
+; Asignación a dia1mes
+; Obtener dirección de VARIABLE ENTERO:          dia1mes [0, 6]
+	SRF 1 6
+; Obtener valor de VARIABLE ENTERO:          dia1anho [0, 5]
+	SRF 1 5
+	DRF
+; Sustituida expresion constante
+	STC 304
+	PLUS
+; Obtener valor de VARIABLE ENTERO:          anhade [0, 7]
+	SRF 1 7
+	DRF
+	PLUS
+	STC 7
+	MOD
+	ASG
+	JMP L10
+L9:
+; Si no
+; Seleccion
+; Obtener valor de VARIABLE ENTERO:          mes [0, 3]
+	SRF 1 3
+	DRF
+; Sustituida expresion constante
+	STC 12
+	EQ
+	JMF L7
+; Si
+; Asignación a dia1mes
+; Obtener dirección de VARIABLE ENTERO:          dia1mes [0, 6]
+	SRF 1 6
+; Obtener valor de VARIABLE ENTERO:          dia1anho [0, 5]
+	SRF 1 5
+	DRF
+; Sustituida expresion constante
+	STC 334
+	PLUS
+; Obtener valor de VARIABLE ENTERO:          anhade [0, 7]
+	SRF 1 7
+	DRF
+	PLUS
+	STC 7
+	MOD
+	ASG
+	JMP L8
+L7:
+; Si no
+; Escribir cadena: Has introducido el mes mal
+	STC 72
+	WRT 0
+	STC 97
+	WRT 0
+	STC 115
+	WRT 0
+	STC 32
+	WRT 0
+	STC 105
+	WRT 0
+	STC 110
+	WRT 0
+	STC 116
+	WRT 0
+	STC 114
+	WRT 0
+	STC 111
+	WRT 0
+	STC 100
+	WRT 0
+	STC 117
+	WRT 0
+	STC 99
+	WRT 0
+	STC 105
+	WRT 0
+	STC 100
+	WRT 0
+	STC 111
+	WRT 0
+	STC 32
+	WRT 0
+	STC 101
+	WRT 0
+	STC 108
+	WRT 0
+	STC 32
+	WRT 0
+	STC 109
+	WRT 0
+	STC 101
+	WRT 0
+	STC 115
+	WRT 0
+	STC 32
+	WRT 0
+	STC 109
+	WRT 0
+	STC 97
+	WRT 0
+	STC 108
+	WRT 0
+L8:
+L10:
+L12:
+L14:
+L16:
+L18:
+L20:
+L22:
+L24:
+L26:
+L28:
+L30:
+	CSF
+; Comienzo de programa: calendario
+L32:
+; Escribir cadena: CALENDARIO
+	STC 67
+	WRT 0
+	STC 65
+	WRT 0
+	STC 76
+	WRT 0
+	STC 69
+	WRT 0
+	STC 78
+	WRT 0
+	STC 68
+	WRT 0
+	STC 65
+	WRT 0
+	STC 82
+	WRT 0
+	STC 73
+	WRT 0
+	STC 79
+	WRT 0
+; Escribir cadena: Introduce un mes en cifras:
+	STC 73
+	WRT 0
+	STC 110
+	WRT 0
+	STC 116
+	WRT 0
+	STC 114
+	WRT 0
+	STC 111
+	WRT 0
+	STC 100
+	WRT 0
+	STC 117
+	WRT 0
+	STC 99
+	WRT 0
+	STC 101
+	WRT 0
+	STC 32
+	WRT 0
+	STC 117
+	WRT 0
+	STC 110
+	WRT 0
+	STC 32
+	WRT 0
+	STC 109
+	WRT 0
+	STC 101
+	WRT 0
+	STC 115
+	WRT 0
+	STC 32
+	WRT 0
+	STC 101
+	WRT 0
+	STC 110
+	WRT 0
+	STC 32
+	WRT 0
+	STC 99
+	WRT 0
+	STC 105
+	WRT 0
+	STC 102
+	WRT 0
+	STC 114
+	WRT 0
+	STC 97
+	WRT 0
+	STC 115
+	WRT 0
+	STC 58
+	WRT 0
+; Leer como entero
+; Obtener valor de VARIABLE ENTERO:          mes [0, 3]
+	SRF 0 3
+; Instrucción eliminada
+	RD 1
+; Leer como char
+; Obtener valor de VARIABLE CHAR:            ln [0, 8]
+	SRF 0 8
+; Instrucción eliminada
+	RD 0
+; Escribir cadena: Introduce un anio en cifras:
+	STC 73
+	WRT 0
+	STC 110
+	WRT 0
+	STC 116
+	WRT 0
+	STC 114
+	WRT 0
+	STC 111
+	WRT 0
+	STC 100
+	WRT 0
+	STC 117
+	WRT 0
+	STC 99
+	WRT 0
+	STC 101
+	WRT 0
+	STC 32
+	WRT 0
+	STC 117
+	WRT 0
+	STC 110
+	WRT 0
+	STC 32
+	WRT 0
+	STC 97
+	WRT 0
+	STC 110
+	WRT 0
+	STC 105
+	WRT 0
+	STC 111
+	WRT 0
+	STC 32
+	WRT 0
+	STC 101
+	WRT 0
+	STC 110
+	WRT 0
+	STC 32
+	WRT 0
+	STC 99
+	WRT 0
+	STC 105
+	WRT 0
+	STC 102
+	WRT 0
+	STC 114
+	WRT 0
+	STC 97
+	WRT 0
+	STC 115
+	WRT 0
+	STC 58
+	WRT 0
+; Leer como entero
+; Obtener valor de VARIABLE ENTERO:          anho [0, 4]
+	SRF 0 4
+; Instrucción eliminada
+	RD 1
+; Leer como char
+; Obtener valor de VARIABLE CHAR:            ln [0, 8]
+	SRF 0 8
+; Instrucción eliminada
+	RD 0
+; Invocar a ACCION:                   primer_dia_anho() [0, 0]
+	OSF 8 0 L0
+; Invocar a ACCION:                   primer_dia_mes() [0, 4]
+	OSF 8 0 L4
+; Escribir entero
+; Obtener valor de VARIABLE ENTERO:          dia1mes [0, 6]
+	SRF 0 6
+	DRF
+	WRT 1
+; Fin de calendario
+	LVP
