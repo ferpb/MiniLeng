@@ -62,13 +62,22 @@ public class ListaInstr {
 	// El símbolo param debe contener un parámetro
 	// La lista de instrucciones arg debe contener las instrucciones para acceder al valor
 	// del argumento que se quiere apilar
-	public void addApilarArgumento(Simbolo param, Integer i, ListaInstr arg) {
+	public void addApilarArgumento(Simbolo param, Integer nparam, ListaInstr arg) {
 		// IMPORTANTE! En los parámetro por referencia hay que eliminar la última
 	    // 			   instrucción (que será DRF) para apilar su DIRECCIÓN
-        addComentario("Apilar argumento " + (i + 1));
+        addComentario("Apilar argumento " + (nparam + 1) + ": " + param);
         concatenarLista(arg);
-        if (param.ES_REFERENCIA()) {
+        if (!param.ES_VECTOR() && param.ES_REFERENCIA()) {
           eliminarUltimaInstr();
+        }
+	}
+
+	// Apila todos los valores del vector v
+	public void addApilarValoresVector(Simbolo v, Integer nivelAct) {
+        addComentario("Apilar valores vector: " + v);
+        for (int i = 0; i < v.getLongitud(); i++) {
+			lista.add("\tSRF " + (nivelAct - v.getNivel()) + " " + (v.getDir() + i));
+			lista.add("\tDRF");
         }
 	}
 
@@ -80,11 +89,19 @@ public class ListaInstr {
 		lista.add("\tOSF " + size + " " + (nivelAct - accion.getNivel()) + " L" + accion.getDir());
 	}
 
-	public void addRecuperarPar(Simbolo s, Integer nivelAct) {
-		System.out.println("Recuparar parametro: " + s);
-		addComentario("Recuperar parametro: " + s);
-		lista.add("\tSRF " + (nivelAct - s.getNivel()) + " " + s.getDir());
-		lista.add("\tASGI");
+	public void addRecuperarPar(Simbolo s, Integer nparam, Integer nivelAct) {
+		addComentario("Recuperar parametro " + (nparam + 1) + ": " + s);
+		if (s.ES_VECTOR() && s.ES_VALOR()) {
+			// Recuperar componentes del vector en orden inverso
+	        for (int i = (s.getLongitud() - 1); i >= 0; i--) {
+				lista.add("\tSRF " + (nivelAct - s.getNivel()) + " " + (s.getDir() + i));
+				lista.add("\tASGI");
+	        }
+		}
+		else {
+		  lista.add("\tSRF " + (nivelAct - s.getNivel()) + " " + s.getDir());
+		  lista.add("\tASGI");
+		}
 	}
 
 
@@ -177,7 +194,7 @@ public class ListaInstr {
 
 		Integer direccion = s.getDir();
 		// Si se ha pasado un índice constante, sumar sobre la dirección
-		if (indice != null && indice.getValorEnt() != null) {
+		if (indice != null && indice.getValorEnt() != null && !s.ES_REFERENCIA()) {
 			addComentario("Indice: " + indice.getValorEnt());
 			direccion += indice.getValorEnt();
 		}
@@ -192,7 +209,7 @@ public class ListaInstr {
 
 		// Si se ha pasado un índice y no es constante, añadir las instrucciones
 		// y sumar sobre la dirección base
-		if (indice != null && indice.getValorEnt() == null) {
+		if (indice != null && (indice.getValorEnt() == null || s.ES_REFERENCIA())) {
 			addComentario("Indice");
 			concatenarLista(indice.getListaInstr());
 			lista.add("\tPLUS");
@@ -208,7 +225,7 @@ public class ListaInstr {
 
 		Integer direccion = s.getDir();
 		// Si se ha pasado un índice constante, sumar sobre la dirección
-		if (indice != null && indice.getValorEnt() != null) {
+		if (indice != null && indice.getValorEnt() != null && !s.ES_REFERENCIA()) {
 			addComentario("Indice: " + indice.getValorEnt());
 			direccion += indice.getValorEnt();
 		}
@@ -223,7 +240,7 @@ public class ListaInstr {
 
 		// Si se ha pasado un índice y no es constante, añadir las instrucciones
 		// y sumar sobre la dirección base
-		if (indice != null && indice.getValorEnt() == null) {
+		if (indice != null && (indice.getValorEnt() == null || s.ES_REFERENCIA())) {
 			addComentario("Indice");
 			concatenarLista(indice.getListaInstr());
 			lista.add("\tPLUS");
@@ -257,9 +274,12 @@ public class ListaInstr {
 
 		// Copiar resto de elementos
 		for (int i = 0; i < dest.getLongitud(); i++) {
-			lista.add("\tSRF " + (nivelAct - dest.getNivel()) + " " + (dest.getDir() + i));
-			lista.add("\tSRF " + (nivelAct - orig.getNivel()) + " " + (orig.getDir() + i));
-			lista.add("\tDRF");
+			RegistroExpr indice = new RegistroExpr();
+			indice.setTipoEnt();
+			indice.setValorEnt(i);
+			indice.getListaInstr().addConstEnt(i);
+			addGetDireccion(dest, nivelAct, indice);
+			addGetValor(orig, nivelAct, indice);
 			lista.add("\tASG");
 		}
 
@@ -422,7 +442,8 @@ public class ListaInstr {
 	}
 
 	public void eliminarUltimaInstr() {
+		String instr = lista.get(lista.size() - 1);
 		lista.remove(lista.size() - 1);
-		addComentario("Instrucción eliminada");
+		addComentario("Instrucción eliminada (" + instr.trim() + ")");
 	}
 }

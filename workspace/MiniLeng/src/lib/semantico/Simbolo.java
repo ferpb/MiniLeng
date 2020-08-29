@@ -46,7 +46,8 @@ public class Simbolo {
 	Boolean vector = false; // Vale true si el símbolo es una variable o parametro vector
 	Integer longitud; // Longitud para los vectores
 
-	Boolean inicializado = false; // Vale true si el símbolo es una variable o parámetro y ha sido inicializado
+	// Boolean inicializado = false; // Vale true si el símbolo es una variable o parámetro y ha sido inicializado
+
 
 	// Getters y setters
 
@@ -122,6 +123,7 @@ public class Simbolo {
 		return longitud;
 	}
 
+	/*
 	public void setInicializado(Boolean inicializado) {
 		this.inicializado = inicializado;
 	}
@@ -129,6 +131,8 @@ public class Simbolo {
 	public Boolean INICIALIZADO() {
 		return inicializado;
 	}
+	*/
+
 
 	// Métodos para construir los tipos de símbolos
 

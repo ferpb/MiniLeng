@@ -23,8 +23,8 @@ public class PanicMode implements minilengcompilerConstants {
 	public static void iniciar(ParseException e, String mensaje, int tipoToken, String tokenLiteral) {
 		contadorErrores++;
 
-		System.err.println("ERROR SINTÁCTICO (línea " + e.currentToken.next.beginLine +
-				", columna " + (e.currentToken.next.beginColumn) + "): Token incorrecto: '" +
+		System.err.println("ERROR SINTÁCTICO (" + e.currentToken.next.beginLine +
+				", " + (e.currentToken.next.beginColumn) + "): Token incorrecto: '" +
                 e.currentToken.next + "'. " + mensaje);
 
 		System.err.println("PANIC MODE: Iniciado panic mode");
@@ -40,13 +40,13 @@ public class PanicMode implements minilengcompilerConstants {
 
 
 		if (t.kind == EOF) {
-			System.out.println("  > PANIC MODE (línea " + t.beginLine +
-					", columna " + (t.beginColumn) + "): Se ha terminado el fichero");
+			System.out.println("  > PANIC MODE (" + t.beginLine +
+					", " + (t.beginColumn) + "): Se ha terminado el fichero");
 		}
 
 		else {
-			System.out.println("  > PANIC MODE (línea " + t.beginLine +
-					", columna " + (t.beginColumn) +
+			System.out.println("  > PANIC MODE (" + t.beginLine +
+					", " + (t.beginColumn) +
 					"): Se ha encontrado '" + tokenLiteral + "'");
 		}
 

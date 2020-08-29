@@ -2,7 +2,7 @@
  * Excepción utilizada al intentar utilizar un símbolo no definido en
  * la tabla de símbolos
  *
- * Fichero:    DivisionPorCeroException.java
+ * Fichero:    SimboloNoEncontradoException.java
  * Autor:      Fernando Peña (NIA: 756012)
  * Fecha:      29/03/2020
  * Versión:    v1.0

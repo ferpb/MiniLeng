@@ -18,25 +18,25 @@ public class ErrorSemantico {
 
 	public static void deteccion(SimboloYaDeclaradoException e, Token t) {
 		contadorErrores++;
-		System.err.println("ERROR SEMÁNTICO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+		System.err.println("ERROR SEMÁNTICO (" + t.beginLine + ", " + t.beginColumn + "): " +
 				"Símbolo: '" + t.image + "'. No se puede redefinir el símbolo");
 	}
 
 	public static void deteccion(SimboloNoEncontradoException e, Token t) {
 		contadorErrores++;
-		System.err.println("ERROR SEMÁNTICO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+		System.err.println("ERROR SEMÁNTICO (" + t.beginLine + ", " + t.beginColumn + "): " +
 				"Símbolo: '" + t.image + "'. El símbolo no está definido");
 	}
 
 	public static void deteccion(InvocacionAccionException e, String mensaje, Token t) {
 		contadorErrores++;
-		System.err.println("ERROR SEMÁNTICO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+		System.err.println("ERROR SEMÁNTICO (" + t.beginLine + ", " + t.beginColumn + "): " +
 				"Error al invocar a: '" + t.image + "'. " + mensaje);
 	}
 
 	public static void deteccion(String mensaje, Token t) {
 		contadorErrores++;
-		System.err.println("ERROR SEMÁNTICO (línea " + t.beginLine + ", columna " + t.beginColumn + ") " +
+		System.err.println("ERROR SEMÁNTICO (" + t.beginLine + ", " + t.beginColumn + "): " +
 				"Símbolo: '" + t.image + "'. " + mensaje);
 	}
 

@@ -200,7 +200,6 @@ public class RegistroExpr {
 
 	public static RegistroExpr operar(RegistroOp op, RegistroExpr reg1, RegistroExpr reg2) {
 		// Para operar los registros, ambos deben ser del mismo tipo
-		System.out.println("Se va a operar");
 
 		RegistroExpr res = new RegistroExpr();
 
@@ -246,7 +245,6 @@ public class RegistroExpr {
 			}
 		}
 
-		System.out.println("Generar operacion");
 		// Generación de código
 		// Se juntan las listas de intrucciones de los dos registros y se añade la
 		// operacion
@@ -305,9 +303,6 @@ public class RegistroExpr {
 	private static RegistroExpr operarBooleano(RegistroOp op, RegistroExpr reg1, RegistroExpr reg2) {
 		RegistroExpr res = new RegistroExpr();
 		res.setTipoBool();
-
-		System.out.println(reg1.getTipo());
-		System.out.println(reg2.getTipo());
 
 		if (!reg1.esBool()) {
 			ErrorSemantico.deteccion("El operando 1 debe ser booleano", op.getToken());
@@ -446,9 +441,6 @@ public class RegistroExpr {
 	private static boolean hayUnderflowOverflow(RegistroOp op, Integer ent1, Integer ent2) {
 		BigInteger bi1 = BigInteger.valueOf(ent1);
 		BigInteger bi2 = BigInteger.valueOf(ent2);
-
-		System.out.println(bi1);
-		System.out.println(bi2);
 
 		BigInteger res;
 		boolean detectado = false;

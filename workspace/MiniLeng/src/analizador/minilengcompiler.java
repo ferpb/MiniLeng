@@ -154,7 +154,7 @@ public class minilengcompiler implements minilengcompilerConstants {
                         // Si el fichero no terminal en .ml, error
                         if (!fichero_entrada.endsWith(".ml")) {
                         System.err.println("Error: El fichero a compilar tiene que tener extensi\u00f3n .ml");
-                        System.err.println("          Fichero introducido: '" + fichero_entrada + "'");
+                        System.err.println("       Fichero introducido: '" + fichero_entrada + "'");
                         System.exit(0);
                         }
 
@@ -189,19 +189,14 @@ public class minilengcompiler implements minilengcompilerConstants {
                 minilengcompiler.programa();
         }
         catch (Exception e) {
-                // TODO: ELIMINAR ESTO
-                System.err.println(e.getMessage());
-
+            // Si un error semántico o sintáctico llega a este nivel
+            // se ha producido un error en el funcionamiento del compilador
             System.err.println("Error en el compilador");
             System.err.println("Cabeza de lectura: (l\u00ednea " + token.beginLine + ", columna " + token.beginColumn + ") " + token);
                 throw e;
         }
         catch (Error e) {
                         // Detectado error léxico
-
-                        // TODO: ELIMINAR ESTO
-                        System.err.println(e.getMessage());
-
                         SimpleCharStream entrada = minilengcompilerTokenManager.input_stream;
                         String error;
 
@@ -223,7 +218,6 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
 
         static void resultadosCompilacion(String fichero_salida) {
-                System.out.println();
 
                 // Mostrar tabla de ocurrencias
         if (verbose_mode) {
@@ -233,21 +227,33 @@ public class minilengcompiler implements minilengcompilerConstants {
 
                 // Mostrar contadores de errores
                 if (ErrorLexico.getContadorErrores() > 0) {
+                    if (compilado_sin_errores) {
+                      System.out.println();
+                    }
                         compilado_sin_errores = false;
                         System.out.println("Errores l\u00e9xicos: " + ErrorLexico.getContadorErrores());
                 }
 
                 if (ErrorSintactico.getContadorErrores() > 0) {
+                    if (compilado_sin_errores) {
+                      System.out.println();
+                    }
                         compilado_sin_errores = false;
                         System.out.println("Errores sint\u00e1cticos: " + ErrorSintactico.getContadorErrores());
                 }
 
                 if (ErrorSemantico.getContadorErrores() > 0) {
+                  if (compilado_sin_errores) {
+                    System.out.println();
+                  }
                   compilado_sin_errores = false;
                   System.out.println("Errores sem\u00e1nticos: " + ErrorSemantico.getContadorErrores());
                 }
 
                 if (Aviso.getContadorAvisos() > 0) {
+                    if (compilado_sin_errores) {
+                      System.out.println();
+                    }
                         System.out.println("Avisos: " + Aviso.getContadorAvisos());
                 }
 
@@ -264,7 +270,10 @@ public class minilengcompiler implements minilengcompilerConstants {
                         System.out.println("\u005cnSe ha activado el panic mode durante la compilaci\u00f3n. Es necesario corregir los errores y volver a compilar.");
                 }
                 else {
-                        System.out.println("\u005cnCompilaci\u00f3n finalizada. Se ha generado el fichero '" + fichero_salida + "'");
+                    if (Aviso.getContadorAvisos() > 0) {
+                      System.out.println();
+                    }
+                        System.out.println("Compilaci\u00f3n finalizada. Se ha generado el fichero '" + fichero_salida + "'.");
                 }
         }
 
@@ -289,8 +298,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     try {
       jj_consume_token(tPROGRAMA);
       t = identificador();
-                System.out.println("Le\u00eddo programa " + t.image);
-                tabla_simbolos.introducir_programa(t.image, 0);
+            if (t != null) {
+                  tabla_simbolos.introducir_programa(t.image, 0);
+                }
       fin_sentencia();
       declaracion_variables();
       lAcciones = declaracion_acciones();
@@ -426,7 +436,6 @@ public class minilengcompiler implements minilengcompilerConstants {
  */
   static final public void declaracion_variables() throws ParseException {
     try {
-      System.out.println("Entrado en declaracion de variables");
       label_1:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -493,7 +502,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * identificadores	::=	(identificador | vector) ( sep_variable (identificador | vector) )*
+ * identificadores	::=	identificador_declaracion ( sep_variable identificador_declaracion )*
  */
   static final public void identificadores(Tipo_variable tipo) throws ParseException {
     try {
@@ -516,6 +525,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     }
   }
 
+/*
+ * identificador_declaracion = identificador ( corchete_izq longitud_const corchete_der )?
+ */
   static final public void identificador_declaracion(Tipo_variable tipo) throws ParseException {
   Token id = null;
   Integer len = null;
@@ -533,15 +545,12 @@ public class minilengcompiler implements minilengcompilerConstants {
       }
       try {
         if (id != null && tipo != null) {
-          System.err.println("Identificador declaracion " + id.image + " " + len);
           if (len == null) {
             // variable
-            System.out.println("Se va a introducir una variable: " + id.image);
             tabla_simbolos.introducir_variable(id.image, tipo, generacion_codigo.getNivel(), generacion_codigo.nuevaVariable());
           }
           else {
             // vector
-            System.out.println("Se va a introducir una variable vector: " + id.image + " " + len);
             tabla_simbolos.introducir_variable_vector(id.image, tipo, len, generacion_codigo.getNivel(), generacion_codigo.nuevoVector(len));
           }
             }
@@ -557,7 +566,7 @@ public class minilengcompiler implements minilengcompilerConstants {
 // Declaración de acciones
 
 /*
- * declaracion_acciones	::=	( declaracion_accion )*
+ * declaracion_acciones ::= ( declaracion_accion )*
  */
   static final public ListaInstr declaracion_acciones() throws ParseException {
   ListaInstr l = new ListaInstr();
@@ -585,7 +594,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * declaracion_accion	::=	cabecera_accion fin_sentencia declaracion_variables declaracion_acciones bloque_sentencias
+ * declaracion_accion ::= cabecera_accion fin_sentencia declaracion_variables declaracion_acciones bloque_sentencias
  */
   static final public ListaInstr declaracion_accion() throws ParseException {
   Token t = token.next;
@@ -642,9 +651,6 @@ public class minilengcompiler implements minilengcompilerConstants {
           // Procesar símbolo del identificador
           if (id != null) {
             try {
-              System.out.println("Se va a introducir una accion " + id.image);
-              // TODO: pensar en cómo funciona dir en las acciones
-
               s = tabla_simbolos.introducir_accion(id.image, generacion_codigo.getNivel(), generacion_codigo.nuevaEtiqueta());
 
                   // Generación de código
@@ -659,12 +665,10 @@ public class minilengcompiler implements minilengcompilerConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tPARENTESIS_IZQ:
         listaParametros = parametros_formales(s);
-            System.out.println("El tama\u00f1o de la lista de par\u00e1metros formales es " + listaParametros.size());
             // Generación de código
             // Recuperar los parámetros de la invocación. Hay que hacerlo en orden inverso
-            for (int i = listaParametros.size(); i > 0; i--) {
-              System.out.println("A\u00f1adir parametro");
-              l.addRecuperarPar(listaParametros.get(i - 1), generacion_codigo.getNivel());
+            for (int i = (listaParametros.size() - 1); i >= 0; i--) {
+              l.addRecuperarPar(listaParametros.get(i), i, generacion_codigo.getNivel());
             }
         break;
       default:
@@ -720,7 +724,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * parametros	::=	clase_parametros tipo_variables identificadores
+ * parametros	::=	clase_parametros tipo_variables lista_parametros
  */
   static final public ArrayList<Simbolo> parametros(Simbolo s) throws ParseException {
   Clase_parametro clase;
@@ -739,7 +743,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * lista_parametros	::=	parametros ( sep_variable parametros )*
+ * lista_parametros	::=	identificador_parametro ( sep_variable identificador_parametro )*
  */
   static final public ArrayList<Simbolo> lista_parametros(Clase_parametro clase, Tipo_variable tipo, Simbolo s) throws ParseException {
   ArrayList<Simbolo> listaParametros = new ArrayList<Simbolo>();
@@ -800,6 +804,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     throw new Error("Missing return statement in function");
   }
 
+/*
+ * identificador_parametro ::= identificador ( corchete_izq longitud_const corchete_der )?
+ */
   static final public Simbolo identificador_parametro(Clase_parametro clase, Tipo_variable tipo, Simbolo s) throws ParseException {
   Token id;
   Integer len = null;
@@ -820,36 +827,37 @@ public class minilengcompiler implements minilengcompilerConstants {
         try {
           if (len == null) {
             // parametro
-                System.out.println("Se va a introducir un parametro: " + id.image + " " + tipo + " " + clase);
                 par = tabla_simbolos.introducir_parametro(id.image, tipo, clase, generacion_codigo.getNivel(), generacion_codigo.nuevaVariable());
-                        System.out.println("Se ha introducido el par\u00e1metro");
           }
           else {
             // parametro vector
-            System.out.println("Se va a introducir un parametro vector: " + id.image + " " + tipo + " " + clase);
-                par = tabla_simbolos.introducir_parametro_vector(id.image, tipo, clase, len, generacion_codigo.getNivel(), generacion_codigo.nuevoVector(len));
+            if (clase == Clase_parametro.VAL) {
+              // Si es por valor, hay que reservar espacio para todas las componentes
+                  par = tabla_simbolos.introducir_parametro_vector(id.image, tipo, clase, len, generacion_codigo.getNivel(), generacion_codigo.nuevoVector(len));
+            }
+            else if (clase == Clase_parametro.REF) {
+              // Si es por referencia, hay que reservar espacio sólo para la dirección de inicio
+                  par = tabla_simbolos.introducir_parametro_vector(id.image, tipo, clase, len, generacion_codigo.getNivel(), generacion_codigo.nuevaVariable());
+            }
           }
         }
         catch (SimboloYaDeclaradoException e) {
-          System.out.println("Excepci\u00f3n");
           // Si el símbolo está ya declarado, se introduce como un parámetro anónimo
               // en la lista de parametros para poder hacer la comprobación de signatura
               // al llamar a la función, pero no se mete en la tabla de simbolos.
               ErrorSemantico.deteccion(e, id);
               par = new Simbolo();
-              par.introducir_parametro("__anonymus", tipo, clase, generacion_codigo.getNivel(), generacion_codigo.nuevaVariable());
+              par.introducir_parametro("_anonymus", tipo, clase, generacion_codigo.getNivel(), generacion_codigo.nuevaVariable());
         }
       }
     } catch (ParseException e) {
         ErrorSintactico.deteccion(e, "Se esperaba un par\u00e1metro");
     }
     if (s != null && par != null) {
-      System.out.println("A\u00f1adido parametro " + par + " a la accion " + s);
       // añadir el parametro a la acción
       s.addParametro(par);
     }
     // par.setInicializado(true);
-    System.out.println("Devolver parametro " + par);
     {if (true) return par;}
     throw new Error("Missing return statement in function");
   }
@@ -857,7 +865,7 @@ public class minilengcompiler implements minilengcompilerConstants {
 // Sentencias
 
 /*
- * bloque_sentencias	::=	principio lista_sentencias fin
+ * bloque_sentencias ::= principio lista_sentencias fin
  */
   static final public ListaInstr bloque_sentencias() throws ParseException {
   ListaInstr l = new ListaInstr();
@@ -873,7 +881,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * lista_sentencias	::=	sentencia ( sentencia )*
+ * lista_sentencias ::= sentencia ( sentencia )*
  */
   static final public ListaInstr lista_sentencias() throws ParseException {
   ListaInstr l = new ListaInstr();
@@ -906,7 +914,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * sentencia	::=	( leer | escribir | identificacion | seleccion | mientras_que )
+ * sentencia ::= ( leer | escribir | identificacion | seleccion | mientras_que )
  */
   static final public ListaInstr sentencia() throws ParseException {
   ListaInstr l = new ListaInstr();
@@ -940,7 +948,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * leer	::=	<tLEER> parentesis_izq lista_asignables parentesis_der fin_sentencia
+ * leer ::= <tLEER> parentesis_izq lista_asignables parentesis_der fin_sentencia
  */
   static final public ListaInstr leer() throws ParseException {
   Token t;
@@ -970,7 +978,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * lista_asignables	::=	identificadores
+ * lista_asignables ::= lista_expresiones
  */
   static final public ArrayList<RegistroExpr> lista_asignables(Token t) throws ParseException {
   ArrayList<RegistroExpr> listaExpr = new ArrayList<RegistroExpr>();
@@ -978,9 +986,6 @@ public class minilengcompiler implements minilengcompilerConstants {
   ArrayList<RegistroExpr> listaEscribibles = new ArrayList<RegistroExpr>();
     try {
       listaExpr = lista_expresiones();
-          System.out.println("Llegado escribir");
-          System.out.println("Size: " + listaExpr.size());
-
           for (int i = 0; i < listaExpr.size(); i++) {
             if (listaExpr.get(i).esVector()) {
           ErrorSemantico.deteccion(new InvocacionAccionException(),
@@ -995,8 +1000,6 @@ public class minilengcompiler implements minilengcompilerConstants {
               "La expresi\u00f3n " + (i + 1) + " no es asignable", t);
             }
             else {
-              // System.out.println("Se puede asignar");
-              System.out.println("iteracion: " + i);
               listaEscribibles.add(listaExpr.get(i));
             }
           }
@@ -1053,7 +1056,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * lista_escribibles	::=	escribible (sep_variable escribible)*
+ * lista_escribibles ::= escribible (sep_variable escribible)*
  */
   static final public ArrayList<RegistroExpr> lista_escribibles() throws ParseException {
   RegistroExpr reg;
@@ -1087,6 +1090,9 @@ public class minilengcompiler implements minilengcompilerConstants {
     throw new Error("Missing return statement in function");
   }
 
+/*
+ * escribible ::= ( expresion | <tCONSTCAD> )
+ */
   static final public RegistroExpr escribible() throws ParseException {
   RegistroExpr reg = null;
   Token t;
@@ -1134,7 +1140,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * mientras_que	::=	<tMQ> expresion lista_sentencias <tFMQ>
+ * mientras_que ::= <tMQ> expresion lista_sentencias <tFMQ>
  */
   static final public ListaInstr mientras_que() throws ParseException {
   Token t;
@@ -1147,7 +1153,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     t = jj_consume_token(tMQ);
     reg = expresion();
     if (!reg.esDesc() && !reg.esBool()) {
-      ErrorSemantico.deteccion("La condici\u00f3n en el 'mientras_que' debe ser un booleano", t);
+      ErrorSemantico.deteccion("La condici\u00f3n del 'mientras_que' debe ser una expresi\u00f3n booleana", t);
       ok = false;
     }
     else if (reg.esBool() && reg.getValorBool() != null) {
@@ -1177,7 +1183,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * seleccion	::=	<tSI> expresion <tENT> lista_sentencias ( <tSI_NO> lista_sentencias )* <tFSI>
+ * seleccion ::= <tSI> expresion <tENT> lista_sentencias ( <tSI_NO> lista_sentencias )* <tFSI>
  */
   static final public ListaInstr seleccion() throws ParseException {
   Token t;
@@ -1197,18 +1203,14 @@ public class minilengcompiler implements minilengcompilerConstants {
     ErrorSintactico.deteccion(e, "Se esperaba el token 'ENT'");
     }
     lSi = lista_sentencias();
-    label_8:
-    while (true) {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case tSI_NO:
-        ;
-        break;
-      default:
-        jj_la1[15] = jj_gen;
-        break label_8;
-      }
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case tSI_NO:
       jj_consume_token(tSI_NO);
       lSino = lista_sentencias();
+      break;
+    default:
+      jj_la1[15] = jj_gen;
+      ;
     }
     try {
       jj_consume_token(tFSI);
@@ -1219,7 +1221,7 @@ public class minilengcompiler implements minilengcompilerConstants {
         // Si va a ser código muerto no se genera código
 
     if (!reg.esDesc() && !reg.esBool()) {
-      ErrorSemantico.deteccion("La condici\u00f3n en la selecci\u00f3n debe ser un booleano", t);
+      ErrorSemantico.deteccion("La condici\u00f3n de la selecci\u00f3n debe ser una expresi\u00f3n booleana", t);
     }
     else if (reg.esBool() && reg.getValorBool() != null) {
       if (lSino == null) {
@@ -1255,7 +1257,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * identificacion	::=	identificador ( ( argumentos )? fin_sentencia | asignacion )
+ * identificacion ::= identificador ( ( corchete_izq expresion corchete_der )? asignacion fin_sentencia | ( argumentos )? fin_sentencia )
  */
   static final public ListaInstr identificacion() throws ParseException {
   Token t;
@@ -1308,7 +1310,7 @@ public class minilengcompiler implements minilengcompilerConstants {
         if (s != null) {
           if (!s.ES_ACCION()) {
             ErrorSemantico.deteccion(new InvocacionAccionException(),
-              "El simbolo no es una accion", t);
+              "El s\u00edmbolo no es una acci\u00f3n", t);
           }
           else if (!s.getListaParametros().isEmpty() && lArgs == null) {
             ErrorSemantico.deteccion(new InvocacionAccionException(),
@@ -1320,7 +1322,7 @@ public class minilengcompiler implements minilengcompilerConstants {
             if (lArgs != null) {
               l.concatenarLista(lArgs);
             }
-            l.addInvocacionAccion(s, generacion_codigo.getSig() - 1, generacion_codigo.getNivel());
+            l.addInvocacionAccion(s, generacion_codigo.getSig(), generacion_codigo.getNivel());
           }
         }
         break;
@@ -1337,7 +1339,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * asignacion	::=	<tOPAS> expresion fin_sentencia
+ * asignacion	::=	<tOPAS> expresion
  */
   static final public ListaInstr asignacion(Simbolo s, RegistroExpr indice, Token izq) throws ParseException {
   RegistroExpr reg;
@@ -1362,8 +1364,6 @@ public class minilengcompiler implements minilengcompilerConstants {
                 }
                 else if (s.ES_VARIABLE() || (s.ES_PARAMETRO() && s.ES_REFERENCIA())) {
                   if ((!reg.esDesc() && s.getVariable() != reg.getTipo()) || (s.ES_VECTOR() ^ (indice != null)) != reg.esVector()) {
-
-                    System.err.print(s.getVariable() + " " + reg.getTipo() + " " + s.ES_VECTOR() + " " + (indice == null) + " " + reg.esVector() + "\u005cn");
             ErrorSemantico.deteccion("Tipos incompatibles en la asignaci\u00f3n", t);
                   }
                   else if (s.ES_VECTOR() && reg.esVector() && s.getLongitud() != reg.getLongitud()) {
@@ -1371,13 +1371,11 @@ public class minilengcompiler implements minilengcompilerConstants {
                   }
                   else {
                     // La asignación es correcta
-                    System.err.println("La asignaci\u00f3n es correcta");
 
                     // s.setInicializado(true);
 
                     // Generación de código
                     if (s.ES_VECTOR() && indice == null) {
-                      System.err.println("Asignaci\u00f3n directa de vectores");
                       // Asignación directa de vectores
                       l.addAsigVectores(s, reg.getSimbolo(), generacion_codigo.getNivel());
                     }
@@ -1396,7 +1394,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * argumentos	::=	parentesis_izq ( lista_expresiones )? parentesis_der
+ * argumentos ::= parentesis_izq ( lista_expresiones )? parentesis_der
  */
   static final public ListaInstr argumentos(Simbolo s, Token t) throws ParseException {
   ArrayList<RegistroExpr> listaExpr = null;
@@ -1464,10 +1462,15 @@ public class minilengcompiler implements minilengcompilerConstants {
               }
               else {
                 // El argumento es válido
-                System.err.println("El argumento es v\u00e1lido");
 
                 // Generación de código
-                listaInstr.addApilarArgumento(param, i, arg.getListaInstr());
+                if (param.ES_VECTOR() && param.ES_VALOR()) {
+                  listaInstr.addComentario("Apilar argumento " + (i + 1) + ": " + param);
+                  listaInstr.addApilarValoresVector(arg.getSimbolo(), generacion_codigo.getNivel());
+                }
+                else {
+                  listaInstr.addApilarArgumento(param, i, arg.getListaInstr());
+                }
               }
             }
           }
@@ -1483,7 +1486,7 @@ public class minilengcompiler implements minilengcompilerConstants {
 // Expresiones
 
 /*
- * lista_expresiones	::=	expresion ( sep_variable expresion )*
+ * lista_expresiones ::= expresion ( sep_variable expresion )*
  */
   static final public ArrayList<RegistroExpr> lista_expresiones() throws ParseException {
   ArrayList<RegistroExpr> listaExpr = new ArrayList<RegistroExpr>();
@@ -1492,7 +1495,7 @@ public class minilengcompiler implements minilengcompilerConstants {
       // Construir una lista con el tipo y clase de los argumentos
           reg = expresion();
       listaExpr.add(reg);
-      label_9:
+      label_8:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case tSEP_VARIABLE:
@@ -1500,7 +1503,7 @@ public class minilengcompiler implements minilengcompilerConstants {
           break;
         default:
           jj_la1[20] = jj_gen;
-          break label_9;
+          break label_8;
         }
         sep_variable();
         reg = expresion();
@@ -1514,7 +1517,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * expresion	::=	expresion_simple ( operador_relacional expresion_simple )?
+ * expresion ::= expresion_simple ( operador_relacional expresion_simple )?
  */
   static final public RegistroExpr expresion() throws ParseException {
   RegistroExpr reg1 = new RegistroExpr();
@@ -1550,7 +1553,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * operador_relacional	::=	( <tIGUAL> | <tMENOR> | <tMAYOR> | <tMAI> | <tMEI> | <tNI> )
+ * operador_relacional ::= ( <tIGUAL> | <tMENOR> | <tMAYOR> | <tMAI> | <tMEI> | <tNI> )
  */
   static final public RegistroOp operador_relacional() throws ParseException {
   Token t;
@@ -1594,7 +1597,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * expresion_simple	::=	termino ( operador_aditivo termino )*
+ * expresion_simple ::= termino ( operador_aditivo termino )*
  */
   static final public RegistroExpr expresion_simple() throws ParseException {
   RegistroExpr reg1 = new RegistroExpr();
@@ -1602,7 +1605,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   RegistroOp op;
     try {
       reg1 = termino();
-      label_10:
+      label_9:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case tMAS:
@@ -1612,7 +1615,7 @@ public class minilengcompiler implements minilengcompilerConstants {
           break;
         default:
           jj_la1[23] = jj_gen;
-          break label_10;
+          break label_9;
         }
         op = operador_aditivo();
         reg2 = termino();
@@ -1663,7 +1666,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * termino	::=	factor ( operador_multiplicativo factor )*
+ * termino ::= factor ( operador_multiplicativo factor )*
  */
   static final public RegistroExpr termino() throws ParseException {
   RegistroExpr reg1 = null;
@@ -1671,7 +1674,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   RegistroOp op;
     try {
       reg1 = factor();
-      label_11:
+      label_10:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case tPRODUCTO:
@@ -1683,7 +1686,7 @@ public class minilengcompiler implements minilengcompilerConstants {
           break;
         default:
           jj_la1[25] = jj_gen;
-          break label_11;
+          break label_10;
         }
         op = operador_multiplicativo();
         reg2 = factor();
@@ -1702,7 +1705,7 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * operador_multiplicativo	::=	( <tPRODUCTO> | <tDIVISION> | <tMOD> | <tAND> )
+ * operador_multiplicativo ::= ( <tPRODUCTO> | <tDIVISION> | <tMOD> | <tAND> )
  */
   static final public RegistroOp operador_multiplicativo() throws ParseException {
   Token t;
@@ -1742,9 +1745,9 @@ public class minilengcompiler implements minilengcompilerConstants {
   }
 
 /*
- * factor	::=	( <tMENOS> factor
+ * factor	::=	(     <tMENOS> factor
  *                  | <tMAS> factor
- *                  |  <tNOT> factor
+ *                  | <tNOT> factor
  *					| parentesis_izq expresion parentesis_der
  *					| <tENTACAR> parentesis_izq expresion parentesis_der
  *					| <tCARAENT> parentesis_izq expresion parentesis_der
@@ -1891,14 +1894,9 @@ public class minilengcompiler implements minilengcompilerConstants {
         }
       if (t != null) {
           try {
-
-              System.out.println("Encontrado identificador en expresi\u00f3n " + t.image);
-
               // puede ser una variable simple o un vector
 
               s = tabla_simbolos.buscar_simbolo(t.image);
-
-              System.out.println("El tipo del identificador es " + s.getTipo());
 
               if (s.ES_ACCION()) {
                   ErrorSemantico.deteccion("No se puede utilizar una acci\u00f3n dentro de una expresi\u00f3n", t);
@@ -1909,15 +1907,16 @@ public class minilengcompiler implements minilengcompilerConstants {
                   reg.setTipoDesc();
               }
               else if (!(s.ES_VARIABLE() || s.ES_PARAMETRO())) {
-                  System.out.println("El identificador es desconocido");
                   reg.setTipoDesc();
               }
               else {
                   // El símbolo es variable o parametro
 
-                  // if (s.getNivel() == generacion_codigo.getNivel() && !s.INICIALIZADO()) {
-                  //  Aviso.deteccion("El símbolo podría no estar inicializado", t);
-                  //}
+                                 /*
+                  if (s.getNivel() == generacion_codigo.getNivel() && !s.INICIALIZADO()) {
+                    Aviso.deteccion("El símbolo podría no estar inicializado", t);
+                  }
+                  */
 
                   if (s.ES_VARIABLE()) {
                       reg.setTipo(s.getVariable());
@@ -1934,22 +1933,15 @@ public class minilengcompiler implements minilengcompilerConstants {
                       }
                   }
 
-                                  System.err.println("Llegado");
-
                   // Vectores
                   if (s.ES_VECTOR()) {
                       if (indice == null) {
-                          System.err.println("Vector completo: " + s.getNombre() + " " + s.getLongitud());
-
                           // Vector completo
                           reg.setVector(true);
                           reg.setLongitud(s.getLongitud());
-
-                          System.err.println("Registro: " + reg.getTipo() + " " + reg.esVector() + " " + reg.getLongitud());
                       }
                       else {
                           // Acceso a una componente del vector
-                          System.err.println("Acceso a componente de vector: " + s.getNombre() + " " + s.getLongitud() + " " + indice.getValorEnt());
 
                           // Comprobar tipo
                           if (!indice.esDesc() && !indice.esEnt()) {

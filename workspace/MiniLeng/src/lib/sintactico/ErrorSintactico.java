@@ -19,14 +19,9 @@ public class ErrorSintactico {
 
 	public static void deteccion(ParseException e, String mensaje) {
 		contadorErrores++;
-        /*
-	  	Token ultimoToken = minilengcompilerTokenManager.getNextToken();
-	  	e.currentToken.beginLine;
-	  	e.currentToken.beginColumn;
-		e.currentToken.next;
-         */
-		System.err.println("ERROR SINTÁCTICO (línea " + e.currentToken.next.beginLine +
-				", columna " + (e.currentToken.next.beginColumn) + "): Token incorrecto: '" +
+
+		System.err.println("ERROR SINTÁCTICO (" + e.currentToken.next.beginLine +
+				", " + (e.currentToken.next.beginColumn) + "): Token incorrecto: '" +
                 e.currentToken.next + "'. " + mensaje);
 	}
 

@@ -20,8 +20,8 @@ public class ErrorLexico {
 
 		// Imprime el caracter erroneo, si puede no ser imprimible por la terminal,
 		// imprime su equivalente escapado.
-		System.err.println("ERROR LÉXICO (línea " + linea +
-			", columna " + (columna - 1) + "): " +
+		System.err.println("ERROR LÉXICO (" + linea +
+			", " + (columna - 1) + "): " +
 			"Caracter no reconocido: '" + error + "'" +
 			(!error.equals(error_escapado) ? " (" + error_escapado + ")" : "")
 		);

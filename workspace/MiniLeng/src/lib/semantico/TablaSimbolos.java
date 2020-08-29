@@ -19,6 +19,7 @@ import lib.aviso.Aviso;
 
 import java.util.Random;
 
+import analizador.Token;
 import analizador.minilengcompiler;
 
 import java.util.LinkedList;
@@ -90,22 +91,16 @@ public class TablaSimbolos {
 	 */
 	private int h(String cadena) {
 		int h = 0;
-
-		// System.out.println("Se va a generar clave de: " + cadena);
-
 		for (int i = 0; i < cadena.length(); i++) {
 			h = T[h ^ cadena.charAt(i)];
 		}
-
-		// System.out.println("Generada clave: " + h);
-
 		return h;
 	}
 
 	/*
 	 * Busca en la tabla el símbolo de mayor nivel cuyo nombre coincida con el del
 	 * parámetro (se distinguen minúsculas y mayúsculas). Si existe, devuelve un
-	 * puntero como resultado, de lo constario lanza una excepción.
+	 * puntero como resultado, de lo contrario lanza una excepción.
 	 */
 	public Simbolo buscar_simbolo(String nombre) throws SimboloNoEncontradoException {
 		int clave = h(nombre);
@@ -144,12 +139,7 @@ public class TablaSimbolos {
 	 * parámetro.
 	 */
 	private Simbolo introducir_simbolo(Simbolo simbolo) throws SimboloYaDeclaradoException {
-
-		// System.out.println("Introducir simbolo");
-
 		int clave = h(simbolo.getNombre());
-
-		// System.out.println("Clave: " + clave);
 
 		for (Simbolo s : tabla_hash[clave]) {
 			// Si el símbolo ya está declarado en ese mismo nivel, lanzar una excepción
@@ -158,22 +148,19 @@ public class TablaSimbolos {
 			}
 			// Si hay un símbolo ya declarado con ese nombre en otro nivel, mostrar un aviso
 			else if (s.getNombre().equals(simbolo.getNombre())) {
-				/*
-				Aviso.deteccion("El símbolo '" +
-						simbolo.nombre + "' definido en el nivel " + simbolo.nivel
-						+ " va a ocultar a otro definido con el mismo nombre en el nivel " + s.nivel + "");
-			     */
+				Token t = minilengcompiler.token;
+				if (simbolo.ES_VECTOR()) {
+					// Evitar que el token sea ']'
+					t.image = simbolo.nombre;
+				}
 				Aviso.deteccion("Este símbolo, definido en el nivel " + simbolo.nivel +
 						", va a ocultar a otro definido con el mismo nombre en el nivel " + s.nivel + "",
-						minilengcompiler.getToken(0));
+						t);
 			}
 		}
 
-		// Si no, se añade
+		// Si no se ha lanzado la excepción, se añade
 		tabla_hash[clave].addFirst(simbolo);
-
-		System.out.println("Introducido simbolo");
-
 
 		return simbolo;
 	}
@@ -188,11 +175,8 @@ public class TablaSimbolos {
 	 */
 	public Simbolo introducir_variable(String nombre, Tipo_variable variable, int nivel, int dir)
 			throws SimboloYaDeclaradoException {
-
-		System.out.println("Introducir variable: " + nombre + " " + variable + " " + nivel + " " + dir);
 		Simbolo simbolo = new Simbolo();
 		simbolo.introducir_variable(nombre, variable, nivel, dir);
-		System.out.println("Introducir variable");
 		return introducir_simbolo(simbolo);
 	}
 
@@ -203,9 +187,7 @@ public class TablaSimbolos {
 	 */
 	public Simbolo introducir_accion(String nombre, int nivel, int dir) throws SimboloYaDeclaradoException {
 		Simbolo simbolo = new Simbolo();
-		System.out.println("Introduccir accion " + nombre + " " + nivel);
 		simbolo.introducir_accion(nombre, nivel, dir);
-
 		return introducir_simbolo(simbolo);
 	}
 

@@ -60,7 +60,7 @@ public class GeneracionCodigo {
         		stream = new PrintStream(fichero_salida);
       		}
       		catch (FileNotFoundException e) {
-        		System.err.println("MiniLeng: No se ha podido abrir el fichero de salida '" + fichero_salida + "'");
+        		System.err.println("Error: No se ha podido abrir el fichero de salida '" + fichero_salida + "'");
         		System.exit(0);
       		}
 		}
@@ -102,7 +102,6 @@ public class GeneracionCodigo {
 	}
 
 	public int nuevoVector(int longitud) {
-		System.out.println("LONG VECTOR: " + longitud);
 		int devolver = sig;
 		sig += longitud + 1;
 		return devolver;
