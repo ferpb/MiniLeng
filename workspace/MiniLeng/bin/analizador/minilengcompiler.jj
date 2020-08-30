@@ -3,7 +3,7 @@
  *
  * Fichero:    minilengcompiler.jj
  * Autor:      Fernando Peña (NIA: 756012)
- * Fecha:      29/03/2020
+ * Fecha:      30/08/2020
  * Versión:    v4.0
  * Asignatura: Procesadores de Lenguajes, curso 2019-2020
  **********************************************************************************/
@@ -51,8 +51,8 @@ import lib.generacioncodigo.ListaInstr;
 
 public class minilengcompiler {
 
-  	private static final String version = "2.2";
-  	private static final String fecha_version = "abril de 2020";
+  	private static final String version = "4.0";
+  	private static final String fecha_version = "agosto de 2020";
 
 	protected static Boolean verbose_mode = false;
 	protected static Boolean panic_mode = false;
@@ -224,7 +224,7 @@ public class minilengcompiler {
 		  		error = "<EOF>";
 			}
 
-			ErrorLexico.deteccion(entrada.getEndLine(), entrada.getEndColumn(), error, TokenMgrError.addEscapes(error));
+			ErrorLexico.deteccion(entrada.getEndLine(), entrada.getEndColumn() + 1, error, TokenMgrError.addEscapes(error));
 		}
 
 		// Imprimir resultados de la compilación
@@ -1806,7 +1806,7 @@ ArrayList<RegistroExpr> lista_expresiones() :
 
 
 /*
- * expresion ::= expresion_simple ( operador_relacional expresion_simple )?
+ * expresion ::= expresion_simple ( operador_relacional expresion_simple )*
  */
 RegistroExpr expresion() :
 {
@@ -1825,7 +1825,7 @@ RegistroExpr expresion() :
   	   	  reg1 = RegistroExpr.operar(op, reg1, reg2);
   	   	}
   	  }
-  	)?
+  	)*
   }
   catch (ParseException e) {
     ErrorSintactico.deteccion(e, "Se esperaba una expresión");

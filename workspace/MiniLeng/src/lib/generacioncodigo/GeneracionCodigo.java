@@ -3,8 +3,8 @@
  *
  * Fichero:    GeneracionCodigo.java
  * Autor:      Fernando Peña (NIA: 756012)
- * Fecha:      29/03/2020
- * Versión:    v2.0
+ * Fecha:      30/08/2020
+ * Versión:    v1.0
  * Asignatura: Procesadores de Lenguajes, curso 2019-2020
  **********************************************************************************/
 

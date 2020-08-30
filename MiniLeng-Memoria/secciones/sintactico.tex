@@ -23,7 +23,7 @@ identificador ::= <tIDENTIFICADOR>
 \end{codigo}
 
 \subsection{Declaración de variables}
-En la parte de la declaración de variables se ha modificador la regla \tt{identificadores} para añadir soporte a vectores de la siguiente forma:
+En la parte de la declaración de variables se ha modificado la regla \tt{identificadores} para añadir soporte a vectores de la siguiente forma:
 
 \begin{codigo}
 identificadores ::= identificador_declaracion ( sep_variable identificador_declaracion )*
@@ -38,10 +38,10 @@ booleano ok;
 caracter x[100], y, z[1];
 \end{codigo}
 
-El lenguaje sólo admite la declaración del tamaño de un vector con una constante positiva, la regla \tt{longitud\_const} reconoce estas constantes.
+El lenguaje sólo admite la declaración del tamaño de un vector con una constante positiva. La regla \tt{longitud\_const} reconoce estas constantes.
 
 \subsubsection{Parámetros formales}
-Los parámetros formales definen las entradas y las salidas de una acción, su signatura. Se ha utilizado una serie descendente de reglas para reconocerlos, que termina en los identificadores.
+Los parámetros formales definen las entradas y las salidas de una acción, su signatura. Se ha utilizado una serie descendente de reglas para reconocerlos, que termina en el identificador de un parámetro.
 
 \begin{codigo}
 cabecera_accion	::=	<tACCION> identificador ( parametros_formales )?
@@ -53,7 +53,7 @@ clase_parametros ::= ( <tVAL> | <tREF> )
 identificador_parametro ::= identificador ( corchete_izq longitud_const corchete_der )?
 \end{codigo}
 
-Los parámetros, al igual que las variables, pueden ser simples o vectores. Para mantener la sintaxis del lenguaje sencilla se ha decidido utilizar una sintaxis similar a la declaración de variables. Los siguientes ejemplo muestran posibles cabeceras de acciones:
+Los parámetros, al igual que las variables, pueden ser simples o vectores. Para no complicar en exceso el lenguaje, se ha decidido utilizar una sintaxis similar a la declaración de variables. Los siguientes ejemplo muestran posibles cabeceras de acciones:
 
 \begin{codigo}
 accion uno;
@@ -62,10 +62,10 @@ accion tres(val entero a, b[10]; ref caracter c, d);
 \end{codigo}
 
 
-Como esta estructura es opcional al invocar una acción, se ha utilizado el símbolo \car{?} después de la regla \tt{parametros\_formales} en \tt{cabecera\_accion}.
+Cuando una acción no tiene parámetros es opcional escribir los paréntesis, por eso se ha utilizado el símbolo \car{?} después de la regla \tt{parametros\_formales} en \tt{cabecera\_accion}.
 
 \subsubsection{Sentencias}
-La gramática del lenguaje debe ser $LL(1)$, es decir debe utilizar un \it{lookahead} de 1. En la gramática propuesta había un conflicto entre las reglas \tt{asignacion} e \tt{invocacion\_accion}, ya que ambas tenían como prefijo común un identificador. Para solucionarlo, se ha creado una nueva regla (\tt{identificacion}) que contiene el prefijo, y desde ahí se da la opción de que el identificador sea parte de una asignación o de una invocación a acción. También se ha completado la definición de \tt{lista\_asignables}, \tt{lista\_escribibles} y \tt{seleccion}:
+La gramática del lenguaje debe ser $LL(1)$, por lo que debe utilizar un \it{lookahead} de 1. En la gramática propuesta había un conflicto entre las reglas \tt{asignacion} e \tt{invocacion\_accion}, ya que ambas tenían como prefijo común un identificador. Para solucionarlo, se ha creado una nueva regla, \tt{identificacion}, que contiene el prefijo, y desde ahí se da la opción de que el identificador sea parte de una asignación o de una invocación a acción. También se ha completado la definición de \tt{lista\_asignables}, \tt{lista\_escribibles} y \tt{seleccion}:
 
 \begin{codigo}
 bloque_sentencias ::= principio lista_sentencias fin
@@ -86,16 +86,16 @@ asignacion ::= <tOPAS> expresion
 argumentos ::= parentesis_izq ( lista_expresiones )? parentesis_der
 \end{codigo}
 
-A la hora de acceder a las componente un vector es posible utilizar expresiones como índices, como se puede ver en la parte de \tt{identificacion} correspondiente a la asignación.
+A la hora de acceder a las componente un vector es posible utilizar expresiones como índices, esto se puede ver en la parte de \tt{identificacion} correspondiente a la asignación.
 
 Una lista de asignables se ha definido como una lista de expresiones. Después, durante el análisis semántico, se comprobará si las expresiones son asignables o no. En cuanto a la escritura, es posible escribir tanto expresiones como cadenas de caracteres constantes, así que ha hecho falta utilizar una regla un poco más complicada para reconocer listas de escribibles. La definición de lo que es un ``escribible'' se recoge en la regla \tt{escribible}.
 
 \subsubsection{Expresiones}
-Las reglas que se han utilizado para reconocen las expresiones son muy similares a las de Pascal. La precedencia de las operaciones se define de forma implícita en la gramática según la clase de los operadores (relacionales, aditivos y multiplicativos). La asociatividad también es implícita, va de izquierda a derecha, ya que es el orden en el que el analizador lee cada subexpresión.
+Las reglas que se han utilizado para reconocer las expresiones son muy similares a las de Pascal. La precedencia de las operaciones se define de forma implícita en la gramática según la clase de los operadores (relacionales, aditivos y multiplicativos). La asociatividad también es implícita, va de izquierda a derecha, ya que es el orden en el que el analizador lee cada subexpresión.
 
 \begin{codigo}
 lista_expresiones ::= expresion ( sep_variable expresion )*
-expresion ::= expresion_simple ( operador_relacional expresion_simple )?
+expresion ::= expresion_simple ( operador_relacional expresion_simple )*
 operador_relacional ::= ( <tIGUAL> | <tMENOR> | <tMAYOR> | <tMAI> | <tMEI> | <tNI> )
 expresion_simple ::= termino ( operador_aditivo termino )*
 operador_aditivo ::= ( <tMAS> | <tMENOS> | <tOR> )
@@ -150,9 +150,9 @@ ListaInstr bloque_sentencias() :
 
 Como se ha comentado antes, los tokens que aparecen varias veces en la gramática, se envuelto en reglas adicionales para no tener que repetir el tratamiento de las excepciones.
 
-La clase \tt{ErrorSintactico} está definida en el paquete \url{lib.sintactico} (Código~\ref{errorlexico}). La función \tt{deteccion} toma como parámetros la excepción de análisis semántico capturada y un mensaje explicativo, y se encarga de crear un mensaje de error con la fila y columna del token incorrecto, su imagen y el mensaje explicativo.
+La clase \tt{ErrorSintactico} está definida en el paquete \url{lib.sintactico} (Código~\ref{errorSintactico}). La función \tt{deteccion} toma como parámetros la excepción de análisis semántico capturada y un mensaje explicativo, y se encarga de crear un mensaje de error con la fila y columna del token incorrecto, su imagen y el mensaje explicativo.
 
-\begin{codigo}[style=java]
+\begin{codigo}[style=java,caption={Función \url{ErrorSintactico.deteccion}.},label={errorSintactico}]
 public static void deteccion(ParseException e, String mensaje) {
     contadorErrores++;
 

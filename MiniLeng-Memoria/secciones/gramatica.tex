@@ -149,7 +149,7 @@ asignacion ::= <tOPAS> expresion
 argumentos ::= parentesis_izq ( lista_expresiones )? parentesis_der
 
 lista_expresiones ::= expresion ( sep_variable expresion )*
-expresion ::= expresion_simple ( operador_relacional expresion_simple )?
+expresion ::= expresion_simple ( operador_relacional expresion_simple )*
 operador_relacional ::= ( <tIGUAL> | <tMENOR> | <tMAYOR> | <tMAI> | <tMEI> | <tNI> )
 expresion_simple ::= termino ( operador_aditivo termino )*
 operador_aditivo ::= ( <tMAS> | <tMENOS> | <tOR> )

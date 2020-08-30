@@ -46,19 +46,19 @@ fin
 En el directorio `bin` se encuentra el proyecto ya compilado, y se puede ejecutar con el siguiente comando:
 
 ```bash
-java -cp ~/ProcesadoresLenguajes/workspace/MiniLeng/bin/ analizador.minilengcompiler
+java -cp bin analizador.minilengcompiler
 ```
 
 Para compilar el proyecto de nuevo se pueden seguir las siguientes instrucciones:
 
 1. Utilizar JavaCC para generar el analizador:
 ```
-javacc
+javacc src/analizador/minilengcompiler.jj
 ```
 
 2. Compilar el compilador
 ```
-javac
+javac -d bin $(find src -name "*.java")
 ```
 Una vez hecho esto, se podrá ejecutar con el comando anterior.
 

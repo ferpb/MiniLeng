@@ -45,6 +45,7 @@ public class TablaSimbolos {
 
 	private LinkedList<Simbolo> tabla_hash[];
 
+	@SuppressWarnings("unchecked")
 	public TablaSimbolos() {
 		// Crea la tabla hash
 		tabla_hash = new LinkedList[M];

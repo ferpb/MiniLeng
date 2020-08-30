@@ -21,7 +21,6 @@ principio
 fin
 
 principio
-%    n := 1;
     i := 0;
     mq i < 100
         escribir(v[i], "\n");

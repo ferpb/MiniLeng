@@ -1,14 +1,14 @@
 \section{Tabla de símbolos}
 \label{tabla}
 
-La tabla de símbolos es una estructura auxiliar que se utiliza sobretodo durante la fase de análisis semántico. En ella se almacena la información asociada a los símbolos declarados en el programa. De esta forma, cuando se utiliza un símbolo durante el programa, es posible conocer si está definido, cuál es su tipo, etc.
+La tabla de símbolos es una estructura auxiliar que se utiliza principalmente durante las fases de análisis semántico y generación de código. En ella se almacena la información asociada a los símbolos declarados en el programa. De esta forma, cuando se utiliza un símbolo durante el programa, es posible conocer si está definido, cuál es su tipo, etc.
 
 Para implementarla se ha utilizado una tabla hash en la que las colisiones se resuelven mediante listas enlazadas.
 
 \subsection{Simbolos}
 El primer paso fue definir lo que es un símbolo. Para ello se creó la clase \url{lib.semantico.Simbolo} cuyos atributos se pueden ver en el Código~\ref{simbolo}.
 
-\begin{codigo}[style=java,caption={Atributos de la clase \url{lib.semantico.Simbolo}},label={simbolo}]
+\begin{codigo}[style=java,caption={Atributos de la clase \url{lib.semantico.Simbolo}.},label={simbolo}]
 public enum Tipo_simbolo {
     PROGRAMA, VARIABLE, ACCION, PARAMETRO
 };
@@ -43,13 +43,13 @@ Integer longitud; // Longitud para los vectores
 Boolean inicializado = false; // Vale true si el símbolo es una variable o parámetro y ha sido inicializado
 \end{codigo}
 
-Para representar los vectores no se han añadido tipos nuevos de símbolo, se ha decidido añadir un booleano (\tt{vector}) que valdrá \tt{true} si el símbolo es una variable o parámetro vector y un entero, que almacenará la longitud del vector.
+Para representar los vectores no se han definido tipos nuevos de símbolo, se ha decidido añadir un booleano (\tt{vector}) que valdrá \tt{true} si el símbolo es una variable o parámetro vector y un entero, que almacenará la longitud del vector.
 
 \subsection{Función de hash}
 % Detallar y explicar la función de hash implementada
-Como función de hash se ha escogido la función Pearson. Dada una cadena, es capaz de calcular un hash rápidamente, no hay clases de entradas más propensas a colisiones que otras, las cadenas que difieren en un carácter nunca colisionan y tampoco se generan colisiones de anagramas.
+Como función de hash se ha escogido la función de Pearson. Dada una cadena, es capaz de calcular un hash rápidamente, no hay clases de entradas más propensas a colisiones que otras, las cadenas que difieren en un carácter nunca colisionan y tampoco se generan colisiones entre anagramas.
 
-En su versión más sencilla, esta función genera hashes de 8 bits (0-255) y requiere un array de enteros con los números del 0 al 255 ordenados aleatoriamente.
+En su versión más sencilla esta función genera hashes de 8 bits (0-255), y requiere un array de enteros con los números del 0 al 255 ordenados aleatoriamente.
 
 No se espera que el compilador trabaje con programas muy complejos y con gran cantidad identificadores diferentes, así que esta función es adecuada. Su implementación se puede ver en el Código~\ref{hash}.
 
@@ -91,13 +91,13 @@ private void mezclaVector(int[] a) {
 \subsection{Implementación de la tabla y manejo de colisiones}
 % Detallar y explicar la implementación de la tabla y el manejo de colisiones.
 %
-La tabla hash se ha implementado como un array de listas enlazadas. Los nuevos elementos se concatenan al principio de las listas correspondientes a sus hashes. Por tanto, cuando se produce una colisión, el elemento más reciente será el que primero esté en la lista.
+La tabla hash se ha implementado como un array de listas enlazadas. Los nuevos elementos se concatenan al principio de las listas correspondientes a sus hashes. Por tanto, cuando se produce una colisión, el elemento más recientemente introducido será el que primero esté en la lista.
 
-En MiniLeng es posible declarar identificadores con el mismo nombre en niveles distintos, de forma que las declaraciones locales oculten a las globales. La estructura de esta tabla es muy útil para obtener este comportamiento. Para encontrar cuál es el último símbolo declarado con un cierto nombre, basta con calcular su hash y recorrer desde el principio la lista enlazada correspondiente al hash hasta encontrar el primer símbolo cuyo nombre es el que se estaba buscando. Cada vez que un símbolo es ocultado por otro con el mismo nombre, se muestra un aviso para que el programador lo tenga en cuenta.
+En MiniLeng es posible declarar identificadores con el mismo nombre en niveles distintos, de forma que las declaraciones locales oculten a las globales. Para encontrar cuál es el último símbolo declarado con un cierto nombre, basta con calcular su hash y recorrer desde el principio la lista enlazada correspondiente al hash hasta encontrar el primer símbolo cuyo nombre es el que se estaba buscando. Cada vez que un símbolo es ocultado por otro con el mismo nombre, se muestra un aviso para que el programador lo tenga en cuenta.
 
 En cada nivel, hay un único espacio de nombres. No se permite introducir símbolos con el mismo nombre en el mismo nivel, ya que habría una ambigüedad a la hora de decidir a qué símbolo se está haciendo referencia en el código.
 
-Se pensó en implementar un espacio de nombres distinto para las acciones y las variables/parámetros, y distinguir el tipo de símbolo según el uso que se le de en una sentencia. Sin embargo, esta alternativa puede llevar a varios problemas. Por ejemplo, si el lenguaje soportara las funciones y la sintaxis para definir el valor a devolver fuera asignarlo al símbolo de la función, no se saber si realmente se está asignando un valor a la función o a una variable con el mismo nombre. Este problema se podría solucionar dando al programador la opción de crear y especificar espacios de nombres como en Pascal o C, aunque esto aumentaría la complejidad la sintaxis del lenguaje.
+Se pensó en implementar un espacio de nombres distinto para las acciones y las variables/parámetros, y distinguir el tipo de símbolo según el uso que se le de en una sentencia. Sin embargo, esta alternativa puede llevar a varios problemas. Por ejemplo, si el lenguaje soportara funciones y la sintaxis para definir el valor a devolver fuera asignarlo al símbolo de la función, no se podría saber si realmente se está asignando un valor a la función o a una variable con el mismo nombre. Este problema se podría solucionar dando al programador la opción de crear y especificar espacios de nombres como en Pascal o C, aunque esto aumentaría la complejidad de la sintaxis del lenguaje.
 
 En los Códigos~\ref{introducir} y~\ref{buscar} se muestra la implementación de las funciones para insertar y buscar símbolos en la tabla de símbolos, siguiendo las ideas anteriores.
 
@@ -117,11 +117,6 @@ En los Códigos~\ref{introducir} y~\ref{buscar} se muestra la implementación de
 			}
 			// Si hay un símbolo ya declarado con ese nombre en otro nivel, mostrar un aviso
 			else if (s.getNombre().equals(simbolo.getNombre())) {
-				/*
-				Aviso.deteccion("El símbolo '" +
-						simbolo.nombre + "' definido en el nivel " + simbolo.nivel
-						+ " va a ocultar a otro definido con el mismo nombre en el nivel " + s.nivel + "");
-			     */
 				Token t = minilengcompiler.token;
 				if (simbolo.ES_VECTOR()) {
 					// Evitar que el token sea ']'

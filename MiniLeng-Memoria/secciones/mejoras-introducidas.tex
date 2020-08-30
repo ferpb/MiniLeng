@@ -5,7 +5,7 @@
 En esta sección se describen las mejoras que se han hecho sobre el compilador planteado en las prácticas.
 
 \subsection{Mejoras en el uso del compilador}
-Para facilitar al usuario el uso del compilador, se han incluido una serie de opciones extra. Cuando el usuario intenta utilizar opciones inválidas o el fichero a compilar no es correcto, se muestran mensajes de error explicativos. Además, al final de la compilación, se muestra un recuento con el número de errores encontrados de cada tip.
+Para facilitar al usuario el uso del compilador, se han incluido una serie de opciones extra. Cuando el usuario intenta utilizar opciones inválidas o el fichero a compilar no es correcto, se muestran mensajes de error explicativos. Además, al final de la compilación, se muestra un recuento con el número de errores encontrados de cada tipo.
 
 \subsubsection{Uso del compilador}
 El compilador se invoca de la siguiente manera: \tt{minilengcompiler [opciones] fichero}.
@@ -32,7 +32,7 @@ minlengcompiler -pv fichero.ml
 \end{codigo}
 
 \subsubsection{Errores al utilizar el compilador}
-Si se utiliza una opción inválida o no se especifican correctamente, se muestra el siguiente error:
+Si se utiliza una opción inválida, se muestra el siguiente error:
 
 \begin{codigo}
 MiniLeng: Opción inválida <error>
@@ -224,7 +224,7 @@ Los símbolos están ordenador por el hash de forma descendente. Si el hash coin
 Gracias al esquema AST ha sido posible introducir una serie de mejoras interesantes, que hacen que el código final sea más pequeño y más rápido en algunos casos.
 
 \subsubsection{Bloques mientras que}
-El código de los bloques mientras que se genera utilizando el esquema mejorado visto en clase:
+El código de los bloques `mientras que' se generan utilizando el esquema mejorado visto en clase:
 
 \begin{codigo}
         JMF ETIQ1

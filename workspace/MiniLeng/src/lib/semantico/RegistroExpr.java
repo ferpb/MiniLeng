@@ -344,7 +344,7 @@ public class RegistroExpr {
 		return res;
 	}
 
-	private static boolean compararEnt(RegistroOp op, Integer ent1, Integer ent2) {
+	private static boolean compararEnt(RegistroOp op, int ent1, int ent2) {
 		switch (op.getOp()) {
 		case IGUAL:
 			return ent1 == ent2;
@@ -363,7 +363,7 @@ public class RegistroExpr {
 		}
 	}
 
-	private static boolean compararBool(RegistroOp op, Boolean bool1, Boolean bool2) {
+	private static boolean compararBool(RegistroOp op, boolean bool1, boolean bool2) {
 		switch (op.getOp()) {
 		case IGUAL:
 			return bool1 == bool2;
@@ -386,7 +386,7 @@ public class RegistroExpr {
 		}
 	}
 
-	private static boolean compararChar(RegistroOp op, Character char1, Character char2) {
+	private static boolean compararChar(RegistroOp op, char char1, char char2) {
 		switch (op.getOp()) {
 		case IGUAL:
 			return char1 == char2;

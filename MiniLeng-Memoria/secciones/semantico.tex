@@ -1,9 +1,9 @@
 \section{Análisis semántico}
-En el análisis semántico se comprueba que el uso de los elementos del lenguaje es correcto, se realizan comprobaciones sobre los tipos o sobre si los símbolos se usan en los lugares adecuados.
+En el análisis semántico se comprueba que el uso de los elementos del lenguaje es correcto. Se realizan comprobaciones sobre los tipos de dato y se verifica que los símbolos se usen en los lugares adecuados.
 
 \subsection{Gestión de errores y avisos (\it{warnings}) semánticos}
 % Detallarlos errores y avisos (warnings) que se han implementado
-Cada vez que se encuentra un error semántico durante la compilación, se imprime un mensaje con la siguiente forma:
+Cada vez que se encuentra un error semántico durante la compilación, se imprime un mensaje como el siguiente:
 
 \begin{codigo}
 ERROR SEMÁNTICO (<línea>, <columna>): Símbolo: `...'. <mensaje explicativo>
@@ -19,7 +19,7 @@ AVISO (<línea>, <columna>): Símbolo: `...'. <mensaje explicativo>
 
 La diferencia principal entre ambos es que los avisos no impiden generar el programa de salida, aunque generalmente el programador querrá solucionar esos problemas antes de ejecutarlo.
 
-A continuación se detallan los tipos de errores y avisos que se han tenido en cuenta y los mensajes explicativos que se muestran en cada caso.
+A continuación, se detallan los tipos de errores y avisos que se han tenido en cuenta y los mensajes explicativos que se muestran en cada caso.
 
 \subsubsection{Errores}
 \begin{itemize}
@@ -85,7 +85,7 @@ A continuación se detallan los tipos de errores y avisos que se han tenido en c
     \end{codigo}
 
 
-    \item En cuanto a las operaciones, sólo se permiten las operaciones entre operandos del mismo tipo. Las operaciones aritméticas sólo se pueden realizar entre enteros y las lógicas entre booleanos. Las operaciones de comparación se pueden realizar entre enteros y caracteres, para booleanos sólo están definidos los operadores \tt{=} y \tt{<>}.
+\item Las operaciones binarias sólo se permiten entre operandos del mismo tipo. Las operaciones aritméticas sólo se pueden realizar entre enteros y las lógicas sólo entre booleanos. Las operaciones de comparación se pueden realizar entre enteros y caracteres, para booleanos sólo están definidos los operadores \tt{=} y \tt{<>}. En cuanto a las operaciones unarias, \tt{+} y \tt{-} sólo pueden aplicarse sobre enteros y \tt{not} sólo puede aplicarse sobre booleanos.
 
     \begin{codigo}
     Tipo incompatible. Se esperaba `tipo'
@@ -173,7 +173,7 @@ A continuación se detallan los tipos de errores y avisos que se han tenido en c
     La operación produce una división por cero
     \end{codigo}
 
-    \item Como se comentó en la sección sobre la tabla de símbolos (Sección~\ref{tabla}), cada vez que un identificador va a ocultar a otro en un nivel superior, se muestra un aviso.
+    \item Como se comentó en la sección sobre la tabla de símbolos (Sección~\ref{tabla}), cada vez que un identificador va a ocultar a otro definido en un nivel superior, se muestra un aviso.
 
     \begin{codigo}
     Este símbolo, definido en el nivel `n2', va a ocultar a otro definido con el mismo nombre en el nivel `n1'
@@ -212,13 +212,13 @@ private Simbolo s;
 private ListaInstr instrucciones = new ListaInstr();
 \end{codigo}
 
-El objetivo es que la regla \tt{expresion} devuelva un \tt{RegistroExpr} con la información asociada a la expresión: tipo, calculado en caso de que sea una expresión constante o la clase si es un parámetro.
+El objetivo es que la regla \tt{expresion} devuelva un \tt{RegistroExpr} con la información asociada a la expresión: tipo, valor calculado en caso de que sea una expresión constante o la clase si es un parámetro.
 
 Cuando se está procesando una expresión, primero se crean registros para los factores y se van propagando hacia arriba a través de las reglas \tt{termino} y \tt{expresion\_simple} hasta llegar a \tt{expresion}. Cada vez que se encuentra una operación, se crea un nuevo \tt{RegistroExpr} con el resultado de la operación. Para operar dos registros mediante una operación binaria se ha añadido un método llamado \tt{operar} en la clase.
 
 Las expresiones son constantes hasta que incluyen un identificador, en ese momento deja de ser posible calcular su valor durante la compilación.
 
-Cuando se encuentran símbolos no declarados dentro de una expresión, se muestra el error semántico correspondiente y el tipo de la expresión cambia a \tt{DESCONOCIDO}, pera evitar que el error vuelva a aparecer posteriormente al intentar utilizarla en otras partes de la gramática.
+Cuando se encuentran símbolos no declarados dentro de una expresión, se muestra el error semántico correspondiente y el tipo de la expresión cambia a \tt{DESCONOCIDO}, para evitar que el error vuelva a aparecer posteriormente al intentar utilizarla en otras partes de la gramática.
 
 
 \subsection{Controles en las expresiones}
@@ -228,14 +228,14 @@ El compilador es capaz de detectar la aparición de overflow, underflow o divisi
 
 Como MiniLeng es un lenguaje fuertemente tipado, no se realizan conversiones implícitas entre los tipos, de forma que los tipos deben coincidir al realizar operaciones, asignaciones y llamadas a acciones.
 
-Por último, como la precedencia y asociatividad operaciones están definidias de manera implícita en la gramática las expresiones se evalúan siguiendo el orden correcto de las operaciones sin realizar ningún cambio.
+Por último, como la precedencia y asociatividad operaciones están definidias de manera implícita en la gramática las expresiones, por defecto se evalúan siguiendo el orden correcto.
 
 \subsection{Comprobaciones sobre parámetros de las acciones}
 % Detallar y explicar cómo se han implementado las comprobaciones sobre parámetros VAL/REF. ¿Dónde se realizan estas comprobaciones? Adjuntar ejemplos que validen la funcionalidad implementada.
 
 Para comprobar los argumentos al llamar a una acción se utilizan parámetros ocultos. Como se está trabajando con objetos Java, las acciones pueden tener una lista de referencias a los parámetros. Cada vez que se cierra una acción, se eliminan sus parámetros de la tabla de símbolos, pero los objetos siguen referenciados dentro el símbolo de la acción y es posible seguir accediendo a ellos. Se eliminarán definitivamente cuando se elimine el símbolo de la acción de la tabla.
 
-Al analizar la declaración de las acciones es posible que el programador se haya equivocado y haya declarado varios parámetros con el mismo nombre. Esto es un error semántico, ya que en un mismo nivel no puede haber dos símbolos con el mismo nombre. Cuando sucede esto, se muestra el error semántico, pero el parámetro erróneo se añade en la lista de parámetros de la acción bajo el nombre \car{\_anonymous}, aunque no se añade a la tabla de símbolos. De esta forma más adelante se podrá comprobar si la invocación a la acción es correcta a pesar del error.
+Al analizar la declaración de las acciones es posible que el programador se haya equivocado y haya declarado varios parámetros con el mismo nombre. Esto es un error semántico, ya que en un mismo nivel no puede haber dos símbolos con el mismo nombre. Cuando sucede esto, se muestra el error semántico, pero el parámetro erróneo se añade en la lista de parámetros de la acción bajo el nombre \car{\_anonymous}, aunque no se añade a la tabla de símbolos. De esta forma más adelante se podrá comprobar si las invocaciones a la acción son correctas a pesar del error.
 
 Si un parámetro se llama igual que la acción, la situación es diferente, ya que estos se definen en un nivel más de profundidad que la acción. Cuando esto sucede, el parámetro oculta a la acción, y no es posible invocarla recursivamente. Como se ha comentado en la Sección~\ref{avisos}, cada vez que un símbolo es ocultado por otro se muestra un aviso al programador.
 
@@ -294,7 +294,7 @@ Antes de cerrar la acción: error2. Nivel 1
 +--------------------------------------------------------------+
 \end{codigo}
 
-Al procesar la invocación a una acción, se comprueba que los argumentos que se han pasado encajen con los parámetros. Se comprueba que coincidan en número, en tipo y que no se pasen por referencias expresiones no asignables (parámetros por valor y expresiones compuestas). Si se reconoce algún error en el paso de argumentos, se muestra el error semántico correspondiente.
+Al procesar la invocación a una acción, se comprueba que los argumentos que se han pasado encajen con los parámetros. Se comprueba que coincidan en número, en tipo y que no se pasen por referencia expresiones no asignables (parámetros por valor y expresiones compuestas). Si se reconoce algún error en el paso de argumentos, se muestra el error semántico correspondiente.
 
 Se pueden usar vectores completos como parámetros. En la declaración es necesario especificar el tamaño del vector y la longitud del vector que se quiere pasar debe coincidir con la del parámetro.
 

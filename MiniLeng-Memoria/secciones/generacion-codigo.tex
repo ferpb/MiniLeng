@@ -5,15 +5,15 @@ Esta es la última fase del compilador. Tras su ejecución se genera un fichero 
 \subsection{Justificación del esquema escogido}\label{eleccion}
 Para la fase de generación de código se ha escogido el esquema AST. En esta implementación no se genera el árbol abstracto de sintaxis de forma explicita, si no que se aprovecha el árbol de análisis generado por el analizador sintáctico para mejorar el código final.
 
-Este esquema es mucho más flexible que el secuencial, ya que permite reordenar las instrucciones del programa y eliminar las que no sean necesarias. Cada instrucción del programa para la máquina P se almacena como una cadena de caracteres y estás sólo se imprimen al final de la compilación si no se han encontrado errores en el código.
+Este esquema es mucho más flexible que el secuencial, ya que permite reordenar las instrucciones del programa y eliminar las que no sean necesarias. Cada instrucción para la máquina P se almacena como una cadena de caracteres y estás sólo se escriben al final de la compilación si no se han encontrado errores en el código.
 
 Las cadenas que representan las instrucciones se van guardando en listas. Se ha creado una clase llamada \tt{ListaInstr} en el paquete \url{lib.generacioncodigo} con la que se pueden gestionar estas listas. El único atributo de la clase es un \tt{ArrayList<String>} y se incluyen métodos para añadir en la lista todas las instrucciones necesarias para generar el código final.
 
 Los métodos introducen bloques de instrucciones que realizan una determinada función. Se llaman desde el lugar correspondiente de la gramática para generar el conjunto de instrucciones que se necesite.
 
-La idea es que las reglas de la gramática manipulan y devuelven las listas de instrucciones hasta que todas llegan a la regla inicial (\tt{programa}). En este lugar se juntan las listas devueltas y se genera una lista final con todas las instrucciones del programa.
+La idea es que las reglas de la gramática invocan a unos métodos u otros dependiendo de la semántica del programa y devuelven las listas de instrucciones sucesivamente. Al final de la compilación todas llegan a la regla inicial (\tt{programa}). En este lugar se juntan las listas devueltas y se genera una lista final con todas las instrucciones del programa.
 
-Esta es una interfaz limpia y fácil de modificar, ya que casi toda la generación de código esta centralizada en una clase. Por ejemplo, el siguiente método (Código~\ref{addseleccion}) genera el código necesario para añadir una selección a la lista.
+Esta es una interfaz limpia y fácil de modificar, ya que casi toda la generación de código esta centralizada en la clase. Por ejemplo, el siguiente método (Código~\ref{addseleccion}) genera el código necesario para añadir una selección a la lista.
 
 \begin{codigo}[style=java, caption={Método \url{lib.generacioncodigo.ListaInstr.addSeleccion}}, label={addseleccion}]
 public void addSeleccion(ListaInstr expresion, ListaInstr si, ListaInstr sino, Integer etiq1, Integer etiq2) {

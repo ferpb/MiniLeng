@@ -1,9 +1,9 @@
 \section{Análisis léxico}
-El primer paso al construir el compilador es implementar el analizador léxico. Su trabajo es tomar el programa como una cadena de caracteres y devolver un conjunto de \it{tokens} o símbolos, que son las unidades léxicas del lenguaje.
+El primer paso al construir el compilador fue implementar el analizador léxico. Su trabajo es tomar el programa como una cadena de caracteres y devolver un conjunto de \it{tokens} o símbolos, que son las unidades léxicas del lenguaje.
 
 \subsection{Expresión regular utilizada para los identificadores}
 % Detallar y explicar la expresión regular utilizada para los identificadores.
-Según la especificación del lenguaje, los identificadores están compuestos por letras, números y el símbolo \car{\_}, no pueden comenzar por número y no pueden terminar en \car{\_}.
+Según la especificación del lenguaje, los identificadores están compuestos por letras, números y el símbolo \car{\_}. No pueden comenzar por número y no pueden terminar en \car{\_}.
 
 Una posible expresión regular que reconoce identificadores es la siguiente:
 
@@ -101,7 +101,7 @@ TOKEN : /* PALABRAS RESERVADAS */
 Si mientras se está procesando un programa se encuentra un error léxico, el compilador termina y muestra un error como el siguiente:
 
 \begin{codigo}
-ERROR LÉXICO (<línea>, <columna>): símbolo no reconocido: '...' (\u...)
+ERROR LÉXICO (<línea>, <columna>): símbolo no reconocido: `...' (\u...)
 \end{codigo}
 
 Si el carácter que ha producido el error no es ASCII, se muestra escapado con su código Unicode.
