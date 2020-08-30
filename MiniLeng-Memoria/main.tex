@@ -232,20 +232,18 @@ numberstyle = \tiny,
 
 \pagestyle{fancy}
 
-\input{secciones/lexico}
-\input{secciones/sintactico}
-\input{secciones/tabla-simbolos}
-\input{secciones/semantico}
-\input{secciones/generacion-codigo}
-\input{secciones/mejoras-introducidas}
-\pagebreak
-\input{secciones/pruebas}
+\include{secciones/lexico}
+\include{secciones/sintactico}
+\include{secciones/tabla-simbolos}
+\include{secciones/semantico}
+\include{secciones/generacion-codigo}
+\include{secciones/mejoras-introducidas}
+\include{secciones/pruebas}
 
 \renewcommand\appendixname{Anexo}
 
 \begin{appendices}
-\pagebreak
-\input{secciones/gramatica}
+\include{secciones/gramatica}
 % \input{secciones/uso}
 \end{appendices}
 

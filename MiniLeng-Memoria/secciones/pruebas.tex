@@ -9,15 +9,108 @@ El objetivo del analizador léxico es que reconozca todos los tokens de la entra
 Vamos a considerar que tenemos el siguiente programa:
 
 \begin{codigo}[style=minileng,numbers=left]
+programa factorial;
+entero n, solucion;
+
+accion fact (val entero numero; ref entero solucion);
+entero solRecur;
+principio
+	si numero <= 1 ent
+		solucion := 1;
+	si_no
+	  	fact(numero - 1, solRecur);
+		solucion := solucion * solRecur;
+	fsi
+fin
+
+principio
+	n := 10;
+	fact(n, solucion);
+	escribir(n, "! es: ", solucion);
+fin
 \end{codigo}
 
-Al compilar el programa utilizando la opción \tt{-t}, se obtiene la siguiente salida:
+Al compilar el programa utilizando la opción \tt{-t}, se obtiene la siguiente salida, que si se observa detenidamente contiene todos los tokens del programa:
+
 \noindent\begin{minipage}{.45\textwidth}
 \begin{codigo}
+tPROGRAMA
+tIDENTIFICADOR (Valor: factorial)
+tFIN_SENTENCIA
+tENTERO
+tIDENTIFICADOR (Valor: n)
+tSEP_VARIABLE
+tIDENTIFICADOR (Valor: solucion)
+tFIN_SENTENCIA
+tACCION
+tIDENTIFICADOR (Valor: fact)
+tPARENTESIS_IZQ
+tVAL
+tENTERO
+tIDENTIFICADOR (Valor: numero)
+tFIN_SENTENCIA
+tREF
+tENTERO
+tIDENTIFICADOR (Valor: solucion)
+tPARENTESIS_DER
+tFIN_SENTENCIA
+tENTERO
+tIDENTIFICADOR (Valor: solRecur)
+tFIN_SENTENCIA
+tPRINCIPIO
+tSI
+tIDENTIFICADOR (Valor: numero)
+tMEI
+tCONSTENTERA (Valor: 1)
+tENT
+tIDENTIFICADOR (Valor: solucion)
+tOPAS
+tCONSTENTERA (Valor: 1)
+tFIN_SENTENCIA
+tSI_NO
+tIDENTIFICADOR (Valor: fact)
+tPARENTESIS_IZQ
+tIDENTIFICADOR (Valor: numero)
 \end{codigo}
 \end{minipage}\hfill
 \begin{minipage}{.45\textwidth}
 \begin{codigo}
+tMENOS
+tCONSTENTERA (Valor: 1)
+tSEP_VARIABLE
+tIDENTIFICADOR (Valor: solRecur)
+tPARENTESIS_DER
+tFIN_SENTENCIA
+tIDENTIFICADOR (Valor: solucion)
+tOPAS
+tIDENTIFICADOR (Valor: solucion)
+tPRODUCTO
+tIDENTIFICADOR (Valor: solRecur)
+tFIN_SENTENCIA
+tFSI
+tFIN
+tPRINCIPIO
+tIDENTIFICADOR (Valor: n)
+tOPAS
+tCONSTENTERA (Valor: 10)
+tFIN_SENTENCIA
+tIDENTIFICADOR (Valor: fact)
+tPARENTESIS_IZQ
+tIDENTIFICADOR (Valor: n)
+tSEP_VARIABLE
+tIDENTIFICADOR (Valor: solucion)
+tPARENTESIS_DER
+tFIN_SENTENCIA
+tESCRIBIR
+tPARENTESIS_IZQ
+tIDENTIFICADOR (Valor: n)
+tSEP_VARIABLE
+tCONSTCAD (Valor: "! es: ")
+tSEP_VARIABLE
+tIDENTIFICADOR (Valor: solucion)
+tPARENTESIS_DER
+tFIN_SENTENCIA
+tFIN
 \end{codigo}
 \end{minipage}
 
@@ -26,34 +119,290 @@ Al compilar el programa utilizando la opción \tt{-t}, se obtiene la siguiente s
 
 \subsubsection{Test 2}
 % Comprobar que se producen errores
-También se comprobó que si se encuentra algún carácter no soportado por el lenguaje, se produce un error léxico.
+Cuando se encuentra algún carácter no soportado por el lenguaje se produce un error léxico, a no ser que este se encuentre en un comentario, sea una constante carácter o forme parte de una cadena constante.
+
+Si se renombra a \tt{solución} la variable \tt{solución} modificando la linea 2 por la siguiente:
+
+\begin{codigo}[style=minileng]
+entero n, solución
+\end{codigo}
+
+aparece el error léxico:
+
+\begin{codigo}
+ERROR LÉXICO (2, 16): Caracter no reconocido: `ó' (\u00f3)
+\end{codigo}
 
 \subsection{Analizador sintáctico}
-Para probar el analizador sintáctico la idea es intentar compilar programas con errores y comprobar que se lanza un error en el lugar adecuado.
+Para probar el analizador sintáctico una buena estrategia es intentar compilar programas léxicamente correctos pero con errores sintácticos y comprobar que se el compilador lanza errores en los lugares adecuados.
 
 \subsubsection{Test 1}
-% Comprobar lo que pasa cuando falta un ;
+Tenemos el siguiente sencillo programa, al que le falta un punto y coma en la línea 4.
+
+\begin{codigo}[style=minileng,numbers=left]
+programa prueba_sintactico;
+entero n;
+principio
+    n := 1 + 1
+    escribir("Hola");
+fin
+\end{codigo}
+
+Cuando se intenta compilar, el analizador léxico pasa al analizador sintáctico el token \tt{escribir} cuando se necesitaba \car{;}, por lo que aparece el siguiente error:
+
+\begin{codigo}
+ERROR SINTÁCTICO (7, 1): Token incorrecto: `escribir'. Se esperaba `;'
+
+Errores sintácticos: 1
+
+No se ha podido compilar el programa.
+\end{codigo}
 
 \subsubsection{Test 2}
-% Comprobar lo que pasa cuando me dejo el tipo de paso de parámetros en una acción
+En la siguiente declaración de acción no se han especificado la clase del primer parámetro:
+
+\begin{codigo}[style=minileng,numbers=left,firstnumber=4]
+accion miAccion(entero n, val caracter c);
+principio
+    escribir(n, c);
+fin
+\end{codigo}
+
+Al compilar, se ve como el analizador sintáctico intenta seguir compilando el programa después de detectar el primer error, aunque esto lleve a más errores sintácticos:
+
+\begin{codigo}
+ERROR SINTÁCTICO (4, 17): Token incorrecto: `entero'. Se esperaba `('
+ERROR SINTÁCTICO (4, 17): Token incorrecto: `entero'. Se esperaba `;'
+ERROR SINTÁCTICO (4, 27): Token incorrecto: `val'. Se esperaba un identificador
+ERROR SINTÁCTICO (4, 27): Token incorrecto: `val'. Se esperaba `;'
+ERROR SINTÁCTICO (4, 27): Token incorrecto: `val'. Se esperaba el delimitador de principio de bloque: `principio'
+ERROR SINTÁCTICO (4, 27): Token incorrecto: `val'. Se esperaba una sentencia
+ERROR SINTÁCTICO (4, 27): Token incorrecto: `val'. Se esperaba el delimitador fin de bloque: `fin'
+ERROR SINTÁCTICO (4, 27): Token incorrecto: `val'. Se esperaba el delimitador de principio de bloque: `principio'
+ERROR SINTÁCTICO (4, 27): Token incorrecto: `val'. Se esperaba una sentencia
+ERROR SINTÁCTICO (4, 27): Token incorrecto: `val'. Se esperaba el delimitador fin de bloque: `fin'
+ERROR SINTÁCTICO (4, 27): Token incorrecto: `val'. La declaración del programa es incorrecta
+
+Errores sintácticos: 11
+
+No se ha podido compilar el programa.
+\end{codigo}
 
 \subsection{Analizador semántico}
-En cuanto al analizador semántico, se siguió un procedimiento parecido al del sintáctico.
+Para probar el analizador semántico se siguió una estrategia similar a la del sintáctico. Se intentan compilar programas sintácticamente correctos pero con errores semánticos y se verifica que los errores aparezcan en los lugares esperados.
 
 \subsubsection{Test 1}
-% Ver que pasa cuando se inserta un símbolo que ya existe
+El siguiente programa intenta declarar dos variables con el mismo nombre:
+
+\begin{codigo}[style=minileng,numbers=left]
+programa prueba_semantico;
+entero n, n;
+
+    accion miAccion
+    entero n;
+    principio
+        escribir(n);
+    fin
+
+principio
+    n := 1;
+    escribir(n);
+fin
+\end{codigo}
+
+Al intentar compilarlo se obtiene lo siguiente:
+
+\begin{codigo}
+ERROR SEMÁNTICO (2, 11): Símbolo: `n'. No se puede redefinir el símbolo
+AVISO (5, 8): Símbolo: `n'. Este símbolo, definido en el nivel 1, va a ocultar a otro definido con el mismo nombre en el nivel 0
+
+Errores semánticos: 1
+Avisos: 1
+
+No se ha podido compilar el programa.
+\end{codigo}
+
+El compilador detecta que se ha intentado declarar una variable dos veces en la línea 2. Dentro de la acción también se declara una variable llamada \tt{n}, pero al estar en un nivel inferior no se está redefiniendo la variable anterior, si no ocultándola.
 
 \subsubsection{Test 2}
-% Ver que pasa cuando se intenta operar con dos valores incompatibles y asignar a otro
+En el siguiente programa se intenta operar con tipos diferentes:
+
+\begin{codigo}[style=minileng,numbers=left]
+programa prueba_semantico;
+entero n;
+booleano b;
+principio
+    b := true or false;
+    n := "a" + b;
+fin
+\end{codigo}
+
+por lo que el compilador genera:
+
+\begin{codigo}
+ERROR SEMÁNTICO (6, 14): Símbolo: `+'. El operando 1 debe ser entero
+
+Errores semánticos: 1
+
+No se ha podido compilar el programa.
+\end{codigo}
+
+El término que contiene la suma devuelve un \tt{RegistroExpr} de tipo \tt{ENTERO}, por lo que el error no se propaga hasta la asignación.
+
 
 \subsection{Generación de código}
-Para la generación de código, se compilaron programas y se analizó el código generado. También se ejecutó en Hendrix utilizando en ensamblador e intérprete proporcionados y esperar el resultado esperado. En esta fase ha sido de gran utilizar generar comentarios con lo que se hace en cada grupo de instrucciones, para saber que partes del código intermedio corresponden con el programa de MiniLeng.
+Para probar la generación de código, se compilaron varios programas semánticamente correctos y se analizó el código generado. Este código también se probó a ejecutar en Hendrix utilizando el ensamblador e intérprete proporcionados. En esta fase ha sido de gran utilidad generar comentarios con la función de cada grupo de instrucciones, para saber que parte del código intermedio corresponde con cada parte del programa MiniLeng.
 
 \subsubsection{Test 1}
-% Poner el código generado al hacer un mientras que
+El siguiente programa contiene una sentencia mientras que:
+
+\begin{codigo}[style=minileng,numbers=left]
+programa generacion_codigo;
+entero i;
+principio
+    i := 10;
+    mq i < 10
+        escribir(i);
+        i := i - 1;
+    fmq
+fin
+\end{codigo}
+
+Analizando el código generado se ve que es correcto y leyendo los comentarios se puede ver la correspondencia con cada parte del programa inicial.
+
+\begin{codigo}
+; Programa: generacion_codigo
+	ENP L2
+; Comienzo de programa: generacion_codigo
+L2:
+; Asignación a i
+; Obtener dirección de VARIABLE ENTERO:          i [0, 3]
+	SRF 0 3
+; Sustituida expresion constante
+	STC 10
+	ASG
+; Mientras que
+	JMP L0
+L1:
+; Escribir entero
+; Obtener valor de VARIABLE ENTERO:          i [0, 3]
+	SRF 0 3
+	DRF
+	WRT 1
+; Asignación a i
+; Obtener dirección de VARIABLE ENTERO:          i [0, 3]
+	SRF 0 3
+; Obtener valor de VARIABLE ENTERO:          i [0, 3]
+	SRF 0 3
+	DRF
+; Sustituida expresion constante
+	STC 1
+	SBT
+	ASG
+L0:
+; Condicion mientras que
+; Obtener valor de VARIABLE ENTERO:          i [0, 3]
+	SRF 0 3
+	DRF
+; Sustituida expresion constante
+	STC 10
+	LT
+	JMT L1
+; Fin de generacion_codigo
+	LVP
+\end{codigo}
 
 \subsubsection{Test 2}
-% Poner el código generado al evaluar una expresión constante
+El siguiente programa contiene varias expresiones constantes:
+
+\begin{codigo}[style=minileng,numbers=left]
+programa generacion_codigo;
+entero e;
+booleano b;
+principio
+    e := (20 + 4) * 5 / 4;
+    b := (2 * 100) = (100 * 2);
+fin
+\end{codigo}
+
+El compilador es capaz de calcularlas correctamente y almacenar sus valores directamente sobre la pila:
+
+\begin{codigo}
+; Programa: generacion_codigo
+	ENP L0
+; Comienzo de programa: generacion_codigo
+L0:
+; Asignación a e
+; Obtener dirección de VARIABLE ENTERO:          e [0, 3]
+	SRF 0 3
+; Sustituida expresion constante
+	STC 30
+	ASG
+; Asignación a b
+; Obtener dirección de VARIABLE BOOLEANO:        b [0, 4]
+	SRF 0 4
+; Sustituida expresion constante
+	STC 1
+	ASG
+; Fin de generacion_codigo
+	LVP
+\end{codigo}
 
 \subsubsection{Test 3}
 % Poner el código generado al acceder a una componente de vector a través de una variable en un parámetro por referencia
+A continuación, se va a intentar acceder a una componente de vector que se ha pasado por referencia a una acción para comprobar que el código generado en este caso es correcto.
+
+\begin{codigo}[style=minileng,numbers=left]
+programa generacion_codigo;
+entero v[10];
+
+accion miAccion(ref entero v[10]);
+principio
+    escribir(v[1]);
+fin
+
+principio
+    v[1] := 100;
+    miAccion(v);
+fin
+\end{codigo}
+
+Se ha generado el siguiente código. Se puede comprobar que es correcto y que sigue los aspectos de la generación de código explicados en las secciones anteriores.
+
+\begin{codigo}
+; Programa: generacion_codigo
+	ENP L2
+; Acción: miAccion
+L0:
+; Recuperar parametro 1: PARAMETRO REF ENTERO:     v[10] [1, 3]
+	SRF 0 3
+	ASGI
+; Comienzo de acción: miAccion
+; Escribir entero
+; Obtener valor de PARAMETRO REF ENTERO:     v[10] [1, 3]
+	SRF 0 3
+	DRF
+; Indice
+; Sustituida expresion constante
+	STC 1
+	PLUS
+	DRF
+	WRT 1
+	CSF
+; Comienzo de programa: generacion_codigo
+L2:
+; Asignación a v
+; Obtener dirección de VARIABLE ENTERO:          v[10] [0, 3]
+; Indice: 1
+	SRF 0 4
+; Sustituida expresion constante
+	STC 100
+	ASG
+; Apilar argumento 1: PARAMETRO REF ENTERO:     v[10] [1, 3]
+; Obtener dirección de VARIABLE ENTERO:          v[10] [0, 3]
+	SRF 0 3
+; Invocar a ACCION:                   miAccion(v) [0, 0]
+	OSF 14 0 L0
+; Fin de generacion_codigo
+	LVP
+\end{codigo}
