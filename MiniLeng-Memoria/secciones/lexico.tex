@@ -1,26 +1,22 @@
-\documentclass[../main.tex]{subfiles}
-
-\begin{document}
 \section{Análisis léxico}
-El analizador es case-insensitive, no distingue entre mayúsculas y minúsculas.
+El primer paso al construir el compilador es implementar el analizador léxico. Su trabajo es tomar el programa como una cadena de caracteres y devolver un conjunto de \it{tokens} o símbolos, que son las unidades léxicas del lenguaje.
 
 \subsection{Expresión regular utilizada para los identificadores}
 % Detallar y explicar la expresión regular utilizada para los identificadores.
 Según la especificación del lenguaje, los identificadores están compuestos por letras, números y el símbolo \car{\_}, no pueden comenzar por número y no pueden terminar en \car{\_}.
 
 Una posible expresión regular que reconoce identificadores es la siguiente:
-\begin{codigo}{text}
+
+\begin{codigo}
 < #DIGITO : [ "0"-"9" ] >
 < #LETRA : [ "a"-"z" ] >
-< tIDENTIFICADOR : 
+< tIDENTIFICADOR :
   (< LETRA > | "_"(< LETRA > | < DIGITO >))(("_")?(< LETRA > | < DIGITO >))* >
 \end{codigo}
 
 \subsection{Procesamiento de comentarios}
 % Detallar y explicar cómo se han procesado los comentarios simples y multilínea.
-En el lenguaje se permiten definir comentarios de una línea (simples) y multilínea.
-
-Los comentarios de una línea se indican con el carácter \car{\%}, todo lo que haya desde ese carácter hasta el indicador de fin de línea se considerará como comentario. Los comentarios multilínea empiezan y terminan con la secuencia \car{\%\%}.
+En el lenguaje se permiten definir comentarios de una línea (simples) y multilínea.  Los comentarios de una línea se indican con el carácter \car{\%}, todo lo que haya desde ese carácter hasta el final de la línea se considerará como comentario. Los comentarios multilínea empiezan y terminan con la secuencia \car{\%\%}.
 
 Para implementar los comentarios en JavaCC se han utilizado contextos léxicos.
 Inicialmente el analizador se encuentra en el contexto \tt{DEFAULT}.
@@ -28,7 +24,7 @@ Se puede indicar el contexto al que pertenece una declaración léxica entre los
 
 El objetivo es filtrar los comentarios para que no sean enviados al analizador sintáctico. JavaCC define la declaración léxica \tt{SKIP} que permite justamente descartar la entrada reconocida. Teniendo estos aspectos en cuenta, la implementación propuesta para procesar comentarios es la siguiente:
 
-\begin{codigo}{text}
+\begin{codigo}
 SKIP : {  " "| "\r"| "\t"| "\n"
 | < "%"~["%"] > : COMENTARIO
 | "%%"          : MULTICOMENTARIO}
@@ -56,47 +52,45 @@ Las expresiones reconocidas en las declaraciones \tt{MORE} son añadidas como pr
 \subsection{Implementación del modo \it{verbose}}
 % Detallar y explicar cómo se ha implementado el modo verbose
 El compilador dispone de una opción \it{verbose}. Cuando está activada, se muestra al final de la compilación una trabla con el número de ocurrencias de cada token que se han encontrado en el programa. La tabla tiene la siguiente forma:
-\begin{verbatim}
-       +-------------------------------------+
-       | Número de ocurrencias de los tokens |
-       +-------------------------------------+
-       | Token                         num.  |
-       +-------------------------------------+
-       | Palabras reservadas                 |
-       |     PROGRAMA                     1  |
-       |     PRINCIPIO                    3  |
-       |     FIN                          3  |
-       |     SI                           3  |
-       |     ENT                          3  |
-       |     SI_NO                        2  |
-       |     FSI                          3  |
-       | Caracteres de agrupación            |
-       |     PARENTESIS_IZQ              27  |
-       |     PARENTESIS_DER              27  |
-       | Operadores aritméticos              |
-       |     SUMA                         2  |
-       |     RESTA                        1  |
-       | Operadores lógicos                  |
-       |     AND                          2  |
-       |     OR                           1  |
-       | Tipos de dato                       |
-       |     BOOLEANO                     1  |
-       |     CARACTER                     4  |
-       +-------------------------------------+
-\end{verbatim}
 
-Para implementarla se ha creado una clase llamada \tt{TablaOcurrencias} en el paquete \url{lib.lexico}. Esta clase contiene una enumeracion para cada tipo de token (Palabras reservadas, Operadores lógicos, Tipos de dato, Valores...) con los nombres de los tokens que pertenecen al tipo. Cada tipo tiene asociado un vector con un contadores para cada uno de sus tokens, que se van incrementando conforme se reconocen en el código. Para incrementar los contadores, la clase define una función \tt{incrementar} que se llama desde el analizador léxico pasándole el token cuyo contador se quiere incrementar.
+\begin{codigo}[xleftmargin=3.5cm]
+ +-------------------------------------+
+ | Número de ocurrencias de los tokens |
+ +-------------------------------------+
+ | Token                         num.      |
+ +-------------------------------------+
+ | Palabras reservadas                     |
+ |     PROGRAMA                     1      |
+ |     PRINCIPIO                    3      |
+ |     FIN                          3      |
+ |     SI                           3      |
+ |     ENT                          3      |
+ |     FSI                          3      |
+ | Caracteres de agrupación                |
+ |     PARENTESIS_IZQ              27      |
+ |     PARENTESIS_DER              27      |
+ | Operadores aritméticos                  |
+ |     SUMA                         2      |
+ |     RESTA                        1      |
+ | Operadores lógicos                      |
+ |     AND                          2      |
+ |     OR                           1      |
+ | Tipos de dato                           |
+ |     BOOLEANO                     1      |
+ |     CARACTER                     4      |
+ +-------------------------------------+
+\end{codigo}
 
-La expresión del analizador léxico que reconoce la palabra reservada \tt{PROGRAMA}, realiza la siguiente llamada a la clase:
+Para implementarla se ha creado una clase llamada \tt{TablaOcurrencias} en el paquete \url{lib.lexico}. Esta clase contiene un tipo enumerado para cada tipo de token (Palabras reservadas, Operadores lógicos, Tipos de dato, Valores...) con los nombres de los tokens que pertenecen al tipo. Cada tipo tiene asociado un vector con un contadores para cada uno de sus tokens, que se van incrementando conforme se reconocen en el código. Para incrementar los contadores, la clase define una función \tt{incrementar} que se llama desde el analizador léxico pasándole el token cuyo contador se quiere incrementar.
 
-%%%%% CAMBIAR NOMBRE TABLA
+Por ejemplo, la expresión del analizador léxico que reconoce la palabra reservada \tt{PROGRAMA}, realiza la siguiente llamada a la clase:
 
-\begin{codigo}{text}
+\begin{codigo}
 TOKEN : /* PALABRAS RESERVADAS */
 {
   < tPROGRAMA : "programa" >
   {
-    tabla.incrementar(TablaOcurrencias.Reservadas.tPROGRAMA);
+    minilengcompiler.tabla_ocurrencias.incrementar(TablaOcurrencias.Reservadas.tPROGRAMA);
   }
   ...
 }
@@ -106,12 +100,29 @@ TOKEN : /* PALABRAS RESERVADAS */
 % Detallar y explicar la función de error léxico implementada
 Si mientras se está procesando un programa se encuentra un error léxico, el compilador termina y muestra un error como el siguiente:
 
-\begin{codigo}{text}
-ERROR LÉXICO (línea ..., columna ...): símbolo no reconocido: '...' (\u...)
+\begin{codigo}
+ERROR LÉXICO (<línea>, <columna>): símbolo no reconocido: '...' (\u...)
 \end{codigo}
 
 Si el carácter que ha producido el error no es ASCII, se muestra escapado con su código Unicode.
 
 En JavaCC, los errores léxicos son capturados como excepciones de tipo \tt{Error} durante la ejecución del compilador. Cuando se captura esta excepción, se toma el carácter que ha producido el error junto con su fila y columna en la entrada y se muestran utilizando una función personalizada (definida en la clase \tt{ErrorLexico} de \url{lib.lexico}).
 
-\end{document}
+Esta función (Código~\ref{errorlexico}) toma como parámetros la línea y columna en la que ha ocurrido el error, el carácter erróneo y el carácter escapado a código Unicode, e imprime el error con el formato mencionado.
+
+\begin{codigo}[style=java, keywordstyle=\color{blue}, stringstyle=\color{red},
+    caption={Función \tt{ErrorLexico.deteccion}.},
+    label={errorlexico}]
+
+public static void deteccion(int linea, int columna, String error, String error_escapado) {
+    contadorErrores++;
+
+    // Imprime el caracter erroneo, si puede no ser imprimible por la terminal,
+    // imprime su equivalente escapado.
+    System.err.println("ERROR LÉXICO (" + linea +
+        ", " + (columna - 1) + "): " +
+        "Caracter no reconocido: '" + error + "'" +
+        (!error.equals(error_escapado) ? " (" + error_escapado + ")" : "")
+    );
+}
+\end{codigo}

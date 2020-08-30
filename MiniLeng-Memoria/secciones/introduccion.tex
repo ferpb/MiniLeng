@@ -1,0 +1,51 @@
+
+\vspace*{1cm}
+\section*{\hfil Resumen \hfil}
+\addcontentsline{toc}{section}{Resumen}
+
+En este informe de documenta el desarrollo de un compilador para el lenguaje MiniLeng durante la asignatura Procesadores de Lenguajes.
+
+MiniLeng es un lenguaje procedural, estructurado y fuertemente tipado, cuya sintaxis está inspirada en Pascal y C.
+
+El lenguaje es \it{case-insensitive} y soporta comentarios tanto de una sola línea como multilínea. Se pueden declarar variables tanto globales como locales de tres tipos de dato: entero, carácter y booleano, y permite la declaración de acciones (procedimientos) anidadas con paso de parámetros tanto por valor como por referencia.
+
+Se pueden utilizar las estructuras de control ``mientras que'' (while) y ``selección'' (if), y se soporta la asignación de valores a variables y la evaluación de expresiones aritméticas y lógicas.
+
+El lenguaje tiene dos procedimientos predefinidos: ``escribir'', que permite escribir por pantalla variables simples y cadenas de caracteres constantes y ``leer'', que permite leer valores introducidos por el usuario y asignarlos a variables. También tiene dos funciones que permiten transformar un entero a carácter y viceversa: ``entacar'' y ``caraent''.
+
+Por último, se ha añadido la posibilidad de trabajar con vectores unidimensionales. Se permite la declaración de vectores, la asignación de valores a las componentes, la asignación directa entre vectores del mismo tamaño, el uso de componentes en expresiones y el paso de componentes y vectores completos como argumentos al invocar una acción.
+
+Un ejemplo de programa de MiniLeng válido semánticamente se puede ver en el Código~\ref{ejemplo}.
+
+%%%%%% INSERTAR PROGRAMA
+\begin{minileng}[caption={Ejemplo de programa en MiniLeng.},label={ejemplo}]
+programa factorialVect;
+    entero i, r, v[8];
+
+    accion factorial(val entero n; ref entero r);
+    principio
+        si n < 2 ent
+            r := 1;
+        si_no
+            factorial(n - 1, r);
+            r := n * r;
+        fsi
+    fin
+
+principio
+    i := 0;
+    mq i < 8
+        factorial(i, v[i]);
+        escribir("v[", i, "] = ", v[i], "\n");
+        i := i + 1;
+    fmq
+fin\end{minileng}
+
+
+Cada vez que se produce un error de compilación, el compilador muestra un mensaje explicativo junto al token más relevante en el error y su número de fila y columna en el programa. Distingue entre errores léxicos, sintácticos y semánticos. Cuando el compilador encuentra un error léxico termina la ejecución, pero cuando el error es sintáctico o semántico, intenta seguir compilando hasta el final del fichero para mostrar la máxima información posible sobre los errores que puede en el programa. También se incluyen avisos de compilación, como \textit{underflow}/\textit{overflow} y divisiones por cero.
+
+Si no se han producido errores durante la compilación del programa (no se tienen en cuenta los avisos), se genera un fichero con el mismo nombre del fichero de entrada y extensión \tt{.code} con el código intermedio que contiene las instrucciones para ejecutar el programa en la máquina P. La generación de código se realiza utilizando el esquema AST, que da flexibilidad a la generación de código y permite introducir optimizaciones interesantes.
+
+Para implementar el compilador, se ha utilizado JavaCC, un metacompilador de código abierto para el lenguaje Java.
+Se ha desarrollado principalmente, sobre Eclipse 2020-06 con el plugin JavaCC Eclipse Plug-in 1.5.33.
+\pagebreak

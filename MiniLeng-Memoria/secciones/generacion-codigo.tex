@@ -1,7 +1,65 @@
-\documentclass[../main.tex]{subfiles}
-
-\begin{document}
 \section{Generación de código}
 % Detallar y justificar la elección del esquema de generación de código utilizado (secuencial/AST).
+Esta es la última fase del compilador. Tras su ejecución se genera un fichero con las instrucciones para ejecutar el programa de MiniLeng en la máquina P.
 
-\end{document}
+\subsection{Justificación del esquema escogido}\label{eleccion}
+Para la fase de generación de código se ha escogido el esquema AST. En esta implementación no se genera el árbol abstracto de sintaxis de forma explicita, si no que se aprovecha el árbol de análisis generado por el analizador sintáctico para mejorar el código final.
+
+Este esquema es mucho más flexible que el secuencial, ya que permite reordenar las instrucciones del programa y eliminar las que no sean necesarias. Cada instrucción del programa para la máquina P se almacena como una cadena de caracteres y estás sólo se imprimen al final de la compilación si no se han encontrado errores en el código.
+
+Las cadenas que representan las instrucciones se van guardando en listas. Se ha creado una clase llamada \tt{ListaInstr} en el paquete \url{lib.generacioncodigo} con la que se pueden gestionar estas listas. El único atributo de la clase es un \tt{ArrayList<String>} y se incluyen métodos para añadir en la lista todas las instrucciones necesarias para generar el código final.
+
+Los métodos introducen bloques de instrucciones que realizan una determinada función. Se llaman desde el lugar correspondiente de la gramática para generar el conjunto de instrucciones que se necesite.
+
+La idea es que las reglas de la gramática manipulan y devuelven las listas de instrucciones hasta que todas llegan a la regla inicial (\tt{programa}). En este lugar se juntan las listas devueltas y se genera una lista final con todas las instrucciones del programa.
+
+Esta es una interfaz limpia y fácil de modificar, ya que casi toda la generación de código esta centralizada en una clase. Por ejemplo, el siguiente método (Código~\ref{addseleccion}) genera el código necesario para añadir una selección a la lista.
+
+\begin{codigo}[style=java, caption={Método \url{lib.generacioncodigo.ListaInstr.addSeleccion}}, label={addseleccion}]
+public void addSeleccion(ListaInstr expresion, ListaInstr si, ListaInstr sino, Integer etiq1, Integer etiq2) {
+    // El código generado tiene la siguiente forma:
+    //
+    //			<expresion>
+    //			JMF ETIQ1
+    //			<si>
+    //			JMP ETIQ2
+    // ETIQ1:
+    //			<sino>
+    // ETIQ2:
+    addComentario("Seleccion");
+    concatenarLista(expresion);
+    addSaltoFalse(etiq1);
+    addComentario("Si");
+    concatenarLista(si);
+    addSaltoIncod(etiq2);
+    addEtiqueta(etiq1);
+    addComentario("Si no");
+    concatenarLista(sino);
+    addEtiqueta(etiq2);
+}
+\end{codigo}
+
+Toma la listas de instrucciones necesaria para calcular la condición de la selección, además del código que hay que ejecutar en el `si' y en el `si\_no'.
+
+Si en el análisis semántico se detecta que no hay bloque `si\_no', se puede generar el código utilizando el método del Código~\ref{addseleccionsimple} para evitar el salto incondicional.
+
+\begin{codigo}[style=java, caption={Método \url{lib.generacioncodigo.ListaInstr.addSeleccionSimple}}, label={addseleccionsimple}]
+public void addSeleccionSimple(ListaInstr expresion, ListaInstr si, Integer etiq) {
+    // El código generado tiene la siguiente forma:
+    //
+    //			<expresion>
+    //			JMF ETIQ
+    //			<si>
+    // ETIQ:
+    addComentario("Seleccion simple");
+    concatenarLista(expresion);
+    addSaltoFalse(etiq);
+    addComentario("Si");
+    concatenarLista(si);
+    addEtiqueta(etiq);
+}
+\end{codigo}
+
+Esta flexibilidad para mejorar el código dependiendo del programa de entrada no se tiene al utilizar un esquema de generación de código secuencial.
+
+El código que se encarga de gestionar el nivel actual durante la compilación, los números de las etiquetas y las direcciones del bloque de activación, además de la escritura de la lista final en el fichero de salida, se encuentra en la clase \tt{GeneracionCodigo}, también en el paquete \url{lib.generacioncodigo}.

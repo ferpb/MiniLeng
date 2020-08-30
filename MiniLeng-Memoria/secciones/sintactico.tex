@@ -1,67 +1,169 @@
-\documentclass[../main.tex]{subfiles}
-
-\begin{document}
 \section{Análisis sintáctico}
+En este compilador, el analizador sintáctico guia la compilación. Va pidiendo \it{tokens} al analizador léxico uno a uno y comprueba que siguen la gramática definida para el lenguaje. Como resultado, genera un árbol de análisis para el programa de entrada. Si durante este proceso se detecta algún token incorrecto según la gramática, se genera un error sintáctico.
 
 \subsection{Modificaciones sobre la gramática propuesta y decisiones de diseño}
 % Modificaciones sobre la gramática propuesta y decisiones de diseño adoptadas.
 En la gramática propuesta, algunas reglas estaban incompletas.
 A continuación, se detalla como se han completado y cuáles han sido las decisiones de diseño adoptadas.
 
-\begin{description}
-\item[Parametros formales] Contiene la definición de los parámetros de una acción, esta estructura es opcional por lo que se ha utilizado el símbolo \car{?}:
-\begin{verbatim}
-parametros_formales	::=	( parentesis_izq ( lista_parametros )? parentesis_der )?
+\subsection{Delimitadores e identificadores}
+Los tokens delimitadores, identificadores e índices de vectores se han envuelto en reglas, que son llamadas por el resto de reglas de la gramática. Esto facilitará posteriormente el análisis sintáctico y semántico ya que permite escribir sólo una vez el tratamiento que se le da a cada token dentro de la gramática.
 
-lista_parametros	::=	parametros ( fin_sentencia parametros )*
+\begin{codigo}
+fin_sentencia ::= <tFIN_SENTENCIA>
+sep_variable ::= <tSEP_VARIABLE>
+parentesis_izq ::= <tPARENTESIS_IZQ>
+parentesis_der ::= <tPARENTESIS_DER>
+corchete_izq ::= <tCORCHETE_IZQ>
+corchete_der ::= <tCORCHETE_DER>
+longitud_const ::= <tCONSTENTERA>
+principio ::= <tPRINCIPIO>
+fin ::= <tFIN>
+identificador ::= <tIDENTIFICADOR>
+\end{codigo}
 
-\end{verbatim}
+\subsection{Declaración de variables}
+En la parte de la declaración de variables se ha modificador la regla \tt{identificadores} para añadir soporte a vectores de la siguiente forma:
+
+\begin{codigo}
+identificadores ::= identificador_declaracion ( sep_variable identificador_declaracion )*
+identificador_declaracion ::= identificador ( corchete_izq longitud_const corchete_der )?
+\end{codigo}
+
+Se ha añadido la regla \tt{identificador\_declaración} para no repetir la definición de los identificadores de variables dos veces. Como resultado, se pueden realizar declaraciones como:
+
+\begin{codigo}
+entero a, b, c[10], d;
+booleano ok;
+caracter x[100], y, z[1];
+\end{codigo}
+
+El lenguaje sólo admite la declaración del tamaño de un vector con una constante positiva, la regla \tt{longitud\_const} reconoce estas constantes.
+
+\subsubsection{Parámetros formales}
+Los parámetros formales definen las entradas y las salidas de una acción, su signatura. Se ha utilizado una serie descendente de reglas para reconocerlos, que termina en los identificadores.
+
+\begin{codigo}
+cabecera_accion	::=	<tACCION> identificador ( parametros_formales )?
+
+parametros_formales ::= parentesis_izq ( parametros ( fin_sentencia parametros )* )? parentesis_der
+parametros ::= clase_parametros tipo_variables lista_parametros
+lista_parametros ::= identificador_parametro ( sep_variable identificador_parametro )*
+clase_parametros ::= ( <tVAL> | <tREF> )
+identificador_parametro ::= identificador ( corchete_izq longitud_const corchete_der )?
+\end{codigo}
+
+Los parámetros, al igual que las variables, pueden ser simples o vectores. Para mantener la sintaxis del lenguaje sencilla se ha decidido utilizar una sintaxis similar a la declaración de variables. Los siguientes ejemplo muestran posibles cabeceras de acciones:
+
+\begin{codigo}
+accion uno;
+accion dos(val entero a, b);
+accion tres(val entero a, b[10]; ref caracter c, d);
+\end{codigo}
 
 
-\item[Lista de sentencias]
+Como esta estructura es opcional al invocar una acción, se ha utilizado el símbolo \car{?} después de la regla \tt{parametros\_formales} en \tt{cabecera\_accion}.
 
-\begin{verbatim}
+\subsubsection{Sentencias}
+La gramática del lenguaje debe ser $LL(1)$, es decir debe utilizar un \it{lookahead} de 1. En la gramática propuesta había un conflicto entre las reglas \tt{asignacion} e \tt{invocacion\_accion}, ya que ambas tenían como prefijo común un identificador. Para solucionarlo, se ha creado una nueva regla (\tt{identificacion}) que contiene el prefijo, y desde ahí se da la opción de que el identificador sea parte de una asignación o de una invocación a acción. También se ha completado la definición de \tt{lista\_asignables}, \tt{lista\_escribibles} y \tt{seleccion}:
 
-lista_sentencias	::=	sentencia ( sentencia )*
+\begin{codigo}
+bloque_sentencias ::= principio lista_sentencias fin
+lista_sentencias ::= sentencia ( sentencia )*
 
-sentencia	::=	( leer | escribir | identificacion | seleccion | mientras_que )
+sentencia ::= ( leer | escribir | identificacion | seleccion | mientras_que )
+leer ::= <tLEER> parentesis_izq lista_asignables parentesis_der fin_sentencia
+lista_asignables ::= lista_expresiones
+escribir ::= <tESCRIBIR> parentesis_izq lista_escribibles parentesis_der fin_sentencia
+lista_escribibles ::= escribible ( sep_variable escribible )*
+escribible ::= ( expresion | <tCONSTCAD> )
 
+mientras_que ::= <tMQ> expresion lista_sentencias <tFMQ>
+seleccion ::= <tSI> expresion <tENT> lista_sentencias ( <tSI_NO> lista_sentencias )? <tFSI>
 
-leer	::=	<tLEER> parentesis_izq lista_asignables parentesis_der fin_sentencia
+identificacion ::= identificador ( ( corchete_izq expresion corchete_der )? asignacion fin_sentencia | ( argumentos )? fin_sentencia )
+asignacion ::= <tOPAS> expresion
+argumentos ::= parentesis_izq ( lista_expresiones )? parentesis_der
+\end{codigo}
 
-lista_asignables	::=	identificadores
+A la hora de acceder a las componente un vector es posible utilizar expresiones como índices, como se puede ver en la parte de \tt{identificacion} correspondiente a la asignación.
 
-escribir	::=	<tESCRIBIR> parentesis_izq lista_escribibles parentesis_der fin_sentencia
-lista_escribibles	::=	lista_expresiones
+Una lista de asignables se ha definido como una lista de expresiones. Después, durante el análisis semántico, se comprobará si las expresiones son asignables o no. En cuanto a la escritura, es posible escribir tanto expresiones como cadenas de caracteres constantes, así que ha hecho falta utilizar una regla un poco más complicada para reconocer listas de escribibles. La definición de lo que es un ``escribible'' se recoge en la regla \tt{escribible}.
 
+\subsubsection{Expresiones}
+Las reglas que se han utilizado para reconocen las expresiones son muy similares a las de Pascal. La precedencia de las operaciones se define de forma implícita en la gramática según la clase de los operadores (relacionales, aditivos y multiplicativos). La asociatividad también es implícita, va de izquierda a derecha, ya que es el orden en el que el analizador lee cada subexpresión.
 
+\begin{codigo}
+lista_expresiones ::= expresion ( sep_variable expresion )*
+expresion ::= expresion_simple ( operador_relacional expresion_simple )?
+operador_relacional ::= ( <tIGUAL> | <tMENOR> | <tMAYOR> | <tMAI> | <tMEI> | <tNI> )
+expresion_simple ::= termino ( operador_aditivo termino )*
+operador_aditivo ::= ( <tMAS> | <tMENOS> | <tOR> )
+termino ::= factor ( operador_multiplicativo factor )*
+operador_multiplicativo ::= ( <tPRODUCTO> | <tDIVISION> | <tMOD> | <tDIV> | <tAND> )
+factor ::= ( <tMENOS> factor | <tMAS> factor | <tNOT> factor | parentesis_izq expresion parentesis_der | <tENTACAR> parentesis_izq expresion parentesis_der | <tCARAENT> parentesis_izq expresion parentesis_der | identificador ( corchete_izq expresion corchete_der )? | <tCONSTENTERA> | <tCONSTCHAR> | <tTRUE> | <tFALSE> )
+\end{codigo}
 
+En la regla \tt{factor} se ha incluido el reconocimiento de acceso a componentes de vectores, de forma similar a la definición de \tt{identificacion}.
 
-seleccion	::=	<tSI> expresion <tENT> lista_sentencias ( <tSI_NO> lista_sentencias )* <tFSI>
-
-\end{verbatim}
-
-
-\item[Expresiones]
-
-\begin{verbatim}
-
-lista_expresiones	::=	expresion ( sep_variable expresion )*
-
-expresion	::=	expresion_simple ( operador_relacional expresion_simple )?
-operador_relacional	::=	( <tIGUAL> | <tMENOR> | <tMAYOR> | <tMAI> | <tMEI> | <tNI> )
-expresion_simple	::=	( <tMAS> | <tMENOS> )? termino ( operador_aditivo termino )*
-operador_aditivo	::=	( <tMAS> | <tMENOS> | <tOR> )
-termino	::=	factor ( operador_multiplicativo factor )*
-operador_multiplicativo	::=	( <tPRODUCTO> | <tDIVISION> | <tMOD> | <tAND> )
-
-\end{verbatim}
-
-\end{description}
-
-Los símbolos \car{,}, \car{;}, \car{(} y \car{)}  se han sustituido en la gramática por sus tokens correspondientes: \tok{tSEP\_VARIABLE}, \tok{tFIN\_SENTENCIA}, \tok{tPRENTESIS\_IZQ} y \tok{tPARENTESIS\_DER}, de esta forma sería posible cambiar los caracteres en un futuro de forma sencilla.
-
-\subsection{Gestión de errores y avisos (\it{warnings}) sintácticos}
+\subsection{Gestión de errores sintácticos}
 % Detallar y explicar el manejo de excepciones y la función de error sintáctico implementada.
 
-\end{document}
+Los errores sintácticos se producen cuando el analizador sintáctico recibe un token inesperado del analizador léxico. Por defecto JavaCC genera una excepción de tipo \tt{ParseException} que termina con la ejecución del programa. Para poder continuar la compilación a pesar de que se produzcan estas excepciones, se capturan en las reglas de la gramática mediante bloques \tt{try}/\tt{catch} y se imprimen por pantalla utilizando una función personalizada.
+
+Por ejemplo, la regla \tt{bloque\_sentencias} está definida de la siguiente manera:
+
+\begin{codigo}
+void principio() :
+{}
+{
+  try {
+    < tPRINCIPIO >
+  }
+  catch (ParseException e) {
+    ErrorSintactico.deteccion(e, "Se esperaba el delimitador de principio de bloque: `principio'");
+  }
+}
+
+void fin() :
+{}
+{
+  try {
+    < tFIN >
+  }
+  catch (ParseException e) {
+    ErrorSintactico.deteccion(e, "Se esperaba el delimitador fin de bloque: `fin'");
+  }
+}
+
+ListaInstr bloque_sentencias() :
+{}
+{
+  try {
+    principio() lista_sentencias() fin()
+  }
+  catch (ParseException e) {
+    ErrorSintactico.deteccion(e, "Se esperaba un bloque se sentencias");
+  }
+}
+\end{codigo}
+
+Como se ha comentado antes, los tokens que aparecen varias veces en la gramática, se envuelto en reglas adicionales para no tener que repetir el tratamiento de las excepciones.
+
+La clase \tt{ErrorSintactico} está definida en el paquete \url{lib.sintactico} (Código~\ref{errorlexico}). La función \tt{deteccion} toma como parámetros la excepción de análisis semántico capturada y un mensaje explicativo, y se encarga de crear un mensaje de error con la fila y columna del token incorrecto, su imagen y el mensaje explicativo.
+
+\begin{codigo}[style=java]
+public static void deteccion(ParseException e, String mensaje) {
+    contadorErrores++;
+
+    System.err.println("ERROR SINTÁCTICO (" + e.currentToken.next.beginLine +
+            ", " + (e.currentToken.next.beginColumn) + "): Token incorrecto: '" +
+            e.currentToken.next + "'. " + mensaje);
+}
+\end{codigo}
+
+El mensaje de error final tiene la siguiente forma:
+
+\begin{codigo}
+ERROR SINTÁCTICO (<línea>, <columna>): Token incorrecto: `...'. <mensaje explicativo>
+\end{codigo}

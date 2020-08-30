@@ -1,70 +1,91 @@
-\documentclass[../main.tex]{subfiles}
-
-\begin{document}
 \section{Mejoras introducidas}
 % Detallar las mejoras y puntos opcionales que se han desarrollado sobre la propuesta inicial.
 % Especificar detalles de implementación, decisiones de diseño y pruebas/ejemplos de las funcionalidades añadidas.
 % Separar las mejoras en bloques, según correspondan al análisis léxico, semántico o a la generación de código.
+En esta sección se describen las mejoras que se han hecho sobre el compilador planteado en las prácticas.
 
-\subsection{Mejoras en el comportamiento del compilador}
+\subsection{Mejoras en el uso del compilador}
+Para facilitar al usuario el uso del compilador, se han incluido una serie de opciones extra. Cuando el usuario intenta utilizar opciones inválidas o el fichero a compilar no es correcto, se muestran mensajes de error explicativos. Además, al final de la compilación, se muestra un recuento con el número de errores encontrados de cada tip.
 
-Errores en el uso del programa
+\subsubsection{Uso del compilador}
+El compilador se invoca de la siguiente manera: \tt{minilengcompiler [opciones] fichero}.
 
-\begin{itemize}
-\item Si se utiliza una opción inválida o no se especifican correctamente, se muestra el siguiente error:
-\begin{codigo}{text}
+El fichero debe tener extensión \tt{.ml} y se ofrecen las siguientes opciones:
+
+\begin{description}
+     \item[\tt{-v, -{}-verbose}] Al final de la compilación se muestra un resumen de los tokens utilizados en el programa y el número de ocurrencias de cada uno.
+     \item[\tt{-p, -{}-panic}] Compila utilizando panic mode. El panic mode se activa cada vez que se detecta que falta un token \car{;} su finalidad es intentar que el compilador se recupere del error para evitar que el error afecte a la compilación de las siguientes partes del código. El compilador descarta la entrada hasta encontrar el siguiente \car{;} y continúa compilando desde ese punto.
+     \item[\tt{-t, -{}-tokens}] Se imprimen los tokens conforme se van encontrando durante el análisis léxico.
+     \item[\tt{-d, -{}-debug}] Se muestra la tabla de símbolos antes y después de cerrar cada bloque.
+     \item[\tt{-h, -{}-help}] Muestra el uso del programa y las opciones disponibles.
+     \item[\tt{-{}-version}] Imprime información sobre la versión del compilador.
+\end{description}
+
+A continuación, se muestran algunos ejemplos de uso del compilador:
+
+\begin{codigo}
+minilengcompiler -h
+minilengcompiler --version
+minilengcompiler -v fichero.ml
+minlengcompiler -p -v fichero.ml
+minlengcompiler -pv fichero.ml
+\end{codigo}
+
+\subsubsection{Errores al utilizar el compilador}
+Si se utiliza una opción inválida o no se especifican correctamente, se muestra el siguiente error:
+
+\begin{codigo}
 MiniLeng: Opción inválida <error>
 \end{codigo}
 
-\item Si el fichero a compilar no tiene extensión \tt{.ml}, se muestra el error:
-\begin{codigo}{text}
+Si el fichero a compilar no tiene extensión \tt{.ml}, se muestra el error:
+
+\begin{codigo}
 MiniLeng: El fichero a compilar tiene que tener extensión .ml
           Fichero introducido: '...'
 \end{codigo}
 
-\item Si no se encuentra el fichero a compilar, se indica de la siguiente forma:
-\begin{codigo}{text}
+Si no se encuentra el fichero a compilar, se indica de la siguiente forma:
+
+\begin{codigo}
 MiniLeng: No se ha encontrado el fichero '...'
 \end{codigo}
 
-\end{itemize}
-
 Al final de la compilación se muestra un recuento de los errores encontrados:
 
-\begin{codigo}{text}
+\begin{codigo}
 Errores léxicos: ...
 Errores sintácticos: ...
+Errores semánticos: ...
+Avisos: ...
 Veces activado panic mode: ...
 \end{codigo}
 
-Y se muestra
+Si ha aparecido algún error durante la compilación se muestra:
 
-\begin{codigo}{text}
-No se ha podido compilar el programa
+\begin{codigo}
+No se ha podido compilar el programa.
 \end{codigo}
 
-si ha habido errores durante la compilación, o:
+En caso contrario:
 
-\begin{codigo}{text}
-Compilado sin errores
+\begin{codigo}
+Compilación finalizada. Se ha generado el fichero `...'.
 \end{codigo}
 
-si la compilación ha sido exitosa.
+Si durante la compilación se ha activado el modo pánico, se muestra el siguiente mensaje para indicar al usuario que es necesario volver a compilar.
 
-Si durante la compilación se ha activado el modo pánico, se muestra el siguiente mensaje:
-
-\begin{codigo}{text}
+\begin{codigo}
 Se ha activado el panic mode durante la compilación. Corrige los errores y vuelve a compilar.
 \end{codigo}
 
-para indicar al usuario que tiene que hace falta volver a compilar el programa.
-
-
+El fichero \tt{.code} sólo se escribe si la compilación ha sido exitosa. Si el programa contenía algún error y ya existía un fichero \tt{.code} con el nombre del programa, este se mantiene intacto.
 
 \subsection{Mejoras en el análisis léxico}
-La opción tokens muestra por pantalla los nombres de los tokens que se van reconociendo conforme se analiza el programa. Ejemplo:
+\subsubsection{Opción \it{tokens}}
+Se ha añadido la opción \it{tokens} (\tt{-t}, \tt{-{}-tokens}), que muestra por pantalla los nombres de los tokens que se van reconociendo conforme se analiza el programa. Por ejemplo:
 
-\begin{codigo}{text}
+\begin{codigo}
 tPROGRAMA
 tIDENTIFICADOR (Valor: mi_programa)
 tFIN_SENTENCIA
@@ -75,10 +96,11 @@ tFIN_SENTENCIA
 tFIN
 \end{codigo}
 
-\subsection{Mejoras en el análisis semántico}
-  - Se permiten acciones anidadas con cualquier nivel de profuncidad. Las declaraciones de acciones
-    anidadas deben entre la zona de declaración de las variables y la palabra 'principio' de la
-    función padre:
+\subsection{Mejoras en el análisis sintáctico}
+\subsubsection{Anidamiento de bloques}
+Se permiten acciones anidadas con cualquier nivel de profundidad. Las declaraciones de acciones
+anidadas deben colocarse entre la zona de declaración de las variables y la palabra `principio' de la
+función padre. Notar que las acciones anidadas son locales a la acción padre, de forma que no son visibles desde el nivel de la acción padre y superiores.
 
   \begin{verbatim}
       accion accion1;
@@ -98,7 +120,7 @@ tFIN
       fin
   \end{verbatim}
 
-  - Se permiten bloques 'seleccion' y 'mientras que' anidados con cualquier nivel de profundidad:
+También se permiten bloques `seleccion' y `mientras que' anidados con cualquier nivel de profundidad.
 
   \begin{verbatim}
       SI <condicion> ENT
@@ -122,35 +144,140 @@ tFIN
       FMQ
   \end{verbatim}
 
-  - Cualquier bloque ('principio/fin', 'seleccion' o 'mientras que') debe contener al menos una
-    sentencia.
-
-
+  Cualquier bloque (`principio/fin', `seleccion' o `mientras que') debe contener al menos una sentencia (el punto y coma no es una sentencia). Esto está definido en la gramática del programa, si un bloque está vacío se generará un error sintáctico.
 
 
 \subsubsection{Panic Mode}
-El compilador dispone de la opción panic (\tt{-p}), que activa el modo pánico durante la compilación. Se entra en este modo cada vez que se produce un error sintáctico porque se esperaba un punto y coma. El analizador descarta todos los tokens siguientes al error hasta que encuentra un carácter \car{;} o el fichero se acaba, entonces sale del modo y sigue analizando la entrada.
+El compilador dispone de la opción panic (\tt{-p}, \tt{-{}-panic}), que activa el modo pánico durante la compilación. Se entra en este modo cada vez que se produce un error sintáctico porque se esperaba un punto y coma. El analizador descarta todos los tokens siguientes al error hasta que encuentra un carácter \car{;} o el fichero se acaba, entonces sale del modo y sigue analizando la entrada.
 
 Cuando se entra en el modo pánico, se informa al usuario con las siguientes líneas:
 
-\begin{codigo}{text}
-MiniLeng: ERROR SINTÁCTICO (línea ..., columna ...): Token incorrecto: '...'. Se esperaba ';'
+\begin{codigo}
+ERROR SINTÁCTICO (<linea>, <columna>): Token incorrecto: `...'. Se esperaba `;'
 PANIC MODE: Iniciado panic mode
 \end{codigo}
 
 Y se va mostrando en una línea diferente cada token descartado:
 
-\begin{codigo}{text}
-> PANIC MODE: Token descartado: '...'
+\begin{codigo}
+> PANIC MODE: Token descartado: `...'
 \end{codigo}
 
 Cuando se sale del modo, se muestra:
 
-\begin{codigo}{text}
-  > PANIC MODE (línea ..., columna ...): Se ha encontrado ';'
+\begin{codigo}
+  > PANIC MODE (<linea>, <columna>): Se ha encontrado `;'
 PANIC MODE: Terminado panic mode
 \end{codigo}
 
-\subsection{Mejoras en la generación de código}
+\subsection{Mejoras en el análisis semántico}
+\subsubsection{Opción \it{debug}}
 
-\end{document}
+La opción \it{debug} (\tt{-d}, \tt{-{}-debug}) hace que se muestre la tabla de símbolos antes y después de cerrar cada bloque, para facilitar la depuración del compilador. Ejemplo:
+
+\begin{codigo}
+    ...
+Antes de cerrar la acción: fib. Nivel 1
++-----------------------------------------------------------+
+| Tabla de símbolos                                                |
++-----------------------------------------------------------+
+|    26  ACCION:                   cambiar_de_linea() [0, 0]       |
+|    39  VARIABLE ENTERO:          r1 [1, 5]                       |
+|    96  ACCION:                   fib(n, r) [0, 9]                |
+|   128  PARAMETRO VAL ENTERO:     n [1, 3]                        |
+|        VARIABLE ENTERO:          n [0, 3]                        |
+|   157  PARAMETRO REF ENTERO:     r [1, 4]                        |
+|        VARIABLE ENTERO:          r [0, 4]                        |
+|   198  ACCION:                   dato(dato) [0, 2]               |
+|   224  PROGRAMA:                 fibbonaci [0, -]                |
+|   233  VARIABLE ENTERO:          r2 [1, 6]                       |
++-----------------------------------------------------------+
+Después de cerrar la acción
++-----------------------------------------------------------+
+| Tabla de símbolos                                                |
++-----------------------------------------------------------+
+|    26  ACCION:                   cambiar_de_linea() [0, 0]       |
+|    96  ACCION:                   fib(n, r) [0, 9]                |
+|   128  VARIABLE ENTERO:          n [0, 3]                        |
+|   157  VARIABLE ENTERO:          r [0, 4]                        |
+|   198  ACCION:                   dato(dato) [0, 2]               |
+|   224  PROGRAMA:                 fibbonaci [0, -]                |
++-----------------------------------------------------------+
+    ...
+\end{codigo}
+
+Los campos de cada símbolo la tabla de símbolos se muestran con el siguiente formato:
+
+\begin{codigo}
+`hash' `tipo':     `nombre' [`nivel', `dirección']
+
+* Si el símbolo es una acción:
+      `nombre' := `nombre acción'(`nombres parámetros')
+* Si el símbolo es un vector:
+      `nombre' := `nombre vector'[`longitud']
+\end{codigo}
+
+Los símbolos están ordenador por el hash de forma descendente. Si el hash coincide, se ordenan descendentemente por nivel y el hash sólo se imprime una vez junto al primer símbolo.
+
+
+\subsection{Mejoras en la generación de código}
+Gracias al esquema AST ha sido posible introducir una serie de mejoras interesantes, que hacen que el código final sea más pequeño y más rápido en algunos casos.
+
+\subsubsection{Bloques mientras que}
+El código de los bloques mientras que se genera utilizando el esquema mejorado visto en clase:
+
+\begin{codigo}
+        JMF ETIQ1
+        ETIQ2:
+          		<sentencias>
+        ETIQ1:
+        		<expresion>
+        		JMP ETIQ2
+\end{codigo}
+
+Si la expresión del `mientras que' es constante y es evaluada a \tt{true}, durante la ejecución se producirá un bucle infinito. Se muestra un aviso al programador, pero genera el código igualmente. Si por el contrario, la expresión siempre es \tt{false}, el código del bloque está muerto por lo que no incluye en el programa final y se muestra un aviso.
+
+\subsubsection{Bloques selección}
+Como se explica en la Sección~\ref{eleccion}, cuando en una selección no hay `si\_no', se genera únicamente el código necesario para el bloque `si', evitando un salto incondicional.
+
+Cuando la expresión del bloque selección es constante se pueden dar varios escenarios, el objetivo es no generar código innecesario:
+
+\begin{itemize}
+    \item Si la expresión es \tt{true} y no hay `si\_no', el código del `sí' siempre se ejecuta, por lo que se incluye directamente, eliminando el cálculo del valor de la expresión y los saltos.
+    \item Si la expresión es \tt{true} y hay `si\_no', el código del `si\_no' está muerto, por lo que se incluye directamente el código del `si' y se muestra un aviso.
+    \item Si la expresión es \tt{false} y no hay `si\_no', no se genera código para la selección y se muestra un aviso.
+    \item Si la expresión es \tt{false} y hay `si\_no', el código del `si' está muerto, así que se incluye directamente el código del `si\_no' y se muestra un aviso.
+\end{itemize}
+
+\subsubsection{Expresiones constantes}
+Todas las expresiones constantes del programa de entrada se sustituyen por un apilamiento (\tt{STC}) del valor de la expresión contenido en su \tt{RegistroExpr}.
+
+Si el índice para acceder a una componente de un vector es constante, se genera una instrucción \tt{SRF} que calcula la dirección de la componente directamente, sin necesidad de realizar una suma sobre la dirección base. Si por ejemplo hay un vector local de tamaño 10 declarado en la dirección 3 del BA y se sabe que el programa accede a la componente 1, se genera la instrucción:
+
+\begin{codigo}
+        SRF 0 4
+\end{codigo}
+
+en vez de:
+
+\begin{codigo}
+        SRF 0 3
+        STC 1
+        PLUS
+\end{codigo}
+
+Sin embargo esta mejora no es posible cuando se está accediendo a una componente de un vector por referencia, ya que el BA de la acción invocada únicamente contiene la dirección de la primera componente del vector, y esta sólo se conoce durante la ejecución. Si por ejemplo el vector fuera el primer parámetro, se generaría el siguiente código para acceder a la componente 1:
+
+\begin{codigo}
+        SRF 0 3
+        DRF
+        STC 1
+        PLUS
+\end{codigo}
+
+Si el vector se pasa por valor, se puede aplicar la mejora porque al pasarlo por valor se realiza una copia completa del vector en el BA.
+
+\subsubsection{Función `escribir'}
+La escritura de booleanos produce las cadenas \tt{"True"} y \tt{"False"}. Cuando la expresión booleana es constante, se escribe directamente una de las dos cadenas. Si no lo es, se genera una selección que escribe una cadena u otra dependiendo del valor de la expresión durante la ejecución.
+
+En las cadenas constantes se sustituyen las secuencias \tt{\textbackslash r}, \tt{\textbackslash t} y \tt{\textbackslash n} por los caracteres ASCII 13, 9 y 10 respectivamente, para que dar formato al texto sea más sencillo.

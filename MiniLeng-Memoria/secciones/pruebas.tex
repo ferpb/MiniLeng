@@ -1,7 +1,59 @@
-\documentclass[../main.tex]{subfiles}
-
-\begin{document}
 \section{Pruebas realizadas}
-% Detallar la metodología seguida para verificar el funcionamiento del compilador desarrollado.
+En esta sección se detalla la metodología seguida para verificar el funcionamiento del compilador desarrollado en cada fase. Para cada fase se incluyen algunos tests junto a sus resultados, no se tratan de unas pruebas intensivas pero sirven para dar una idea del proceso que se ha seguido en la fase de pruebas.
 
-\end{document}
+\subsection{Analizador léxico}
+El objetivo del analizador léxico es que reconozca todos los tokens de la entrada y que se lancen errores léxicos cuando se encuentran caracteres no soportados. Para probarlo, se intentó compilar varios programas diferentes activando la opción \it{tokens} (\tt{-t}, \tt{-{}-tokens}), que muestra los tokens que se van reconociendo en en análisis, para verificar que todos son reconocidos correctamente.
+
+\subsubsection{Test 1}
+% Poner un programa un poco complicado y ver que todos los tokens salen bien reconocidos
+Vamos a considerar que tenemos el siguiente programa:
+
+\begin{codigo}[style=minileng,numbers=left]
+\end{codigo}
+
+Al compilar el programa utilizando la opción \tt{-t}, se obtiene la siguiente salida:
+\noindent\begin{minipage}{.45\textwidth}
+\begin{codigo}
+\end{codigo}
+\end{minipage}\hfill
+\begin{minipage}{.45\textwidth}
+\begin{codigo}
+\end{codigo}
+\end{minipage}
+
+\begin{codigo}
+\end{codigo}
+
+\subsubsection{Test 2}
+% Comprobar que se producen errores
+También se comprobó que si se encuentra algún carácter no soportado por el lenguaje, se produce un error léxico.
+
+\subsection{Analizador sintáctico}
+Para probar el analizador sintáctico la idea es intentar compilar programas con errores y comprobar que se lanza un error en el lugar adecuado.
+
+\subsubsection{Test 1}
+% Comprobar lo que pasa cuando falta un ;
+
+\subsubsection{Test 2}
+% Comprobar lo que pasa cuando me dejo el tipo de paso de parámetros en una acción
+
+\subsection{Analizador semántico}
+En cuanto al analizador semántico, se siguió un procedimiento parecido al del sintáctico.
+
+\subsubsection{Test 1}
+% Ver que pasa cuando se inserta un símbolo que ya existe
+
+\subsubsection{Test 2}
+% Ver que pasa cuando se intenta operar con dos valores incompatibles y asignar a otro
+
+\subsection{Generación de código}
+Para la generación de código, se compilaron programas y se analizó el código generado. También se ejecutó en Hendrix utilizando en ensamblador e intérprete proporcionados y esperar el resultado esperado. En esta fase ha sido de gran utilizar generar comentarios con lo que se hace en cada grupo de instrucciones, para saber que partes del código intermedio corresponden con el programa de MiniLeng.
+
+\subsubsection{Test 1}
+% Poner el código generado al hacer un mientras que
+
+\subsubsection{Test 2}
+% Poner el código generado al evaluar una expresión constante
+
+\subsubsection{Test 3}
+% Poner el código generado al acceder a una componente de vector a través de una variable en un parámetro por referencia

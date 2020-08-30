@@ -16,11 +16,11 @@
 \hypersetup{
     colorlinks=true, % make the links colored
     linkcolor=blue, % color TOC links in blue
-    urlcolor=red, % color URLs in red
+    urlcolor=black, % color URLs in red
     linktoc=all % 'all' will create links for everything in the TOC
 }
 
-\usepackage{xcolor}
+\usepackage[dvipsnames]{xcolor}
 \usepackage{setspace}
 \usepackage{float}
 
@@ -32,15 +32,6 @@
 \setlength{\parindent}{0cm}
 \usepackage{amsmath, amssymb}
 
-% Listados de código
-\usepackage{minted}
-\usepackage{caption}
-\newenvironment{code}{\captionsetup{type=listing}}{}
-% \SetupFloatingEnvironment{listing}{name=Source Code}
-\renewcommand{\listingscaption}{Código}
-\BeforeBeginEnvironment{minted}{\medskip}
-% \AfterEndEnvironment{minted}{\medskip}
-
 \usepackage{csquotes}
 
 \renewcommand{\it}[1]{\textit{#1}}
@@ -50,54 +41,129 @@
 \newcommand{\car}[1]{`\texttt{#1}'}
 \newcommand{\tok}[1]{\texttt{\textless#1\textgreater}}
 
-%%%%%%% Comandos para escribir los comandos %%%%%%%%%%%
-%% \com{el comando}    para comandos en la misma línea
 
-%% begin{comm}           para comentarios en la misma línea
-%%   comandos
-%% end{comm}
 
-%% \tt  es una abreviación para no tener que poner \texttt al usar fuente monoespaciada
-%%%%
 
-\newcommand{\com}[1]{\fbox{\mintinline{bash}{$ #1}}}
 
-\newcommand{\BashFancyFormatLine}{%
-  \def\FancyVerbFormatLine##1{\$ ##1}%
+% Listados de código
+\usepackage{listings}
+\lstdefinelanguage{minileng}{
+  %keyword1&2&6
+  morekeywords = [1]{programa, principio, fin, si, ent, si\_no, fsi, mq, fmq, accion},
+  %keyword3
+  morekeywords = [2]{escribir, leer, entacar, caraent},
+  %keyword4
+  morekeywords = [3]{entero, caracter, booleano},
+  %keyword5
+  morekeywords = [4]{ref, val},
+  %function1
+  sensitive = true,
+  morecomment = [l]{\%},
+  morecomment = [s]{\%\%}{\%\%},
+  % morecomment = [s]{/**}{*/},
+  morestring = [b]",
+  stringstyle = \color{purple},
+  sensitive=false
 }
-\newcommand{\BashFancyFormatLineDB}{%
-  \def\FancyVerbFormatLine##1{SQL> ##1}%
+\lstdefinestyle{minileng}{
+  language={minileng},
+  basicstyle={\ttfamily\small},
+  commentstyle={\small\itshape\color{Maroon}},
+  ndkeywordstyle={\small},
+  stringstyle={\ttfamily\color{red}},
+  % frame={tb},
+  breaklines=true,
+  columns=[l]{fullflexible},
+  % numbers=left,
+  xrightmargin=0em,
+  xleftmargin=3.5em,
+  numberstyle={\scriptsize},
+  stepnumber=1,
+  numbersep=1em,
+  lineskip=-0.5ex,
+  keywordstyle = [1]\bfseries\color{blue},
+  keywordstyle = [2]\bfseries\color{OliveGreen},
+  keywordstyle = [3]\bfseries\color{cyan},
+  keywordstyle = [4]\bfseries\color{orange},
+  literate=
+    {á}{{\'a}}1
+    {Á}{{\'A}}1
+    {à}{{\`a}}1
+    {ã}{{\~a}}1
+    {é}{{\'e}}1
+    {É}{{\'E}}1
+    {ê}{{\^e}}1
+    {í}{{\'i}}1
+    {ó}{{\'o}}1
+    {Ó}{{\'O}}1
+    {õ}{{\~o}}1
+    {ú}{{\'u}}1
+    {Ú}{{\'U}}1
+    {ü}{{\"u}}1
+    {ñ}{{\~n}}1
+    {ç}{{\c{c}}}1,
+    captionpos=b
 }
-\newenvironment{comm}
- {
-    \VerbatimEnvironment
-    \begin{minted}[frame=single, formatcom=\BashFancyFormatLine, fontsize=\normalsize, xleftmargin=10pt, xrightmargin=10pt]{bash}}
- {\end{minted}}
-\newenvironment{commdb}
- {
-    \VerbatimEnvironment
-    \begin{minted}[frame=single, formatcom=\BashFancyFormatLineDB, fontsize=\normalsize, xleftmargin=21pt, xrightmargin=21pt]{bash}}
- {\end{minted}}
+\lstdefinestyle{text}{
+  basicstyle={\ttfamily\small},
+  breaklines=true,
+  % columns=[l]{fullflexible},
+  columns=flexible,
+  % xrightmargin=0em,
+  % xleftmargin=3.5em,
+  lineskip=-0.5ex,
+  literate=
+    {á}{{\'a}}1
+    {Á}{{\'A}}1
+    {à}{{\`a}}1
+    {ã}{{\~a}}1
+    {é}{{\'e}}1
+    {É}{{\'E}}1
+    {ê}{{\^e}}1
+    {í}{{\'i}}1
+    {ó}{{\'o}}1
+    {Ó}{{\'O}}1
+    {õ}{{\~o}}1
+    {ú}{{\'u}}1
+    {Ú}{{\'U}}1
+    {ü}{{\"u}}1
+    {ñ}{{\~n}}1
+    {ç}{{\c{c}}}1,
+    captionpos=b
+}
+\lstdefinestyle{java}{
+language=java,
+tabsize = 4, %% set tab space width
+showstringspaces = false, %% prevent space marking in strings, string is defined as the text that is generally printed directly to the console
+% numbers = left, %% display line numbers on the left
+commentstyle = \color{OliveGreen}, %% set comment color
+keywordstyle = \color{blue}, %% set keyword color
+stringstyle = \color{red}, %% set string color
+rulecolor = \color{black}, %% set frame color to avoid being affected by text color
+basicstyle = \small \ttfamily , %% set listing font and size
+breaklines = true, %% enable line breaking
+numberstyle = \tiny,
+}
+
+\renewcommand{\lstlistingname}{Código}
+
+\lstnewenvironment{minileng}[1][]
+    {\hfill\lstset{style=minileng,#1}\minipage{0.8\linewidth}}
+    {\endminipage\hfill\null}
+
+\lstnewenvironment{codigo}[1][]
+    {\hfill\lstset{style=text,#1}\minipage{0.9\linewidth}}
+    {\endminipage\hfill\null}
 
 
-
- \newenvironment{codigo}[1]
- {
-    \captionsetup{type=listing}
-    \VerbatimEnvironment
-    \begin{minted}[fontsize=\normalsize, xleftmargin=5pt, xrightmargin=5pt, frame=single]{#1}}
-    %% Se puede utilizar framesep=10pt para añadir separación entre el marco
-    %% Se puede utilizar frame=single para poner una caja alrededor del texto.
-    %% frame=lines
- {\end{minted}}
-
+\usepackage{fancyvrb}
 
 \usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables for horizontal lines
 \usepackage{graphicx}
 \graphicspath{{imagenes/}{../imagenes/}} % Declara dos paths, uno con respecto a este documento y otro respecto a la carpeta secciones
 
 \usepackage[margin=3cm, headheight=13.6pt]{geometry}
- \usepackage{fancyhdr}
+\usepackage{fancyhdr}
 \fancyhf{}
 \lhead{\emph{Procesadores de Lenguajes -- 2019-20}}
 \rhead{\emph{Compilador de MiniLeng}}
@@ -105,7 +171,7 @@
 
 \usepackage[titletoc, title]{appendix}
 
-\usepackage{subfiles} % Permite incluir ficheros .tex en el texto
+\usepackage{fancyvrb}
 
 \begin{document}
 
@@ -153,20 +219,7 @@
 
 \pagenumbering{Roman}
 
-
-\vspace*{2cm}
-\section*{\hfil Resumen \hfil}
-En este informe de documenta el desarrollo de un compilador para el lenguaje MiniLeng durante la asignatura Procesadores de Lenguajes.
-
-MiniLeng es un lenguaje procedural, estructurado y fuertemente tipado. Su sintaxis está inspirada en Pascal.
-
-Para implementar el compilador, se ha utilizado JavaCC, un metacompilador de código abierto para el lenguaje Java.
-Se ha desarrollado, principalmente, sobre Eclipse 2020-06 con el plugin JavaCC Eclipse Plug-in 1.5.33.
-
-\addcontentsline{toc}{section}{Resumen}
-
-
-\pagebreak
+\input{secciones/introduccion}
 
 \tableofcontents
 %\listoffigures
@@ -179,18 +232,21 @@ Se ha desarrollado, principalmente, sobre Eclipse 2020-06 con el plugin JavaCC E
 
 \pagestyle{fancy}
 
-\subfile{secciones/lexico}
-\subfile{secciones/sintactico}
-\subfile{secciones/tabla-simbolos}
-\subfile{secciones/semantico}
-\subfile{secciones/generacion-codigo}
-\subfile{secciones/mejoras-introducidas}
-\subfile{secciones/pruebas}
+\input{secciones/lexico}
+\input{secciones/sintactico}
+\input{secciones/tabla-simbolos}
+\input{secciones/semantico}
+\input{secciones/generacion-codigo}
+\input{secciones/mejoras-introducidas}
+\pagebreak
+\input{secciones/pruebas}
 
 \renewcommand\appendixname{Anexo}
+
 \begin{appendices}
-\subfile{secciones/gramatica}
-\subfile{secciones/uso}
+\pagebreak
+\input{secciones/gramatica}
+% \input{secciones/uso}
 \end{appendices}
 
 \clearpage{}

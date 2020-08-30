@@ -1,7 +1,164 @@
-\documentclass[../main.tex]{subfiles}
+\section{Gramática BNF de MiniLeng} \label{gramatica}
+En este anexo se incluye la gramática BNF que se ha utilizado en la implementación del compilador. El código de JavaCC que la implementa se encuentra en el fichero \url{src/analizador/minilengcompiler.jj}. Encima de cada regla no terminal del fichero \tt{.jj} se ha añadido un comentario con la regla BNF correspondiente para facilitar la lectura.
 
-\begin{document}
-\section{Gramática de MiniLeng implementada} \label{gramatica}
+\subsection{Tokens}
 
+\begin{Verbatim}[fontsize=\small]
+<DEFAULT> SKIP : {
+" "
+| "\r"
+| "\t"
+| "\n"
+| <"%" ~["%"]> : COMENTARIO
+| "%%" : MULTICOMENTARIO
+}
 
-\end{document}
+<COMENTARIO> SKIP : {
+"\n" : DEFAULT
+}
+
+<COMENTARIO> MORE : {
+<~[]>
+}
+
+<MULTICOMENTARIO> SKIP : {
+"%%" : DEFAULT
+}
+
+<MULTICOMENTARIO> MORE : {
+<~[]>
+}
+
+<DEFAULT> TOKEN : {
+  <tPROGRAMA: "programa"> : {}
+| <tVAR: "var"> : {}
+| <tPRINCIPIO: "principio"> : {}
+| <tFIN: "fin"> : {}
+| <tSI: "si"> : {}
+| <tENT: "ent"> : {}
+| <tSI_NO: "si_no"> : {}
+| <tFSI: "fsi"> : {}
+| <tMQ: "mq"> : {}
+| <tFMQ: "fmq"> : {}
+| <tESCRIBIR: "escribir"> : {}
+| <tLEER: "leer"> : {}
+| <tENTACAR: "entacar"> : {}
+| <tCARAENT: "caraent"> : {}
+| <tACCION: "accion"> : {}
+| <tVAL: "val"> : {}
+| <tREF: "ref"> : {}
+}
+
+<DEFAULT> TOKEN : {
+  <tENTERO: "entero"> : {}
+| <tBOOLEANO: "booleano"> : {}
+| <tCARACTER: "caracter"> : {}
+}
+
+<DEFAULT> TOKEN : {
+  <tLLAVE_IZQ: "{"> : {}
+| <tLLAVE_DER: "}"> : {}
+| <tPARENTESIS_IZQ: "("> : {}
+| <tPARENTESIS_DER: ")"> : {}
+}
+
+<DEFAULT> TOKEN : {
+  <tCORCHETE_IZQ: "["> : {}
+| <tCORCHETE_DER: "]"> : {}
+}
+
+<DEFAULT> TOKEN : {
+  <tOPAS: ":="> : {}
+| <tFIN_SENTENCIA: ";"> : {}
+| <tSEP_VARIABLE: ","> : {}
+| <tMAS: "+"> : {}
+| <tMENOS: "-"> : {}
+| <tPRODUCTO: "*"> : {}
+| <tDIVISION: "/"> : {}
+| <tMOD: "mod"> : {}
+| <tDIV: "div"> : {}
+| <tAND: "and"> : {}
+| <tOR: "or"> : {}
+| <tNOT: "not"> : {}
+| <tMAYOR: ">"> : {}
+| <tMENOR: "<"> : {}
+| <tIGUAL: "="> : {}
+| <tMAI: ">="> : {}
+| <tMEI: "<="> : {}
+| <tNI: "<>"> : {}
+}
+
+<DEFAULT> TOKEN : {
+  <#DIGITO: ["0"-"9"]>
+| <#LETRA: ["a"-"z"]>
+| <tTRUE: "true"> : {}
+| <tFALSE: "false"> : {}
+| <tIDENTIFICADOR: (<LETRA> | "_" (<LETRA> | <DIGITO>)) (("_")? (<LETRA> | <DIGITO>))*> : {}
+| <tCONSTENTERA: (["0"-"9"])+> : {}
+| <tCONSTCHAR: "\"" (~["\""])? "\""> : {}
+| <tCONSTCAD: "\"" (~["\""])* "\""> : {}
+}
+\end{Verbatim}
+
+\subsection{No terminales}
+
+\begin{Verbatim}[fontsize=\small]
+programa ::= <tPROGRAMA> identificador fin_sentencia declaracion_variables
+             declaracion_acciones bloque_sentencias <EOF>
+
+fin_sentencia ::= <tFIN_SENTENCIA>
+sep_variable ::= <tSEP_VARIABLE>
+parentesis_izq ::= <tPARENTESIS_IZQ>
+parentesis_der ::= <tPARENTESIS_DER>
+corchete_izq ::= <tCORCHETE_IZQ>
+corchete_der ::= <tCORCHETE_DER>
+longitud_const ::= <tCONSTENTERA>
+
+principio ::= <tPRINCIPIO>
+fin ::= <tFIN>
+identificador ::= <tIDENTIFICADOR>
+declaracion_variables ::= ( declaracion fin_sentencia )*
+declaracion ::= tipo_variables identificadores
+tipo_variables ::= ( <tENTERO> | <tCARACTER> | <tBOOLEANO> )
+identificadores ::= identificador_declaracion ( sep_variable identificador_declaracion )*
+identificador_declaracion ::= identificador ( corchete_izq longitud_const corchete_der )?
+
+declaracion_acciones ::= ( declaracion_accion )*
+declaracion_accion ::= cabecera_accion fin_sentencia declaracion_variables
+                       declaracion_acciones bloque_sentencias
+cabecera_accion ::= <tACCION> identificador ( parametros_formales )?
+parametros_formales ::= parentesis_izq ( parametros ( fin_sentencia parametros )* )? parentesis_der
+parametros ::= clase_parametros tipo_variables lista_parametros
+lista_parametros ::= identificador_parametro ( sep_variable identificador_parametro )*
+clase_parametros ::= ( <tVAL> | <tREF> )
+identificador_parametro ::= identificador ( corchete_izq longitud_const corchete_der )?
+
+bloque_sentencias ::= principio lista_sentencias fin
+lista_sentencias ::= sentencia ( sentencia )*
+sentencia ::= ( leer | escribir | identificacion | seleccion | mientras_que )
+leer ::= <tLEER> parentesis_izq lista_asignables parentesis_der fin_sentencia
+lista_asignables ::= lista_expresiones
+escribir ::= <tESCRIBIR> parentesis_izq lista_escribibles parentesis_der fin_sentencia
+lista_escribibles ::= escribible ( sep_variable escribible )*
+escribible ::= ( expresion | <tCONSTCAD> )
+mientras_que ::= <tMQ> expresion lista_sentencias <tFMQ>
+seleccion ::= <tSI> expresion <tENT> lista_sentencias ( <tSI_NO> lista_sentencias )? <tFSI>
+identificacion ::= identificador ( ( corchete_izq expresion corchete_der )?
+                   asignacion fin_sentencia | ( argumentos )? fin_sentencia )
+asignacion ::= <tOPAS> expresion
+argumentos ::= parentesis_izq ( lista_expresiones )? parentesis_der
+
+lista_expresiones ::= expresion ( sep_variable expresion )*
+expresion ::= expresion_simple ( operador_relacional expresion_simple )?
+operador_relacional ::= ( <tIGUAL> | <tMENOR> | <tMAYOR> | <tMAI> | <tMEI> | <tNI> )
+expresion_simple ::= termino ( operador_aditivo termino )*
+operador_aditivo ::= ( <tMAS> | <tMENOS> | <tOR> )
+termino ::= factor ( operador_multiplicativo factor )*
+operador_multiplicativo ::= ( <tPRODUCTO> | <tDIVISION> | <tMOD> | <tDIV> | <tAND> )
+factor ::= ( <tMENOS> factor | <tMAS> factor | <tNOT> factor
+             | parentesis_izq expresion parentesis_der
+             | <tENTACAR> parentesis_izq expresion parentesis_der
+             | <tCARAENT> parentesis_izq expresion parentesis_der
+             | identificador ( corchete_izq expresion corchete_der )?
+             | <tCONSTENTERA> | <tCONSTCHAR> | <tTRUE> | <tFALSE> )
+\end{Verbatim}

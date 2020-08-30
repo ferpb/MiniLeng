@@ -1,12 +1,161 @@
-\documentclass[../main.tex]{subfiles}
-
-\begin{document}
 \section{Tabla de símbolos}
+\label{tabla}
+
+La tabla de símbolos es una estructura auxiliar que se utiliza sobretodo durante la fase de análisis semántico. En ella se almacena la información asociada a los símbolos declarados en el programa. De esta forma, cuando se utiliza un símbolo durante el programa, es posible conocer si está definido, cuál es su tipo, etc.
+
+Para implementarla se ha utilizado una tabla hash en la que las colisiones se resuelven mediante listas enlazadas.
+
+\subsection{Simbolos}
+El primer paso fue definir lo que es un símbolo. Para ello se creó la clase \url{lib.semantico.Simbolo} cuyos atributos se pueden ver en el Código~\ref{simbolo}.
+
+\begin{codigo}[style=java,caption={Atributos de la clase \url{lib.semantico.Simbolo}},label={simbolo}]
+public enum Tipo_simbolo {
+    PROGRAMA, VARIABLE, ACCION, PARAMETRO
+};
+
+// Representa el tipo de variable
+public enum Tipo_variable {
+    DESCONOCIDO, ENTERO, BOOLEANO, CHAR, CADENA
+};
+
+// Representa la clase de los parámetros en las acciones
+public enum Clase_parametro {
+    VAL, REF
+};
+
+/////////////////////////////
+// Atributos del símbolo //
+/////////////////////////////
+
+String nombre;
+Integer nivel; // Nivel en el que se ha declarado el símbolo (primer nivel = 0)
+Integer dir; // Dirección del símbolo
+
+Tipo_simbolo tipo;
+Tipo_variable variable;
+Clase_parametro parametro;
+
+ArrayList<Simbolo> lista_parametros; // Lista de símbolos que representan los parámetros de una acción
+
+Boolean vector = false; // Vale true si el símbolo es una variable o parametro vector
+Integer longitud; // Longitud para los vectores
+
+Boolean inicializado = false; // Vale true si el símbolo es una variable o parámetro y ha sido inicializado
+\end{codigo}
+
+Para representar los vectores no se han añadido tipos nuevos de símbolo, se ha decidido añadir un booleano (\tt{vector}) que valdrá \tt{true} si el símbolo es una variable o parámetro vector y un entero, que almacenará la longitud del vector.
 
 \subsection{Función de hash}
 % Detallar y explicar la función de hash implementada
+Como función de hash se ha escogido la función Pearson. Dada una cadena, es capaz de calcular un hash rápidamente, no hay clases de entradas más propensas a colisiones que otras, las cadenas que difieren en un carácter nunca colisionan y tampoco se generan colisiones de anagramas.
+
+En su versión más sencilla, esta función genera hashes de 8 bits (0-255) y requiere un array de enteros con los números del 0 al 255 ordenados aleatoriamente.
+
+No se espera que el compilador trabaje con programas muy complejos y con gran cantidad identificadores diferentes, así que esta función es adecuada. Su implementación se puede ver en el Código~\ref{hash}.
+
+\begin{codigo}[style=java,caption={Función \url{lib.semantico.TablaSimbolos.h}.},label={hash}]
+/*
+ * Función de hash utilizando el algoritmo de Pearson
+ */
+private int h(String cadena) {
+    int h = 0;
+    for (int i = 0; i < cadena.length(); i++) {
+        h = T[h ^ cadena.charAt(i)];
+    }
+    return h;
+}
+\end{codigo}
+
+Para generar el vector \tt{T}, se incializa un vector de 256 componentes con los números de 0 al 255 en orden y se permutan utilizando el algoritmo Fisher-Yates. Este algoritmo se muestra en el código~\ref{mezcla}.
+
+\begin{codigo}[style=java,caption={Función \url{lib.semantico.TablaSimbolos.mezclaVector}.},label={mezcla}]
+/*
+ * Algoritmo de Fisher-Yates para permutar aleatoriamente los elementos de un
+ * vector
+ */
+private void mezclaVector(int[] a) {
+    Random rnd = new Random();
+    for (int i = a.length - 1; i > 0; i--) {
+        // Genera un número aleatorio j tal que 0 <= j 0 <= i
+        int j = rnd.nextInt(i + 1);
+
+        // Intercambia a[j] y a[i]
+        int aux = a[j];
+        a[j] = a[i];
+        a[i] = aux;
+    }
+}
+\end{codigo}
+
 
 \subsection{Implementación de la tabla y manejo de colisiones}
 % Detallar y explicar la implementación de la tabla y el manejo de colisiones.
+%
+La tabla hash se ha implementado como un array de listas enlazadas. Los nuevos elementos se concatenan al principio de las listas correspondientes a sus hashes. Por tanto, cuando se produce una colisión, el elemento más reciente será el que primero esté en la lista.
 
-\end{document}
+En MiniLeng es posible declarar identificadores con el mismo nombre en niveles distintos, de forma que las declaraciones locales oculten a las globales. La estructura de esta tabla es muy útil para obtener este comportamiento. Para encontrar cuál es el último símbolo declarado con un cierto nombre, basta con calcular su hash y recorrer desde el principio la lista enlazada correspondiente al hash hasta encontrar el primer símbolo cuyo nombre es el que se estaba buscando. Cada vez que un símbolo es ocultado por otro con el mismo nombre, se muestra un aviso para que el programador lo tenga en cuenta.
+
+En cada nivel, hay un único espacio de nombres. No se permite introducir símbolos con el mismo nombre en el mismo nivel, ya que habría una ambigüedad a la hora de decidir a qué símbolo se está haciendo referencia en el código.
+
+Se pensó en implementar un espacio de nombres distinto para las acciones y las variables/parámetros, y distinguir el tipo de símbolo según el uso que se le de en una sentencia. Sin embargo, esta alternativa puede llevar a varios problemas. Por ejemplo, si el lenguaje soportara las funciones y la sintaxis para definir el valor a devolver fuera asignarlo al símbolo de la función, no se saber si realmente se está asignando un valor a la función o a una variable con el mismo nombre. Este problema se podría solucionar dando al programador la opción de crear y especificar espacios de nombres como en Pascal o C, aunque esto aumentaría la complejidad la sintaxis del lenguaje.
+
+En los Códigos~\ref{introducir} y~\ref{buscar} se muestra la implementación de las funciones para insertar y buscar símbolos en la tabla de símbolos, siguiendo las ideas anteriores.
+
+\begin{codigo}[style=java,caption={Función \url{lib.semantico.TablaSimbolos.introducir_simbolo}},label={introducir}]
+	/*
+	 * Si existe un símbolo en la tabla del mismo nivel y con el mismo, nombre,
+	 * lanza una excepción. De lo contrario, introduce el símbolo pasado como
+	 * parámetro.
+	 */
+	private Simbolo introducir_simbolo(Simbolo simbolo) throws SimboloYaDeclaradoException {
+		int clave = h(simbolo.getNombre());
+
+		for (Simbolo s : tabla_hash[clave]) {
+			// Si el símbolo ya está declarado en ese mismo nivel, lanzar una excepción
+			if (s.getNombre().equals(simbolo.getNombre()) && s.getNivel() == simbolo.getNivel()) {
+				throw new SimboloYaDeclaradoException();
+			}
+			// Si hay un símbolo ya declarado con ese nombre en otro nivel, mostrar un aviso
+			else if (s.getNombre().equals(simbolo.getNombre())) {
+				/*
+				Aviso.deteccion("El símbolo '" +
+						simbolo.nombre + "' definido en el nivel " + simbolo.nivel
+						+ " va a ocultar a otro definido con el mismo nombre en el nivel " + s.nivel + "");
+			     */
+				Token t = minilengcompiler.token;
+				if (simbolo.ES_VECTOR()) {
+					// Evitar que el token sea ']'
+					t.image = simbolo.nombre;
+				}
+				Aviso.deteccion("Este símbolo, definido en el nivel " + simbolo.nivel +
+						", va a ocultar a otro definido con el mismo nombre en el nivel " + s.nivel + "",
+						t);
+			}
+		}
+
+		// Si no, se añade
+		tabla_hash[clave].addFirst(simbolo);
+
+		return simbolo;
+	}
+\end{codigo}
+
+
+\begin{codigo}[style=java,caption={Función \url{lib.semantico.TablaSimbolos.buscar_simbolo}},label={buscar}]
+/*
+ * Busca en la tabla el símbolo de mayor nivel cuyo nombre coincida con el del
+ * parámetro (se distinguen minúsculas y mayúsculas). Si existe, devuelve un
+ * puntero como resultado, de lo contrario lanza una excepción.
+ */
+public Simbolo buscar_simbolo(String nombre) throws SimboloNoEncontradoException {
+    int clave = h(nombre);
+    for (Simbolo s : tabla_hash[clave]) {
+        if (s.nombre.equals(nombre)) {
+            return s;
+        }
+    }
+
+    // Si no se ha encontrado
+    throw new SimboloNoEncontradoException();
+}
+\end{codigo}

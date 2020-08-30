@@ -1,22 +1,348 @@
-\documentclass[../main.tex]{subfiles}
-
-\begin{document}
 \section{Análisis semántico}
+En el análisis semántico se comprueba que el uso de los elementos del lenguaje es correcto, se realizan comprobaciones sobre los tipos o sobre si los símbolos se usan en los lugares adecuados.
+
 \subsection{Gestión de errores y avisos (\it{warnings}) semánticos}
 % Detallarlos errores y avisos (warnings) que se han implementado
+Cada vez que se encuentra un error semántico durante la compilación, se imprime un mensaje con la siguiente forma:
 
-\subsection{Controles sobre los tipos de datos}
-% Detallar y explicar los controles que se han implementado sobre los tipos de datos (desbordamientos, booleanos, etc.)
+\begin{codigo}
+ERROR SEMÁNTICO (<línea>, <columna>): Símbolo: `...'. <mensaje explicativo>
+\end{codigo}
+
+Se señala la línea y columna en la que se encuentra el símbolo en el que se ha detectado el error, la imagen del símbolo y un mensaje explicativo.
+
+Hay algunos usos del lenguaje que pueden llevar a problemas durante la ejecución, estos se tratan como avisos y se muestran con un formato similar.
+
+\begin{codigo}
+AVISO (<línea>, <columna>): Símbolo: `...'. <mensaje explicativo>
+\end{codigo}
+
+La diferencia principal entre ambos es que los avisos no impiden generar el programa de salida, aunque generalmente el programador querrá solucionar esos problemas antes de ejecutarlo.
+
+A continuación se detallan los tipos de errores y avisos que se han tenido en cuenta y los mensajes explicativos que se muestran en cada caso.
+
+\subsubsection{Errores}
+\begin{itemize}
+    \item Utilización de símbolos no declarados. Este error se puede producir al evaluar expresiones, asignaciones o llamadas a acción.
+
+    \begin{codigo}
+    El símbolo no está definido
+    \end{codigo}
+
+    \item Redeclaración de símbolos dentro del mismo nivel. Se puede producir en cualquier tipo de declaración (variables, acciones y parámetros).
+
+    \begin{codigo}
+    No se puede redefinir el símbolo
+    \end{codigo}
+
+    \item No se puede asignar un valor a una expresión no asignable dentro de una sentencia de asignación o en la función `leer'. No son asignables las expresiones compuestas, ni los parámetros por valor.
+
+    \begin{codigo}
+    La expresión es un vector, no es asignable.
+    La expresión es un parámetro por valor, no es asignable.
+    La expresión no es asignable.
+    \end{codigo}
+
+    \item Tampoco son asignables las acciones ni el programa que se está compilando.
+
+    \begin{codigo}
+    No se puede realizar una asignación a una acción
+    No se puede realizar una asignación a un programa
+    \end{codigo}
+
+
+    \item Asignaciones en las que los tipos de ambos lados de la asignación no coinciden. Para realizar una asignación directa entre dos vectores, además del tipo debe coincidir la longitud de ambos.
+
+    \begin{codigo}
+    Tipos incompatibles en la asignación
+    No se puede realizar la asignación directa de vectores de diferente longitud
+    \end{codigo}
+
+    \item No se permite escribir vectores completos con la función `leer', sólo componentes individuales.
+
+    \begin{codigo}
+    No se pueden escribir vectores
+    \end{codigo}
+
+
+    \item Las condiciones de las sentencias `mientras que' y `selección' deben ser expresiones booleanas.
+
+    \begin{codigo}
+    La condición del `mientras_que' debe ser una expresión booleana
+    La condición de la selección debe ser una expresión booleana
+    \end{codigo}
+
+
+    \item En las invocaciones a acciones se comprueba que el símbolo invocado sea una acción, se comprueba que el número y tipo de los argumentos coincida con el de los parámetros. También se comprueba si se está pasando un no asignable a un parámetro por referencia.
+
+    \begin{codigo}
+    El símbolo no es una acción
+    La acción require `n' argumentos
+    El número de argumentos es incorrecto, se esperaban `n'
+    El tipo del argumento `i' no coincide con el del parámetro, se esperaba `tipo'
+    El argumento `i' es un parámetro por valor, no es asignable y no se puede pasar por referencia
+    La expresión del argumento `i' no es asignable, así que no se puede pasar por referencia
+    \end{codigo}
+
+
+    \item En cuanto a las operaciones, sólo se permiten las operaciones entre operandos del mismo tipo. Las operaciones aritméticas sólo se pueden realizar entre enteros y las lógicas entre booleanos. Las operaciones de comparación se pueden realizar entre enteros y caracteres, para booleanos sólo están definidos los operadores \tt{=} y \tt{<>}.
+
+    \begin{codigo}
+    Tipo incompatible. Se esperaba `tipo'
+    Los operandos deben ser del mismo tipo
+    El operando 1 debe ser `tipo'
+    El operando 2 debe ser `tipo'
+    El operador `>=' no esta definido para booleanos
+    El operador `>' no esta definido para booleanos
+    El operador `<=' no esta definido para booleanos
+    El operador `<' no esta definido para booleanos
+    \end{codigo}
+
+
+    \item  No se permite operar directamente con vectores, sólo con sus componentes como si fueran variables.
+
+    \begin{codigo}
+    No se pueden realizar operaciones con vectores
+    \end{codigo}
+
+    \item Las expresiones para acceder a componentes de un vector deben ser enteras.
+
+    \begin{codigo}
+    La expresión para acceder a una componente del vector debe ser entera
+    \end{codigo}
+
+    \item No se puede acceder a componentes de símbolos que no sean vectores
+
+    \begin{codigo}
+    El símbolo no es un vector
+    \end{codigo}
+
+    \item Dentro de las expresiones no se pueden utilizar acciones ni el símbolo de programa, sólo variables, parámetros y constantes.
+
+    \begin{codigo}
+    No se puede utilizar una acción dentro de una expresión
+    No se puede utilizar un programa dentro de una expresión
+    \end{codigo}
+
+
+    \item En la operación `entacar se comprueba que la expresión a convertir sea entera y que el entero a convertir es representable como un carácter ASCII, es decir su valor está entre 0-255.
+
+    \begin{codigo}
+    La expresión no se puede convertir en un carácter válido
+    La expresión no produce un entero ASCII válido
+    \end{codigo}
+
+    \item En la operación `caraent' se comprueba que la expresión a convertir sea de tipo carácter.
+
+    \begin{codigo}
+    La expresión no se puede convertir en un entero válido
+    \end{codigo}
+
+    \end{itemize}
+
+
+\subsubsection{Avisos}
+\label{avisos}
+
+\begin{itemize}
+    \item En las sentencias `mientras que' se comprueba si la condición es constante a \tt{true}, ya que se produciría un bucle infinito durante la ejecución. Si por el contrario la condición es constante \tt{false}, el interior del bloque es código muerto.
+
+    \begin{codigo}
+    La expresión del `mientras_que' siempre es `true', se produce un bucle infinito
+    La expresión del `mientras_que' siempre es `false', el interior del bloque es código muerto
+    \end{codigo}
+
+    \item Si una selección es simple (no hay `si\_no') y la condición es constante \tt{false}, el bloque completo es código muerto. Si hay `si\_no' y la condición es siempre \tt{true}, el bloque del `si\_no' es código muerto; si la condición es siempre \tt{false}, el bloque del `si' es código muerto.
+
+    \begin{codigo}
+    La expresión del `si' es siempre `false', el interior del bloque es código muerto
+    La expresión de la selección es siempre `true', el interior del bloque `si_no' es código muerto
+    La expresión de la selección es siempre `false', el interior del bloque `si' es código muerto
+    \end{codigo}
+
+    \item Al realizar operaciones aritméticas se comprueba si se va a producir un overflow o un underflow en memoria. También se considera overflow o underflow cuando la expresión de acceso a la componente de un vector es constante y es más grande o más pequeña que los límites del vector.
+
+    \begin{codigo}
+    La operación produce overflow
+    La operación produce underflow
+    \end{codigo}
+
+    \item En las operaciones de división \tt{div}, \tt{/} (ambas son equivalentes) y \tt{mod}, se comprueba si el segundo operando es 0.
+
+    \begin{codigo}
+    La operación produce una división por cero
+    \end{codigo}
+
+    \item Como se comentó en la sección sobre la tabla de símbolos (Sección~\ref{tabla}), cada vez que un identificador va a ocultar a otro en un nivel superior, se muestra un aviso.
+
+    \begin{codigo}
+    Este símbolo, definido en el nivel `n2', va a ocultar a otro definido con el mismo nombre en el nivel `n1'
+    \end{codigo}
+
+\end{itemize}
+
+También se intentó crear un aviso cuando se intenta acceder al valor de variables no inicializadas, sin embargo, la estructura del lenguaje no permite cubrir todos los casos de una forma sencilla. Por ejemplo, si se lee una acción que accede a variables globales, no se puede saber con una sola pasada si esas variables se inicializan más tarde antes de llamar a la acción.
 
 \subsection{Propagación y manejo de valores constantes en las expresiones}
 % Detallar y explicar cómo se ha implementado la propagación y el manejo de valores constantes en las expresiones.
+Para implementar la propagación de la información sobre el tipo de las expresiones y su valor en caso de que sean constantes, se ha creado la clase \tt{RegistroExpr} en el paquete \url{lib.semantico}.
 
-\subsection{Comprobaciones sobre parámetros \tt{VAL} y \tt{REF}}
+La clase tiene los siguientes atributos:
+
+\begin{codigo}[style=java]
+private Integer valorEnt;
+private Boolean valorBool;
+private Character valorChar;
+private String valorCad;
+
+private Tipo_variable tipo;
+private Clase_parametro parametro;
+private Boolean asignable = false;
+
+private Boolean vector = false;
+private Integer longitud;
+
+// Se puede almacenar un símbolo cuando la expresión es un
+// factor identificador
+private Simbolo s;
+
+// Generacion codigo
+// Contiene la lista de instrucciones necesaria para calcular la
+// expresión que representa el registro
+private ListaInstr instrucciones = new ListaInstr();
+\end{codigo}
+
+El objetivo es que la regla \tt{expresion} devuelva un \tt{RegistroExpr} con la información asociada a la expresión: tipo, calculado en caso de que sea una expresión constante o la clase si es un parámetro.
+
+Cuando se está procesando una expresión, primero se crean registros para los factores y se van propagando hacia arriba a través de las reglas \tt{termino} y \tt{expresion\_simple} hasta llegar a \tt{expresion}. Cada vez que se encuentra una operación, se crea un nuevo \tt{RegistroExpr} con el resultado de la operación. Para operar dos registros mediante una operación binaria se ha añadido un método llamado \tt{operar} en la clase.
+
+Las expresiones son constantes hasta que incluyen un identificador, en ese momento deja de ser posible calcular su valor durante la compilación.
+
+Cuando se encuentran símbolos no declarados dentro de una expresión, se muestra el error semántico correspondiente y el tipo de la expresión cambia a \tt{DESCONOCIDO}, pera evitar que el error vuelva a aparecer posteriormente al intentar utilizarla en otras partes de la gramática.
+
+
+\subsection{Controles en las expresiones}
+Cuando las expresiones son constantes, se pueden hacer comprobaciones sobre los valores que producen.
+
+El compilador es capaz de detectar la aparición de overflow, underflow o división por cero al realizar operaciones aritméticas con enteros. Esta comprobación se realiza al llamar a \tt{operar} dentro de las funciones auxiliares \tt{hayUndeflowOverflow} y \tt{hayDivisionPorCero}. Cuando se utilizan expresiones constantes para acceder a las componentes de los vectores también se comprueba que el índice esté dentro de los límites del vector.
+
+Como MiniLeng es un lenguaje fuertemente tipado, no se realizan conversiones implícitas entre los tipos, de forma que los tipos deben coincidir al realizar operaciones, asignaciones y llamadas a acciones.
+
+Por último, como la precedencia y asociatividad operaciones están definidias de manera implícita en la gramática las expresiones se evalúan siguiendo el orden correcto de las operaciones sin realizar ningún cambio.
+
+\subsection{Comprobaciones sobre parámetros de las acciones}
 % Detallar y explicar cómo se han implementado las comprobaciones sobre parámetros VAL/REF. ¿Dónde se realizan estas comprobaciones? Adjuntar ejemplos que validen la funcionalidad implementada.
 
+Para comprobar los argumentos al llamar a una acción se utilizan parámetros ocultos. Como se está trabajando con objetos Java, las acciones pueden tener una lista de referencias a los parámetros. Cada vez que se cierra una acción, se eliminan sus parámetros de la tabla de símbolos, pero los objetos siguen referenciados dentro el símbolo de la acción y es posible seguir accediendo a ellos. Se eliminarán definitivamente cuando se elimine el símbolo de la acción de la tabla.
 
-No se van a usar parámetros ocultos. Como estamos trabajando con objetos Java, las acciones pueden
-tener una lista de referencias a los parámetros. Los parámetros se borrarán de la tabla en el
-momento que la función deje de ser visible y se borre.
+Al analizar la declaración de las acciones es posible que el programador se haya equivocado y haya declarado varios parámetros con el mismo nombre. Esto es un error semántico, ya que en un mismo nivel no puede haber dos símbolos con el mismo nombre. Cuando sucede esto, se muestra el error semántico, pero el parámetro erróneo se añade en la lista de parámetros de la acción bajo el nombre \car{\_anonymous}, aunque no se añade a la tabla de símbolos. De esta forma más adelante se podrá comprobar si la invocación a la acción es correcta a pesar del error.
 
-\end{document}
+Si un parámetro se llama igual que la acción, la situación es diferente, ya que estos se definen en un nivel más de profundidad que la acción. Cuando esto sucede, el parámetro oculta a la acción, y no es posible invocarla recursivamente. Como se ha comentado en la Sección~\ref{avisos}, cada vez que un símbolo es ocultado por otro se muestra un aviso al programador.
+
+% Meter ejemplos de la tabla de símbolos al insertar identificadores repetidos e identificadores con el mismo nombre que la acción
+El siguiente programa (Código~\ref{error-dec-acc}) aparecen los dos casos anteriores.
+
+\begin{codigo}[style=minileng, caption={Programa \tt{errores\_acciones}.}, label={error-dec-acc}]
+programa errores_acciones;
+
+accion error1(val entero a, p, p);
+principio
+    escribir(a, p, p);
+fin
+
+accion error2(val entero a, error2);
+principio
+    escribir(a, error2);
+    error2(1, 2);
+fin
+
+principio
+    error1(1, 2, 3);
+    error2(1, 2);
+fin
+\end{codigo}
+
+En la declaración de la primera acción hay un parámetro repetido (\tt{p}). El compilador muestra el error correspondiente, y no añade el repetido en la tabla de símbolos, pero si que se apunta en la lista de parámetros de la acción con el nombre \car{\_anonymous}. En el bloque principal es posible comprobar que la acción está bien utilizada y no se muestran más errores.
+
+\begin{codigo}
+ERROR SEMÁNTICO (3, 32): Símbolo: `p'. No se puede redefinir el símbolo
+Antes de cerrar la acción: error1. Nivel 1
++-----------------------------------------------------------------+
+| Tabla de símbolos                                                      |
++-----------------------------------------------------------------+
+|    63  PARAMETRO VAL ENTERO:     a [1, 3]                              |
+|    89  PARAMETRO VAL ENTERO:     p [1, 4]                              |
+|   195  ACCION:                   error1(a, p, _anonymus) [0, 0]        |
+|   202  PROGRAMA:                 errores_acciones [0, -]               |
++-----------------------------------------------------------------+
+\end{codigo}
+
+La declaración de la segunda acción contiene un parámetro con el mismo nombre que la acción. Al procesar la cabecera tan sólo se muestra el aviso de que se va a ocultar el símbolo de la acción, pero al intentar invocarla se genera un error semántico ya que no es posible invocar a un parámetro.
+
+\begin{codigo}
+AVISO (8, 29): Símbolo: `error2'. Este símbolo, definido en el nivel 1, va a ocultar a otro definido con el mismo nombre en el nivel 0
+ERROR SEMÁNTICO (11, 5): Error al invocar a: `error2'. El símbolo no es una acción
+Antes de cerrar la acción: error2. Nivel 1
++--------------------------------------------------------------+
+| Tabla de símbolos                                                   |
++--------------------------------------------------------------+
+|    17  PARAMETRO VAL ENTERO:     a [1, 3]                           |
+|   108  PROGRAMA:                 errores_acciones [0, -]            |
+|   144  ACCION:                   error1(a, p, _anonymus) [0, 0]     |
+|   221  PARAMETRO VAL ENTERO:     error2 [1, 4]                      |
+|        ACCION:                   error2(a, error2) [0, 2]           |
++--------------------------------------------------------------+
+\end{codigo}
+
+Al procesar la invocación a una acción, se comprueba que los argumentos que se han pasado encajen con los parámetros. Se comprueba que coincidan en número, en tipo y que no se pasen por referencias expresiones no asignables (parámetros por valor y expresiones compuestas). Si se reconoce algún error en el paso de argumentos, se muestra el error semántico correspondiente.
+
+Se pueden usar vectores completos como parámetros. En la declaración es necesario especificar el tamaño del vector y la longitud del vector que se quiere pasar debe coincidir con la del parámetro.
+
+En el siguiente programa (Código~\ref{error-in-acc}) se define una acción y desde el bloque principal se realiza una serie de invocaciones correctas e incorrectas.
+
+\begin{codigo}[style=minileng, caption={Programa \tt{errores\_invocacion}.}, label={error-in-acc}]
+programa errores_invocacion;
+entero miEnt, miVecEnt[100], miVecEnt2[10];
+booleano miBool, miVecBool[10];
+
+accion miAccion(val booleano b, vb[10]; ref entero e, vn[10]);
+principio
+    escribir("Bien");
+fin
+
+principio
+    miAccion(miBool);  % error
+    miAccion(miEnt, miVecBool, miEnt, miVecEnt2);  % error
+    miAccion((1 = 2) and (2 <> 2), miVecBool, 1 + 2, miVecEnt2);  % error
+    miAccion(true, miVecBool, miEnt, miVecEnt);  % error
+    miAccion(miBool, miVecBool, miEnt, miVecEnt2);  % bien
+fin
+\end{codigo}
+
+\begin{enumerate}
+    \item En la primera invocación no coincide el número de argumentos y parámetros, por lo que se muestra lo siguiente:
+
+        \begin{codigo}
+ERROR SEMÁNTICO (11, 5): Error al invocar a: 'miAccion'. El número de argumentos es incorrecto, se esperaban 4
+        \end{codigo}
+
+    \item En la segunda invocación, el tipo del primer argumento es incorrecto:
+
+        \begin{codigo}
+ERROR SEMÁNTICO (12, 5): Error al invocar a: 'miAccion'. El tipo del argumento 1 no coincide con el del parámetro, se esperaba BOOLEANO
+        \end{codigo}
+
+    \item En la tercera, se está intentando pasar en el tercer argumento una expresión como valor por referencia.
+
+        \begin{codigo}
+ERROR SEMÁNTICO (13, 5): Error al invocar a: 'miAccion'. La expresión del argumento 3 no es asignable, así que no se puede pasar por referencia:
+        \end{codigo}
+
+    \item En la cuarta, no coinciden los tamaños de los vectores del argumento 4:
+
+        \begin{codigo}
+ERROR SEMÁNTICO (14, 5): Error al invocar a: 'miAccion'. El tipo del argumento 4 no coincide con el del parámetro, se esperaba ENTERO[10]
+        \end{codigo}
+
+    \item La última invocación a la acción es correcta y no se muestra ningún error.
+\end{enumerate}
