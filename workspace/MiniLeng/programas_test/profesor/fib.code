@@ -14,7 +14,7 @@ L0:
 	CSF
 ; Acción: dato
 L2:
-; Recuperar parametro: PARAMETRO REF ENTERO:     dato [1, 3]
+; Recuperar parametro 1: PARAMETRO REF ENTERO:     dato [1, 3]
 	SRF 0 3
 	ASGI
 	JMP L8
@@ -64,7 +64,7 @@ L3:
 ; Obtener valor de PARAMETRO REF ENTERO:     dato [1, 3]
 	SRF 1 3
 	DRF
-; Instrucción eliminada
+; Instrucción eliminada (DRF)
 	RD 1
 	CSF
 L8:
@@ -86,7 +86,7 @@ L8:
 	JMP L6
 L7:
 ; Invocar a ACCION:                   pedir_dato() [1, 3]
-	OSF 4 0 L3
+	OSF 5 0 L3
 ; Asignación a correcto
 ; Obtener dirección de VARIABLE BOOLEANO:        correcto [1, 4]
 	SRF 0 4
@@ -161,7 +161,7 @@ L7:
 	STC 46
 	WRT 0
 ; Invocar a ACCION:                   cambiar_de_linea() [0, 0]
-	OSF 4 1 L0
+	OSF 5 1 L0
 L5:
 L6:
 ; Condicion mientras que
@@ -173,10 +173,10 @@ L6:
 	CSF
 ; Acción: fib
 L9:
-; Recuperar parametro: PARAMETRO REF ENTERO:     r [1, 4]
+; Recuperar parametro 2: PARAMETRO REF ENTERO:     r [1, 4]
 	SRF 0 4
 	ASGI
-; Recuperar parametro: PARAMETRO VAL ENTERO:     n [1, 3]
+; Recuperar parametro 1: PARAMETRO VAL ENTERO:     n [1, 3]
 	SRF 0 3
 	ASGI
 ; Comienzo de acción: fib
@@ -189,32 +189,32 @@ L9:
 	GT
 	JMF L10
 ; Si
-; Apilar argumento 1
+; Apilar argumento 1: PARAMETRO VAL ENTERO:     n [1, 3]
 ; Obtener valor de PARAMETRO VAL ENTERO:     n [1, 3]
 	SRF 0 3
 	DRF
 ; Sustituida expresion constante
 	STC 1
 	SBT
-; Apilar argumento 2
+; Apilar argumento 2: PARAMETRO REF ENTERO:     r [1, 4]
 ; Obtener valor de VARIABLE ENTERO:          r1 [1, 5]
 	SRF 0 5
-; Instrucción eliminada
+; Instrucción eliminada (DRF)
 ; Invocar a ACCION:                   fib(n, r) [0, 9]
-	OSF 6 1 L9
-; Apilar argumento 1
+	OSF 7 1 L9
+; Apilar argumento 1: PARAMETRO VAL ENTERO:     n [1, 3]
 ; Obtener valor de PARAMETRO VAL ENTERO:     n [1, 3]
 	SRF 0 3
 	DRF
 ; Sustituida expresion constante
 	STC 2
 	SBT
-; Apilar argumento 2
+; Apilar argumento 2: PARAMETRO REF ENTERO:     r [1, 4]
 ; Obtener valor de VARIABLE ENTERO:          r2 [1, 6]
 	SRF 0 6
-; Instrucción eliminada
+; Instrucción eliminada (DRF)
 ; Invocar a ACCION:                   fib(n, r) [0, 9]
-	OSF 6 1 L9
+	OSF 7 1 L9
 ; Asignación a r
 ; Obtener dirección de PARAMETRO REF ENTERO:     r [1, 4]
 	SRF 0 4
@@ -242,22 +242,22 @@ L11:
 	CSF
 ; Comienzo de programa: fibbonaci
 L13:
-; Apilar argumento 1
+; Apilar argumento 1: PARAMETRO REF ENTERO:     dato [1, 3]
 ; Obtener valor de VARIABLE ENTERO:          n [0, 3]
 	SRF 0 3
-; Instrucción eliminada
+; Instrucción eliminada (DRF)
 ; Invocar a ACCION:                   dato(dato) [0, 2]
-	OSF 4 0 L2
-; Apilar argumento 1
+	OSF 5 0 L2
+; Apilar argumento 1: PARAMETRO VAL ENTERO:     n [1, 3]
 ; Obtener valor de VARIABLE ENTERO:          n [0, 3]
 	SRF 0 3
 	DRF
-; Apilar argumento 2
+; Apilar argumento 2: PARAMETRO REF ENTERO:     r [1, 4]
 ; Obtener valor de VARIABLE ENTERO:          r [0, 4]
 	SRF 0 4
-; Instrucción eliminada
+; Instrucción eliminada (DRF)
 ; Invocar a ACCION:                   fib(n, r) [0, 9]
-	OSF 4 0 L9
+	OSF 5 0 L9
 ; Escribir cadena: Fibbonaci(
 	STC 70
 	WRT 0
@@ -303,6 +303,6 @@ L13:
 	DRF
 	WRT 1
 ; Invocar a ACCION:                   cambiar_de_linea() [0, 0]
-	OSF 4 0 L0
+	OSF 5 0 L0
 ; Fin de fibbonaci
 	LVP

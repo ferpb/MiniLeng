@@ -655,12 +655,12 @@ L32:
 ; Leer como entero
 ; Obtener valor de VARIABLE ENTERO:          mes [0, 3]
 	SRF 0 3
-; Instrucción eliminada
+; Instrucción eliminada (DRF)
 	RD 1
 ; Leer como char
 ; Obtener valor de VARIABLE CHAR:            ln [0, 8]
 	SRF 0 8
-; Instrucción eliminada
+; Instrucción eliminada (DRF)
 	RD 0
 ; Escribir cadena: Introduce un anio en cifras:
 	STC 73
@@ -722,17 +722,17 @@ L32:
 ; Leer como entero
 ; Obtener valor de VARIABLE ENTERO:          anho [0, 4]
 	SRF 0 4
-; Instrucción eliminada
+; Instrucción eliminada (DRF)
 	RD 1
 ; Leer como char
 ; Obtener valor de VARIABLE CHAR:            ln [0, 8]
 	SRF 0 8
-; Instrucción eliminada
+; Instrucción eliminada (DRF)
 	RD 0
 ; Invocar a ACCION:                   primer_dia_anho() [0, 0]
-	OSF 8 0 L0
+	OSF 9 0 L0
 ; Invocar a ACCION:                   primer_dia_mes() [0, 4]
-	OSF 8 0 L4
+	OSF 9 0 L4
 ; Escribir entero
 ; Obtener valor de VARIABLE ENTERO:          dia1mes [0, 6]
 	SRF 0 6

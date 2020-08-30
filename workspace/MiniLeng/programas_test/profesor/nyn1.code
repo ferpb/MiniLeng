@@ -1,20 +1,7 @@
 ; Programa: noventa_y_nueve
-	ENP L6
-; Acción: miaccion
-L0:
-; Comienzo de acción: miaccion
-; Escribir cadena: hola
-	STC 104
-	WRT 0
-	STC 111
-	WRT 0
-	STC 108
-	WRT 0
-	STC 97
-	WRT 0
-	CSF
+	ENP L4
 ; Comienzo de programa: noventa_y_nueve
-L6:
+L4:
 ; Asignación a n
 ; Obtener dirección de VARIABLE ENTERO:          n [0, 5]
 	SRF 0 5
@@ -22,8 +9,8 @@ L6:
 	STC 0
 	ASG
 ; Mientras que
-	JMP L2
-L3:
+	JMP L0
+L1:
 ; Escribir cadena: n: 
 	STC 110
 	WRT 0
@@ -34,9 +21,9 @@ L3:
 ; Leer como entero
 ; Obtener valor de VARIABLE ENTERO:          n [0, 5]
 	SRF 0 5
-; Instrucción eliminada
+; Instrucción eliminada (DRF)
 	RD 1
-L2:
+L0:
 ; Condicion mientras que
 ; Obtener valor de VARIABLE ENTERO:          n [0, 5]
 	SRF 0 5
@@ -63,7 +50,7 @@ L2:
 	MOD
 	EQ
 	OR
-	JMT L3
+	JMT L1
 ; Escribir entero
 ; Obtener valor de VARIABLE ENTERO:          n [0, 5]
 	SRF 0 5
@@ -104,23 +91,6 @@ L2:
 	WRT 0
 	STC 32
 	WRT 0
-; Invocar a ACCION:                   miaccion() [0, 0]
-	OSF 6 0 L0
-; Asignación a x
-; Obtener dirección de VARIABLE ENTERO:          x [0, 3]
-	SRF 0 3
-; Sustituida expresion constante
-	STC 0
-	ASG
-; Asignación a x
-; Obtener dirección de VARIABLE ENTERO:          x [0, 3]
-	SRF 0 3
-; Sustituida expresion constante
-	STC 1
-; Sustituida expresion constante
-	STC 999999999
-	SBT
-	ASG
 ; Asignación a x
 ; Obtener dirección de VARIABLE ENTERO:          x [0, 3]
 	SRF 0 3
@@ -160,7 +130,7 @@ L2:
 	SRF 0 6
 	DRF
 	GT
-	JMF L4
+	JMF L2
 ; Si
 ; Asignación a n
 ; Obtener dirección de VARIABLE ENTERO:          n [0, 5]
@@ -173,8 +143,8 @@ L2:
 	DRF
 	SBT
 	ASG
-	JMP L5
-L4:
+	JMP L3
+L2:
 ; Si no
 ; Asignación a n
 ; Obtener dirección de VARIABLE ENTERO:          n [0, 5]
@@ -187,7 +157,7 @@ L4:
 	DRF
 	SBT
 	ASG
-L5:
+L3:
 ; Asignación a x
 ; Obtener dirección de VARIABLE ENTERO:          x [0, 3]
 	SRF 0 3

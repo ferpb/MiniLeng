@@ -1,0 +1,26 @@
+; Programa: leer_booleanos
+	ENP L0
+; Comienzo de programa: leer_booleanos
+L0:
+; Leer como char
+; Obtener valor de VARIABLE CHAR:            miCar [0, 3]
+	SRF 0 3
+; Instrucción eliminada (DRF)
+	RD 0
+; Escribir char
+; Obtener valor de VARIABLE CHAR:            miCar [0, 3]
+	SRF 0 3
+	DRF
+	WRT 0
+; Leer como char
+; Obtener valor de VARIABLE CHAR:            miCar [0, 3]
+	SRF 0 3
+; Instrucción eliminada (DRF)
+	RD 0
+; Escribir char
+; Obtener valor de VARIABLE CHAR:            miCar [0, 3]
+	SRF 0 3
+	DRF
+	WRT 0
+; Fin de leer_booleanos
+	LVP

@@ -1,0 +1,166 @@
+; Programa: factorialVect
+	ENP L8
+; Acción: factorial
+L0:
+; Recuperar parametro 2: PARAMETRO REF ENTERO:     r [1, 4]
+	SRF 0 4
+	ASGI
+; Recuperar parametro 1: PARAMETRO VAL ENTERO:     n [1, 3]
+	SRF 0 3
+	ASGI
+; Comienzo de acción: factorial
+; Seleccion
+; Obtener valor de PARAMETRO VAL ENTERO:     n [1, 3]
+	SRF 0 3
+	DRF
+; Sustituida expresion constante
+	STC 2
+	LT
+	JMF L1
+; Si
+; Asignación a r
+; Obtener dirección de PARAMETRO REF ENTERO:     r [1, 4]
+	SRF 0 4
+	DRF
+; Sustituida expresion constante
+	STC 1
+	ASG
+	JMP L2
+L1:
+; Si no
+; Apilar argumento 1: PARAMETRO VAL ENTERO:     n [1, 3]
+; Obtener valor de PARAMETRO VAL ENTERO:     n [1, 3]
+	SRF 0 3
+	DRF
+; Sustituida expresion constante
+	STC 1
+	SBT
+; Apilar argumento 2: PARAMETRO REF ENTERO:     r [1, 4]
+; Obtener valor de PARAMETRO REF ENTERO:     r [1, 4]
+	SRF 0 4
+	DRF
+; Instrucción eliminada
+; Invocar a ACCION:                   factorial(n, r) [0, 0]
+	OSF 4 1 L0
+; Asignación a r
+; Obtener dirección de PARAMETRO REF ENTERO:     r [1, 4]
+	SRF 0 4
+	DRF
+; Obtener valor de PARAMETRO VAL ENTERO:     n [1, 3]
+	SRF 0 3
+	DRF
+; Obtener valor de PARAMETRO REF ENTERO:     r [1, 4]
+	SRF 0 4
+	DRF
+	DRF
+	TMS
+	ASG
+L2:
+	CSF
+; Comienzo de programa: factorialVect
+L8:
+; Asignación a i
+; Obtener dirección de VARIABLE ENTERO:          i [0, 3]
+	SRF 0 3
+; Sustituida expresion constante
+	STC 0
+	ASG
+; Mientras que
+	JMP L4
+L5:
+; Apilar argumento 1: PARAMETRO VAL ENTERO:     n [1, 3]
+; Obtener valor de VARIABLE ENTERO:          i [0, 3]
+	SRF 0 3
+	DRF
+; Apilar argumento 2: PARAMETRO REF ENTERO:     r [1, 4]
+; Obtener valor de VARIABLE ENTERO:          v[8] [0, 5]
+	SRF 0 5
+; Indice
+; Obtener valor de VARIABLE ENTERO:          i [0, 3]
+	SRF 0 3
+	DRF
+	PLUS
+; Instrucción eliminada
+; Invocar a ACCION:                   factorial(n, r) [0, 0]
+	OSF 13 0 L0
+; Asignación a i
+; Obtener dirección de VARIABLE ENTERO:          i [0, 3]
+	SRF 0 3
+; Obtener valor de VARIABLE ENTERO:          i [0, 3]
+	SRF 0 3
+	DRF
+; Sustituida expresion constante
+	STC 1
+	PLUS
+	ASG
+L4:
+; Condicion mientras que
+; Obtener valor de VARIABLE ENTERO:          i [0, 3]
+	SRF 0 3
+	DRF
+; Sustituida expresion constante
+	STC 8
+	LT
+	JMT L5
+; Asignación a i
+; Obtener dirección de VARIABLE ENTERO:          i [0, 3]
+	SRF 0 3
+; Sustituida expresion constante
+	STC 0
+	ASG
+; Mientras que
+	JMP L6
+L7:
+; Escribir cadena: v[
+	STC 118
+	WRT 0
+	STC 91
+	WRT 0
+; Escribir entero
+; Obtener valor de VARIABLE ENTERO:          i [0, 3]
+	SRF 0 3
+	DRF
+	WRT 1
+; Escribir cadena: ] = 
+	STC 93
+	WRT 0
+	STC 32
+	WRT 0
+	STC 61
+	WRT 0
+	STC 32
+	WRT 0
+; Escribir entero
+; Obtener valor de VARIABLE ENTERO:          v[8] [0, 5]
+	SRF 0 5
+; Indice
+; Obtener valor de VARIABLE ENTERO:          i [0, 3]
+	SRF 0 3
+	DRF
+	PLUS
+	DRF
+	WRT 1
+; Escribir cadena: \n
+	STC 10
+	WRT 0
+; Asignación a i
+; Obtener dirección de VARIABLE ENTERO:          i [0, 3]
+	SRF 0 3
+; Obtener valor de VARIABLE ENTERO:          i [0, 3]
+	SRF 0 3
+	DRF
+; Sustituida expresion constante
+	STC 1
+	PLUS
+	ASG
+L6:
+; Condicion mientras que
+; Obtener valor de VARIABLE ENTERO:          i [0, 3]
+	SRF 0 3
+	DRF
+; Sustituida expresion constante
+	STC 8
+	LT
+	JMT L7
+; Fin de factorialVect
+	LVP

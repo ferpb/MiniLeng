@@ -118,7 +118,7 @@ L7:
 	JMP L5
 L6:
 ; Invocar a ACCION:                   es_primo() [0, 0]
-	OSF 4 0 L0
+	OSF 5 0 L0
 ; Asignación a i
 ; Obtener dirección de VARIABLE ENTERO:          i [0, 4]
 	SRF 0 4

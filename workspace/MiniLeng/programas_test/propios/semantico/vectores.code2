@@ -12,7 +12,7 @@ L0:
 ; Mientras que
 	JMP L3
 L4:
-; Escribir cadena: Escribe un número:
+; Escribir cadena: Escribe un número: 
 	STC 69
 	WRT 0
 	STC 115
@@ -175,22 +175,14 @@ L3:
 	CSF
 ; Acción: sumar
 L6:
-; Recuperar parametro 2: PARAMETRO REF ENTERO:     res [1, 4]
+; Recuperar parametro: PARAMETRO VAL ENTERO:     v[11] [1, 4]
 	SRF 0 4
 	ASGI
-; Recuperar parametro 1: PARAMETRO REF ENTERO:     v[10] [1, 3]
+; Recuperar parametro: PARAMETRO REF ENTERO:     res [1, 3]
 	SRF 0 3
 	ASGI
 ; Comienzo de acción: sumar
-; Asignación a v
-; Obtener dirección de PARAMETRO REF ENTERO:     v[10] [1, 3]
-; Indice: 0
-	SRF 0 3
-	DRF
-; Sustituida expresion constante
-	STC 100
-	ASG
-; Escribir cadena: Resultado:
+; Escribir cadena: Resultado: 
 	STC 82
 	WRT 0
 	STC 101
@@ -214,62 +206,28 @@ L6:
 	STC 32
 	WRT 0
 ; Escribir entero
-; Obtener valor de PARAMETRO REF ENTERO:     res [1, 4]
-	SRF 0 4
-	DRF
-	DRF
-	WRT 1
-; Escribir cadena: \n
-	STC 10
-	WRT 0
-; Escribir cadena: Vector 0:
-	STC 86
-	WRT 0
-	STC 101
-	WRT 0
-	STC 99
-	WRT 0
-	STC 116
-	WRT 0
-	STC 111
-	WRT 0
-	STC 114
-	WRT 0
-	STC 32
-	WRT 0
-	STC 48
-	WRT 0
-	STC 58
-	WRT 0
-	STC 32
-	WRT 0
-; Escribir entero
-; Obtener valor de PARAMETRO REF ENTERO:     v[10] [1, 3]
-; Indice: 0
+; Obtener valor de PARAMETRO REF ENTERO:     res [1, 3]
 	SRF 0 3
 	DRF
 	DRF
 	WRT 1
-; Escribir cadena: \n
-	STC 10
-	WRT 0
 ; Asignación a res
-; Obtener dirección de PARAMETRO REF ENTERO:     res [1, 4]
-	SRF 0 4
+; Obtener dirección de PARAMETRO REF ENTERO:     res [1, 3]
+	SRF 0 3
 	DRF
 ; Sustituida expresion constante
 	STC 0
 	ASG
 ; Asignación a i
-; Obtener dirección de VARIABLE ENTERO:          i [1, 5]
-	SRF 0 5
+; Obtener dirección de VARIABLE ENTERO:          i [1, 16]
+	SRF 0 16
 ; Sustituida expresion constante
-	STC 9
+	STC 10
 	ASG
 ; Mientras que
 	JMP L7
 L8:
-; Escribir cadena: Entrado bucle
+; Escribir cadena: Entrado bucle 
 	STC 69
 	WRT 0
 	STC 110
@@ -299,8 +257,8 @@ L8:
 	STC 32
 	WRT 0
 ; Escribir entero
-; Obtener valor de PARAMETRO REF ENTERO:     res [1, 4]
-	SRF 0 4
+; Obtener valor de PARAMETRO REF ENTERO:     res [1, 3]
+	SRF 0 3
 	DRF
 	DRF
 	WRT 1
@@ -309,12 +267,11 @@ L8:
 	STC 32
 	WRT 0
 ; Escribir entero
-; Obtener valor de PARAMETRO REF ENTERO:     v[10] [1, 3]
-	SRF 0 3
-	DRF
+; Obtener valor de PARAMETRO VAL ENTERO:     v[11] [1, 4]
+	SRF 0 4
 ; Indice
-; Obtener valor de VARIABLE ENTERO:          i [1, 5]
-	SRF 0 5
+; Obtener valor de VARIABLE ENTERO:          i [1, 16]
+	SRF 0 16
 	DRF
 	PLUS
 	DRF
@@ -323,29 +280,28 @@ L8:
 	STC 10
 	WRT 0
 ; Asignación a res
-; Obtener dirección de PARAMETRO REF ENTERO:     res [1, 4]
-	SRF 0 4
-	DRF
-; Obtener valor de PARAMETRO REF ENTERO:     res [1, 4]
-	SRF 0 4
-	DRF
-	DRF
-; Obtener valor de PARAMETRO REF ENTERO:     v[10] [1, 3]
+; Obtener dirección de PARAMETRO REF ENTERO:     res [1, 3]
 	SRF 0 3
 	DRF
+; Obtener valor de PARAMETRO REF ENTERO:     res [1, 3]
+	SRF 0 3
+	DRF
+	DRF
+; Obtener valor de PARAMETRO VAL ENTERO:     v[11] [1, 4]
+	SRF 0 4
 ; Indice
-; Obtener valor de VARIABLE ENTERO:          i [1, 5]
-	SRF 0 5
+; Obtener valor de VARIABLE ENTERO:          i [1, 16]
+	SRF 0 16
 	DRF
 	PLUS
 	DRF
 	PLUS
 	ASG
 ; Asignación a i
-; Obtener dirección de VARIABLE ENTERO:          i [1, 5]
-	SRF 0 5
-; Obtener valor de VARIABLE ENTERO:          i [1, 5]
-	SRF 0 5
+; Obtener dirección de VARIABLE ENTERO:          i [1, 16]
+	SRF 0 16
+; Obtener valor de VARIABLE ENTERO:          i [1, 16]
+	SRF 0 16
 	DRF
 ; Sustituida expresion constante
 	STC 1
@@ -353,18 +309,18 @@ L8:
 	ASG
 L7:
 ; Condicion mientras que
-; Obtener valor de VARIABLE ENTERO:          i [1, 5]
-	SRF 0 5
+; Obtener valor de VARIABLE ENTERO:          i [1, 16]
+	SRF 0 16
 	DRF
 ; Sustituida expresion constante
 	STC 0
-	GTE
+	NEQ
 	JMT L8
 	CSF
 ; Comienzo de programa: vectores
 L12:
 ; Invocar a ACCION:                   dato() [0, 0]
-	OSF 17 0 L0
+	OSF 18 0 L0
 ; Asignación a i
 ; Obtener dirección de VARIABLE ENTERO:          i [0, 3]
 	SRF 0 3
@@ -375,7 +331,7 @@ L12:
 	JMP L10
 L11:
 ; Asignación a v
-; Obtener dirección de VARIABLE ENTERO:          v[10] [0, 6]
+; Obtener dirección de VARIABLE ENTERO:          v[11] [0, 6]
 	SRF 0 6
 ; Indice
 ; Obtener valor de VARIABLE ENTERO:          i [0, 3]
@@ -386,7 +342,7 @@ L11:
 	SRF 0 5
 	DRF
 	ASG
-; Escribir cadena: Vector:
+; Escribir cadena: Vector: 
 	STC 86
 	WRT 0
 	STC 101
@@ -404,7 +360,7 @@ L11:
 	STC 32
 	WRT 0
 ; Escribir entero
-; Obtener valor de VARIABLE ENTERO:          v[10] [0, 6]
+; Obtener valor de VARIABLE ENTERO:          v[11] [0, 6]
 	SRF 0 6
 ; Indice
 ; Obtener valor de VARIABLE ENTERO:          i [0, 3]
@@ -442,25 +398,25 @@ L10:
 	SRF 0 3
 	DRF
 ; Sustituida expresion constante
-	STC 10
+	STC 11
 	LT
 	JMT L11
 ; Asignación a resultado
-; Obtener dirección de VARIABLE ENTERO:          resultado [0, 17]
-	SRF 0 17
+; Obtener dirección de VARIABLE ENTERO:          resultado [0, 18]
+	SRF 0 18
 ; Sustituida expresion constante
 	STC 1
 	ASG
-; Apilar argumento 1: PARAMETRO REF ENTERO:     v[10] [1, 3]
-; Obtener dirección de VARIABLE ENTERO:          v[10] [0, 6]
-	SRF 0 6
-; Apilar argumento 2: PARAMETRO REF ENTERO:     res [1, 4]
-; Obtener valor de VARIABLE ENTERO:          resultado [0, 17]
-	SRF 0 17
+; Apilar argumento 1
+; Obtener valor de VARIABLE ENTERO:          resultado [0, 18]
+	SRF 0 18
 ; Instrucción eliminada
-; Invocar a ACCION:                   sumar(v, res) [0, 6]
-	OSF 17 0 L6
-; Escribir cadena: La suma de los números
+; Apilar argumento 2
+; Obtener dirección de VARIABLE ENTERO:          v[11] [0, 6]
+	SRF 0 6
+; Invocar a ACCION:                   sumar(res, v) [0, 6]
+	OSF 18 0 L6
+; Escribir cadena: La suma de los números 
 	STC 76
 	WRT 0
 	STC 97
@@ -512,10 +468,10 @@ L10:
 	SRF 0 5
 	DRF
 ; Sustituida expresion constante
-	STC 10
+	STC 11
 	SBT
 	WRT 1
-; Escribir cadena:  a
+; Escribir cadena:  a 
 	STC 32
 	WRT 0
 	STC 97
@@ -526,11 +482,8 @@ L10:
 ; Obtener valor de VARIABLE ENTERO:          d [0, 5]
 	SRF 0 5
 	DRF
-; Sustituida expresion constante
-	STC 1
-	SBT
 	WRT 1
-; Escribir cadena:  es:
+; Escribir cadena:  es: 
 	STC 32
 	WRT 0
 	STC 101
@@ -542,8 +495,8 @@ L10:
 	STC 32
 	WRT 0
 ; Escribir entero
-; Obtener valor de VARIABLE ENTERO:          resultado [0, 17]
-	SRF 0 17
+; Obtener valor de VARIABLE ENTERO:          resultado [0, 18]
+	SRF 0 18
 	DRF
 	WRT 1
 ; Escribir char

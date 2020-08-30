@@ -1,0 +1,65 @@
+; Programa: vect
+	ENP L4
+; Acción: miAccion
+L0:
+; Recuperar parametro 1: PARAMETRO REF ENTERO:     a [1, 3]
+	SRF 0 3
+	ASGI
+	JMP L3
+; Acción: miAccion2
+L1:
+; Recuperar parametro 1: PARAMETRO VAL ENTERO:     x [2, 3]
+	SRF 0 3
+	ASGI
+; Comienzo de acción: miAccion2
+; Escribir entero
+; Obtener valor de VARIABLE ENTERO:          b [1, 4]
+	SRF 1 4
+	DRF
+	WRT 1
+; Escribir entero
+; Obtener valor de VARIABLE ENTERO:          y [2, 4]
+	SRF 0 4
+	DRF
+	WRT 1
+; Escribir entero
+; Obtener valor de PARAMETRO VAL ENTERO:     x [2, 3]
+	SRF 0 3
+	DRF
+	WRT 1
+	CSF
+L3:
+; Comienzo de acción: miAccion
+; Escribir entero
+; Obtener valor de PARAMETRO REF ENTERO:     a [1, 3]
+	SRF 0 3
+	DRF
+	DRF
+	WRT 1
+; Escribir entero
+; Obtener valor de VARIABLE ENTERO:          b [1, 4]
+	SRF 0 4
+	DRF
+	WRT 1
+	CSF
+; Comienzo de programa: vect
+L4:
+; Asignación a n
+; Obtener dirección de VARIABLE ENTERO:          n [0, 3]
+	SRF 0 3
+; Sustituida expresion constante
+	STC 1
+	ASG
+; Escribir entero
+; Obtener valor de VARIABLE ENTERO:          n [0, 3]
+	SRF 0 3
+	DRF
+	WRT 1
+; Apilar argumento 1: PARAMETRO REF ENTERO:     a [1, 3]
+; Obtener valor de VARIABLE ENTERO:          n [0, 3]
+	SRF 0 3
+; Instrucción eliminada
+; Invocar a ACCION:                   miAccion(a) [0, 0]
+	OSF 4 0 L0
+; Fin de vect
+	LVP

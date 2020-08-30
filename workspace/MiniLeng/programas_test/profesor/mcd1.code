@@ -54,7 +54,7 @@ L3:
 ; Leer como entero
 ; Obtener valor de VARIABLE ENTERO:          d [0, 4]
 	SRF 1 4
-; Instrucción eliminada
+; Instrucción eliminada (DRF)
 	RD 1
 ; Seleccion simple
 ; Obtener valor de VARIABLE ENTERO:          d [0, 4]
@@ -201,7 +201,7 @@ L6:
 ; Comienzo de programa: maximo_comun_divisor
 L9:
 ; Invocar a ACCION:                   dato() [0, 0]
-	OSF 6 0 L0
+	OSF 7 0 L0
 ; Asignación a a
 ; Obtener dirección de VARIABLE ENTERO:          a [0, 5]
 	SRF 0 5
@@ -210,7 +210,7 @@ L9:
 	DRF
 	ASG
 ; Invocar a ACCION:                   dato() [0, 0]
-	OSF 6 0 L0
+	OSF 7 0 L0
 ; Asignación a b
 ; Obtener dirección de VARIABLE ENTERO:          b [0, 6]
 	SRF 0 6
@@ -219,7 +219,7 @@ L9:
 	DRF
 	ASG
 ; Invocar a ACCION:                   mcd() [0, 5]
-	OSF 6 0 L5
+	OSF 7 0 L5
 ; Escribir cadena: El MCD es: 
 	STC 69
 	WRT 0

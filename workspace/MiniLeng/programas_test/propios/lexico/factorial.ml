@@ -24,7 +24,7 @@ principio
 %-------------------------------------------------------------------
 	n := 10;
 
-	factorial(n, solucion);
+	fact(n, solucion);
 
 	escribir(n, "! es: ", solucion);
 
