@@ -10,7 +10,7 @@ Fecha: 30 de agosto de 2020
 # Introducción a MiniLeng
 MiniLeng es un lenguaje procedural, estructurado y fuertemente tipado, cuya sintaxis está inspirada en Pascal y C.
 
-El lenguaje es case-insensitive y soporta comentarios tanto de una sola línea como multilínea. Se pueden  declarar variables tanto globales como locales de tres tipos de dato: `entero`, `carácter` y `booleano`, y permite la declaración de acciones (procedimientos) anidadas con paso de parámetros tanto por valor como por referencia.
+El lenguaje es case-insensitive y soporta comentarios tanto de una sola línea como multilínea. Se pueden  declarar variables tanto globales como locales de tres tipos de dato: `entero`, `caracter` y `booleano`, y permite la declaración de acciones (procedimientos) anidadas con paso de parámetros tanto por valor como por referencia.
 Se pueden utilizar las estructuras de control `mientras que` (while) y `selección` (if), y se soporta la asignación de valores a variables y la evaluación de expresiones aritméticas y lógicas.
 
 El lenguaje tiene dos procedimientos predefinidos: `escribir`, que permite escribir por pantalla variables simples y cadenas de caracteres constantes y `leer`, que permite leer valores introducidos por el usuario y asignarlos a variables. También tiene dos funciones que permiten transformar un entero a carácter y viceversa: `entacar` y `caraent`.
@@ -43,24 +43,22 @@ fin
 ```
 
 # Como ejecutar el compilador
-En el directorio `bin` se encuentra el proyecto ya compilado, y se puede ejecutar con el siguiente comando:
-
-```bash
-java -cp bin analizador.minilengcompiler
-```
-
-Para compilar el proyecto de nuevo se pueden seguir las siguientes instrucciones:
+Para compilar el proyecto se pueden seguir las siguientes instrucciones:
 
 1. Utilizar JavaCC para generar el analizador:
 ```
-javacc src/analizador/minilengcompiler.jj
+javacc -OUTPUT_DIRECTORY=src/analizador src/analizador/minilengcompiler.jj
 ```
 
 2. Compilar el compilador
 ```
 javac -d bin $(find src -name "*.java")
 ```
-Una vez hecho esto, se podrá ejecutar con el comando anterior.
+Una vez hecho esto, se podrá ejecutar con el siguiente comando:
+
+```bash
+java -cp bin analizador.minilengcompiler
+```
 
 # Uso del compilador
 El compilador se invoca de la siguiente manera:
