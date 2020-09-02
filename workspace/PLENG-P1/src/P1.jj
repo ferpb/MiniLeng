@@ -1,29 +1,0 @@
-/**
- * Especificación JavaCC para la Práctica 1 (Procesadores de Lenguajes)
- * Fernando Peña (NIA: 756012)
- * v1 - 2019/02/20
- */options{  static = true;
-  ignore_case = true;
-  // debug_parser = true;}PARSER_BEGIN(P1)
-public class P1{  public static void main(String args []) throws ParseException  {    P1 parser = new P1(System.in);    while (true)    {      System.out.println("Reading from standard input...");      System.out.print("Enter an expression: ");      try      {        switch (P1.one_line()) // Esta invocación llama a la gramática        {          case 0 :	// Si todo va bien           System.out.println("OK.");          break;          case 1 :           System.out.println("Goodbye.");          break;          default :           break;        }      }      catch (Exception e) // Si el compilador lanza errores, se lanzan excepcioes      {        System.out.println("Error sintáctico!!");        System.out.println(e.getMessage());        P1.ReInit(System.in); // Volver a lanzar el axioma inicial      }      catch (Error e)      {        System.out.println("Error léxico!!");        System.out.println(e.getMessage());        break;	// Se podría continuar la compilación, pero los compiladores no lo suelen hacer.      }    }  }}PARSER_END(P1)SKIP :{
-  " "| "\r"| "\t"| "\n"}TOKEN : /* OPERATORS */{  < MINUS : "-" >| < ASSIGN : "=" >}
-
-TOKEN : /* RESERVED WORDS */
-{
-  < CLASS: "Clase" >
-| < METHOD: "metodo" >
-| < INTEGER: "entero" >
-| < DECIMAL: "decimal" >}TOKEN : /* DATA TYPES */{
-  < #DIGIT : [ "0"-"9" ] >
-| < #LETTER : [ "A"-"Z","a"-"z","ñ","Ñ"] >
-| < IDENTIFIER : (< LETTER > | "_")(< DIGIT > | < LETTER > | "_" )*>
-| < INTEGER_NUMBER : (< MINUS >)?(< DIGIT >)+ >
-| < DECIMAL_NUMBER : (< MINUS >)?(< DIGIT >)+"."(< DIGIT >)+ >}int one_line() :{}{	< CLASS > < IDENTIFIER > "{"  (method())* "}" { return 0; }  }
-
-void method() :
-{}
-{
-	< METHOD > <IDENTIFIER > "{" (instruction())* "}"
-}void instruction() :{}{  (      < INTEGER > < IDENTIFIER > < ASSIGN > <INTEGER_NUMBER >
-  	| < DECIMAL > < IDENTIFIER > < ASSIGN > <DECIMAL_NUMBER >
-  )";"}
