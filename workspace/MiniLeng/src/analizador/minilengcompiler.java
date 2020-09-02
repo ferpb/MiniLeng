@@ -429,7 +429,7 @@ public class minilengcompiler implements minilengcompilerConstants {
     throw new Error("Missing return statement in function");
   }
 
-// Declaracion de variables
+// Declaración de variables
 
 /*
  * declaracion_variables ::= ( declaracion fin_sentencia )*
@@ -847,7 +847,7 @@ public class minilengcompiler implements minilengcompilerConstants {
               // al llamar a la función, pero no se mete en la tabla de simbolos.
               ErrorSemantico.deteccion(e, id);
               par = new Simbolo();
-              par.introducir_parametro("_anonymus", tipo, clase, generacion_codigo.getNivel(), generacion_codigo.nuevaVariable());
+              par.introducir_parametro("_anonymous", tipo, clase, generacion_codigo.getNivel(), generacion_codigo.nuevaVariable());
         }
       }
     } catch (ParseException e) {

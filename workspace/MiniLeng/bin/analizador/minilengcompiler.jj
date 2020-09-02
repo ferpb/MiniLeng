@@ -401,7 +401,7 @@ TOKEN : /* PALABRAS RESERVADAS */
 }
 
 
-TOKEN : /* TIPOS DE DATOS */
+TOKEN : /* TIPOS DE DATO */
 {
   < tENTERO : "entero" >
   {
@@ -781,7 +781,7 @@ Token identificador() :
 
 
 
-// Declaracion de variables
+// Declaración de variables
 
 /*
  * declaracion_variables ::= ( declaracion fin_sentencia )*
@@ -1160,7 +1160,7 @@ Simbolo identificador_parametro(Clase_parametro clase, Tipo_variable tipo, Simbo
   	      // al llamar a la función, pero no se mete en la tabla de simbolos.
   	      ErrorSemantico.deteccion(e, id);
   	      par = new Simbolo();
-  	      par.introducir_parametro("_anonymus", tipo, clase, generacion_codigo.getNivel(), generacion_codigo.nuevaVariable());
+  	      par.introducir_parametro("_anonymous", tipo, clase, generacion_codigo.getNivel(), generacion_codigo.nuevaVariable());
         }
       }
     }

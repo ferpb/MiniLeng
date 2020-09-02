@@ -102,37 +102,37 @@ Se pensó en implementar un espacio de nombres distinto para las acciones y las 
 En los Códigos~\ref{introducir} y~\ref{buscar} se muestra la implementación de las funciones para insertar y buscar símbolos en la tabla de símbolos, siguiendo las ideas anteriores.
 
 \begin{codigo}[style=java,caption={Función \url{lib.semantico.TablaSimbolos.introducir_simbolo}},label={introducir}]
-	/*
-	 * Si existe un símbolo en la tabla del mismo nivel y con el mismo, nombre,
-	 * lanza una excepción. De lo contrario, introduce el símbolo pasado como
-	 * parámetro.
-	 */
-	private Simbolo introducir_simbolo(Simbolo simbolo) throws SimboloYaDeclaradoException {
-		int clave = h(simbolo.getNombre());
+/*
+ * Si existe un símbolo en la tabla del mismo nivel y con el mismo, nombre,
+ * lanza una excepción. De lo contrario, introduce el símbolo pasado como
+ * parámetro.
+ */
+private Simbolo introducir_simbolo(Simbolo simbolo) throws SimboloYaDeclaradoException {
+    int clave = h(simbolo.getNombre());
 
-		for (Simbolo s : tabla_hash[clave]) {
-			// Si el símbolo ya está declarado en ese mismo nivel, lanzar una excepción
-			if (s.getNombre().equals(simbolo.getNombre()) && s.getNivel() == simbolo.getNivel()) {
-				throw new SimboloYaDeclaradoException();
-			}
-			// Si hay un símbolo ya declarado con ese nombre en otro nivel, mostrar un aviso
-			else if (s.getNombre().equals(simbolo.getNombre())) {
-				Token t = minilengcompiler.token;
-				if (simbolo.ES_VECTOR()) {
-					// Evitar que el token sea ']'
-					t.image = simbolo.nombre;
-				}
-				Aviso.deteccion("Este símbolo, definido en el nivel " + simbolo.nivel +
-						", va a ocultar a otro definido con el mismo nombre en el nivel " + s.nivel + "",
-						t);
-			}
-		}
+    for (Simbolo s : tabla_hash[clave]) {
+        // Si el símbolo ya está declarado en ese mismo nivel, lanzar una excepción
+        if (s.getNombre().equals(simbolo.getNombre()) && s.getNivel() == simbolo.getNivel()) {
+            throw new SimboloYaDeclaradoException();
+        }
+        // Si hay un símbolo ya declarado con ese nombre en otro nivel, mostrar un aviso
+        else if (s.getNombre().equals(simbolo.getNombre())) {
+            Token t = minilengcompiler.token;
+            if (simbolo.ES_VECTOR()) {
+                // Evitar que el token sea ']'
+                t.image = simbolo.nombre;
+            }
+            Aviso.deteccion("Este símbolo, definido en el nivel " + simbolo.nivel +
+                    ", va a ocultar a otro definido con el mismo nombre en el nivel " + s.nivel + "",
+                    t);
+        }
+    }
 
-		// Si no, se añade
-		tabla_hash[clave].addFirst(simbolo);
+    // Si no, se añade
+    tabla_hash[clave].addFirst(simbolo);
 
-		return simbolo;
-	}
+    return simbolo;
+}
 \end{codigo}
 
 

@@ -272,7 +272,7 @@ Antes de cerrar la acción: error1. Nivel 1
 +-----------------------------------------------------------------+
 |    63  PARAMETRO VAL ENTERO:     a [1, 3]                              |
 |    89  PARAMETRO VAL ENTERO:     p [1, 4]                              |
-|   195  ACCION:                   error1(a, p, _anonymus) [0, 0]        |
+|   195  ACCION:                   error1(a, p, _anonymous) [0, 0]       |
 |   202  PROGRAMA:                 errores_acciones [0, -]               |
 +-----------------------------------------------------------------+
 \end{codigo}
@@ -283,15 +283,15 @@ La declaración de la segunda acción contiene un parámetro con el mismo nombre
 AVISO (8, 29): Símbolo: `error2'. Este símbolo, definido en el nivel 1, va a ocultar a otro definido con el mismo nombre en el nivel 0
 ERROR SEMÁNTICO (11, 5): Error al invocar a: `error2'. El símbolo no es una acción
 Antes de cerrar la acción: error2. Nivel 1
-+--------------------------------------------------------------+
-| Tabla de símbolos                                                   |
-+--------------------------------------------------------------+
-|    17  PARAMETRO VAL ENTERO:     a [1, 3]                           |
-|   108  PROGRAMA:                 errores_acciones [0, -]            |
-|   144  ACCION:                   error1(a, p, _anonymus) [0, 0]     |
-|   221  PARAMETRO VAL ENTERO:     error2 [1, 4]                      |
-|        ACCION:                   error2(a, error2) [0, 2]           |
-+--------------------------------------------------------------+
++-----------------------------------------------------------------+
+| Tabla de símbolos                                                      |
++-----------------------------------------------------------------+
+|    17  PARAMETRO VAL ENTERO:     a [1, 3]                              |
+|   108  PROGRAMA:                 errores_acciones [0, -]               |
+|   144  ACCION:                   error1(a, p, _anonymous) [0, 0]       |
+|   221  PARAMETRO VAL ENTERO:     error2 [1, 4]                         |
+|        ACCION:                   error2(a, error2) [0, 2]              |
++-----------------------------------------------------------------+
 \end{codigo}
 
 Al procesar la invocación a una acción, se comprueba que los argumentos que se han pasado encajen con los parámetros. Se comprueba que coincidan en número, en tipo y que no se pasen por referencia expresiones no asignables (parámetros por valor y expresiones compuestas). Si se reconoce algún error en el paso de argumentos, se muestra el error semántico correspondiente.
