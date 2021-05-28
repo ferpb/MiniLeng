@@ -48,7 +48,7 @@ principio
 fin
 ```
 
-## Como ejecutar el compilador
+## Cómo ejecutar el compilador
 Para compilar el proyecto se pueden seguir las siguientes instrucciones:
 
 1. Utilizar JavaCC para generar el analizador:
