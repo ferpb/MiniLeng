@@ -10,7 +10,6 @@
 
 package lib.semantico;
 
-import lib.semantico.Simbolo.*;
 import analizador.Token;
 
 public class RegistroOp {

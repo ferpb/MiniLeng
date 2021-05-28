@@ -11,7 +11,6 @@
 package lib.generacioncodigo;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import lib.semantico.RegistroExpr;
 import lib.semantico.RegistroOp;
@@ -130,7 +129,7 @@ public class ListaInstr {
 			instr = "\tLTE";
 			break;
 
-		case  MAS:
+		case MAS:
 			instr = "\tPLUS";
 			break;
 		case MENOS:
@@ -186,9 +185,9 @@ public class ListaInstr {
 
 
 
-	// Acceso a variables y parametros
+	// Acceso a variables y parámetros
 
-	// El símbolo s es una variable o parametro
+	// El símbolo s es una variable o parámetro
 	public void addGetValor(Simbolo s, Integer nivelAct, RegistroExpr indice) {
 		addComentario("Obtener valor de " + s);
 
@@ -271,7 +270,6 @@ public class ListaInstr {
 		addComentario("Dest: " + dest);
 		addComentario("Orig: " + orig);
 
-
 		// Copiar resto de elementos
 		for (int i = 0; i < dest.getLongitud(); i++) {
 			RegistroExpr indice = new RegistroExpr();
@@ -282,8 +280,6 @@ public class ListaInstr {
 			addGetValor(orig, nivelAct, indice);
 			lista.add("\tASG");
 		}
-
-
 	}
 
 
