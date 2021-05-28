@@ -12,8 +12,6 @@
 package lib.semantico;
 
 import lib.semantico.Simbolo.*;
-import lib.semantico.SimboloNoEncontradoException;
-import lib.semantico.SimboloYaDeclaradoException;
 
 import lib.aviso.Aviso;
 
@@ -23,25 +21,21 @@ import analizador.Token;
 import analizador.minilengcompiler;
 
 import java.util.LinkedList;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 public class TablaSimbolos {
-	// TODO: Elegir tamaño de la tabla y ponerlo en decisiones de diseño
 	private final int M = 256;
-
-	// TODO: Elegir función de hash. Se debe generar considerando sólo el nombre del
-	// símbolo
-	// Se usa el méotod de Pearson como función de hash
-
-	// Los símbolos se almacenan en las listas por nivel descendente, para encontrar
-	// los elementos
-	// con nivel más alto sin recorrer toda la lista de colisiones
 
 	private int T[];
 
-	// Para manejar las coliciones hay que utilizar encadenamiento de colisiones
-	// generando una tabla abierta.
+	/*
+	 * La tabla de hash es una tabla abierta, las colisiones se resuelven encadenándolas
+	 * en una lista enlazada
+     *
+	 * Los símbolos que colisionan se almacenan en las listas por nivel descendente,
+	 * de esta forma el primer símbolo de la lista siempre tiene nivel mayor o igual que los
+	 * demás.
+	 */
 
 	private LinkedList<Simbolo> tabla_hash[];
 
@@ -55,7 +49,7 @@ public class TablaSimbolos {
 
 	/*
 	 * Crea una tabla de símbolos vacía. Este procedimiento debe invocarse antes de
-	 * hacer ninguna operación con la tabla de símbolos.
+	 * empezar a utilizar la tabla de símbolos.
 	 */
 	public void inicializar_tabla() {
 		for (int i = 0; i < M; i++) {
@@ -77,7 +71,7 @@ public class TablaSimbolos {
 	private void mezclaVector(int[] a) {
 		Random rnd = new Random();
 		for (int i = a.length - 1; i > 0; i--) {
-			// Genera un número aleatorio j tal que 0 <= j 0 <= i
+			// Genera un número aleatorio j tal que 0 <= j <= i
 			int j = rnd.nextInt(i + 1);
 
 			// Intercambia a[j] y a[i]
@@ -110,15 +104,14 @@ public class TablaSimbolos {
 				return s;
 			}
 		}
-
 		// Si no se ha encontrado
 		throw new SimboloNoEncontradoException();
 	}
 
 	/*
-	 * Introduce en la tabla un símbolo PROGRAMA, con el nombre del parametro, de
-	 * nivel 0, con la dirección del parámetro. Dado que debe ser el primer simbolo
-	 * a introducir, NO SE VERIFICA QUE EL SIMBOLO YA EXISTA.
+	 * Introduce en la tabla un símbolo PROGRAMA, con el nombre del parámetro, de
+	 * nivel 0, con la dirección del parámetro. Dado que debe ser el primer símbolo
+	 * a introducir, NO SE VERIFICA QUE EL SÍMBOLO YA EXISTA.
 	 */
 	public Simbolo introducir_programa(String nombre, int dir) {
 		Simbolo simbolo = new Simbolo();
@@ -130,9 +123,6 @@ public class TablaSimbolos {
 
 		return simbolo;
 	}
-
-
-
 
 	/*
 	 * Si existe un símbolo en la tabla del mismo nivel y con el mismo, nombre,
@@ -166,9 +156,6 @@ public class TablaSimbolos {
 		return simbolo;
 	}
 
-
-
-
 	/*
 	 * Si existe un símbolo en la tabla del mismo nivel y con el mismo nombre, lanza
 	 * una excepción. De lo contrario, introduce un símbolo VARIABLE (simple) con
@@ -183,7 +170,7 @@ public class TablaSimbolos {
 
 	/*
 	 * Si existe un símbolo en la tabla del mismo nivel y con el mismo nombre, lanza
-	 * una excepción. De lo contrario, introduce un símbolo ACCION con los datos de
+	 * una excepción. De lo contrario, introduce un símbolo ACCIÓN con los datos de
 	 * los argumentos.
 	 */
 	public Simbolo introducir_accion(String nombre, int nivel, int dir) throws SimboloYaDeclaradoException {
@@ -194,7 +181,7 @@ public class TablaSimbolos {
 
 	/*
 	 * Si existe un símbolo en la tabla del mismo nivel y con el mismo nombre, lanza
-	 * una excepción. De lo contrario, introduce un símbolo PARAMETRO con los datos
+	 * una excepción. De lo contrario, introduce un símbolo PARÁMETRO con los datos
 	 * de los argumentos.
 	 */
 	public Simbolo introducir_parametro(String nombre, Tipo_variable variable, Clase_parametro parametro, int nivel,
@@ -207,7 +194,7 @@ public class TablaSimbolos {
 
 	/*
 	 * Si existe un símbolo en la tabla del mismo nivel y con el mismo nombre, lanza
-	 * una excepción. De lo contrario, introduce un símbolo VARIABLE vector con los datos
+	 * una excepción. De lo contrario, introduce un símbolo VARIABLE VECTOR con los datos
 	 * de los argumentos.
 	 */
 	public Simbolo introducir_variable_vector(String nombre, Tipo_variable variable, int longitud, int nivel,
@@ -220,7 +207,7 @@ public class TablaSimbolos {
 
 	/*
 	 * Si existe un símbolo en la tabla del mismo nivel y con el mismo nombre, lanza
-	 * una excepción. De lo contrario, introduce un símbolo PARAMETRO vector con los datos
+	 * una excepción. De lo contrario, introduce un símbolo PARÁMETRO VECTOR con los datos
 	 * de los argumentos.
 	 */
 	public Simbolo introducir_parametro_vector(String nombre, Tipo_variable variable, Clase_parametro clase, int longitud, int nivel,
@@ -296,9 +283,8 @@ public class TablaSimbolos {
 		eliminar_tipo_en_nivel(nivel, Tipo_simbolo.ACCION);
 	}
 
-
 	/*
-	 * Imprime por pantalla los contendios de la tabla de símbolos
+	 * Imprime por pantalla el contenido de la tabla de símbolos
 	 */
 	public void imprimirTabla() {
 		System.out.println("+" + new String(new char[59]).replace("\0", "-") + "+");
@@ -317,7 +303,6 @@ public class TablaSimbolos {
 				}
 			}
 		}
-
 		System.out.println("+" + new String(new char[59]).replace("\0", "-") + "+");
 	}
 }

@@ -133,7 +133,6 @@ public class Simbolo {
 	}
 	*/
 
-
 	// Métodos para construir los tipos de símbolos
 
 	// Configura los campos del símbolo correspondientes a un programa
@@ -172,7 +171,7 @@ public class Simbolo {
 		this.dir = dir;
 	}
 
-	// Configura los campos del símbolo correspondiente a un vector
+	// Configura los campos del símbolo correspondiente a una variable vector
 	public void introducir_variable_vector(String nombre, Tipo_variable tipo_var, int longitud, int nivel, int dir) {
 		this.nombre = nombre;
 		this.tipo = Tipo_simbolo.VARIABLE;
@@ -183,6 +182,7 @@ public class Simbolo {
 		this.dir = dir;
 	}
 
+	// Configura los campos del símbolo correspondiente a parámetro vector
 	public void introducir_parametro_vector(String nombre, Tipo_variable tipo_var, Clase_parametro clase_param,
 			int longitud, int nivel, int dir) {
 		this.nombre = nombre;
@@ -225,47 +225,11 @@ public class Simbolo {
 		return vector;
 	}
 
-	public Boolean es_asignable() {
+	public Boolean ES_ASIGNABLE() {
 		return this.ES_VARIABLE() || this.ES_REFERENCIA();
 	}
 
 	// Función toString()
-
-	public String getVariableString() {
-		String res = "";
-		switch (variable) {
-		case DESCONOCIDO:
-			res = "DESCONOCIDO";
-			break;
-		case ENTERO:
-			res = "ENTERO";
-			break;
-		case BOOLEANO:
-			res = "BOOLEANO";
-			break;
-		case CHAR:
-			res = "CHAR";
-			break;
-		case CADENA:
-			res = "CADENA";
-			break;
-		}
-		return res;
-	}
-
-	public String getParametroString() {
-		String res = "";
-		switch (parametro) {
-		case VAL:
-			res = "VAL";
-			break;
-		case REF:
-			res = "REF";
-			break;
-		}
-		return res;
-	}
-
 	@Override
 	public String toString() {
 		String res;
@@ -277,11 +241,11 @@ public class Simbolo {
 
 		switch (tipo) {
 		case PROGRAMA:
-			res = String.format("%-25s %s [%d, -]", "PROGRAMA:", nombre, nivel);
+			res = String.format("%-25s %s [%d, -]", tipo.name() + ":", nombre, nivel);
 			break;
 
 		case VARIABLE:
-			res = String.format("%-25s %s [%d, %d]", "VARIABLE " + getVariableString() + ":", nombre, nivel, dir);
+			res = String.format("%-25s %s [%d, %d]", tipo.name() + " " + variable.name() + ":", nombre, nivel, dir);
 			break;
 
 		case ACCION:
@@ -296,12 +260,12 @@ public class Simbolo {
 				signatura += par.nombre;
 			}
 			signatura += ")";
-			res = String.format("%-25s %s [%d, %d]", "ACCION:", signatura, nivel, dir);
+			res = String.format("%-25s %s [%d, %d]", tipo.name() + ":", signatura, nivel, dir);
 			break;
 
 		case PARAMETRO:
 			res = String.format("%-25s %s [%d, %d]",
-					"PARAMETRO " + getParametroString() + " " + getVariableString() + ":", nombre, nivel, dir);
+					tipo.name() + " " + parametro.name() + " " + variable.name() + ":", nombre, nivel, dir);
 			break;
 
 		default:

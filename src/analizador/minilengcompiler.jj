@@ -1726,7 +1726,7 @@ ListaInstr argumentos(Simbolo s, Token t) :
               if ((arg.getTipo() != param.getVariable() || arg.esVector() != param.ES_VECTOR())
                    || (arg.esVector() && param.ES_VECTOR() && arg.getLongitud() != param.getLongitud())) {
 
-                String tipoEsperado = param.getVariableString();
+                String tipoEsperado = param.getVariable().name();
                 if (param.ES_VECTOR()) {
                   tipoEsperado += "[" + param.getLongitud() + "]";
                 }
